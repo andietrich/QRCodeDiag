@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag
 {
-    class WordDetails
+    class WordDetails : ICloneable
     {
         private List<Vector2D> pixelCoordinates;
         public string DataWord { get; private set; }
@@ -65,6 +65,16 @@ namespace QRCodeDiag
                 edges.Add(new PolygonEdge(p3, p0));
             }
             return edges.ToList();
+        }
+
+        public object Clone()
+        {
+            var ret = new WordDetails(this.MaxLength);
+            for(int i = 0; i < this.pixelCoordinates.Count; i++)
+            {
+                ret.AddBit(this.DataWord[i], this.pixelCoordinates[i].X, this.pixelCoordinates[i].Y);
+            }
+            return ret;
         }
     }
 }

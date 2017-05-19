@@ -23,14 +23,14 @@ namespace QRCodeDiag
         private List<WordDetails> completeWordsList; // Contains the complete words
 
         [Conditional("DEBUG")]
-        internal static void DebugHighlightCell(QRCode debuggedQRCode, WordDetails currentWord)
+        internal static void DebugHighlightCell(QRCode debuggedQRCode, WordDetails currentWord) //ToDo: currentWord gets changed/completed before timer ticks
         {
             if (!debugFormOpen)
             {
                 debugDrawingForm = new DebugDrawingForm(debuggedQRCode);
                 debugDrawingForm.Show();
             }
-            debugDrawingForm.EnqueueDrawingEvent(currentWord);
+            debugDrawingForm.EnqueueDrawingEvent(currentWord.Clone() as WordDetails);
         }
 
         private DebugDrawingForm(QRCode debuggedQRCode, int millisecondDelay = 250)
@@ -103,7 +103,7 @@ namespace QRCodeDiag
                                 endY = startY;
                                 break; 
                         }
-                        g.DrawLine(p, edge.Start.X, edge.Start.Y, edge.End.X, edge.End.Y);
+                        g.DrawLine(p, startX * pixelWidth, startY * pixelHeight, endX * pixelWidth, endY * pixelHeight);
                     }
                 }
 
