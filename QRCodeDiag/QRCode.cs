@@ -11,9 +11,17 @@ namespace QRCodeDiag
 {
     public class QRCode
     {
-        public const int SIZE = 29;
+        private enum MessageMode
+        {
+            Numeric = 1,
+            Alphanumeric = 2,
+            Byte = 4,
+            Kanji = 8,
+            ECI = 7
+        }
+        public const int SIZE = 29; //ToDo adjust for other versions
         private char[,] bits;
-        private string[][] OrderedDataAndECC;
+        public int Version { get; private set; }
 
         public QRCode(char[,] setBits)
         {
@@ -21,6 +29,7 @@ namespace QRCodeDiag
                 throw new ArgumentException("Bad QR Code size", "setBits");
 
             this.bits = setBits;
+            this.Version = 3; // ToDo implement other versions
         }
 
         public QRCode(string path) : this(GenerateBitsFromFile(path))
@@ -116,8 +125,14 @@ namespace QRCodeDiag
             return ret;
         }
 
-        private List<WordDetails> GenerateByteList(uint wordLength = 8)
+        /// <summary>
+        /// Reads blocks of 8 bits in placement order. For larger QR-Codes the bytes have to be reordered to obtain the message and ECC bytes.
+        /// After obtaining the bytes apply ECC checking/correction. After ECC read mode indicator, char count indicator, chars.
+        /// </summary>
+        /// <returns></returns>
+        private List<WordDetails> GenerateWordList()
         {
+            uint wordLength = 8; // Always read 8 bit blocks
             var wordList = new List<WordDetails>();
             var it = this.GetBitIterator();
             var wd = new WordDetails(wordLength);
@@ -141,29 +156,151 @@ namespace QRCodeDiag
             return wordList;
         }
 
-        private void GenerateBlocks() //ToDo dynamically find ECC and DATA blocks/counts. Data/ECC Lengths probably wrong.
+        private string[][] GenerateBlocks() //ToDo dynamically find ECC and DATA block count and location for all versions
         {
-            this.OrderedDataAndECC = new string[2][];
-            this.OrderedDataAndECC[0] = new string[26]; //Data
-            this.OrderedDataAndECC[1] = new string[44]; //ECC
-            var byteList = this.GenerateByteList();
-            for (int i = 0; i < 13; i++)
+            var dataWords = 55; //For V3-L
+            var eccWords = 15; //For V3-L
+            var orderedDataAndECC = new string[2][];
+            orderedDataAndECC[0] = new string[dataWords]; //Data
+            orderedDataAndECC[1] = new string[eccWords]; //ECC
+            var byteList = this.GenerateWordList();
+            for(int i = 0; i < dataWords; i++)
             {
-                this.OrderedDataAndECC[0][i] = byteList[2 * i].DataWord;
-                this.OrderedDataAndECC[0][i + 13] = byteList[2 * i + 1].DataWord;
+                orderedDataAndECC[0][i] = byteList[i].DataWord;
             }
-            for (int i = 0; i < 22; i++)
+            for(int i = 0; i < eccWords; i++)
             {
-                this.OrderedDataAndECC[1][i] = byteList[2 * i + 26].DataWord;
-                this.OrderedDataAndECC[1][i + 22] = byteList[2 * i + 1 + 26].DataWord;
+                orderedDataAndECC[1][i] = byteList[dataWords + i].DataWord;
             }
+            return orderedDataAndECC;
+            //for (int i = 0; i < 13; i++)
+            //{
+            //    this.OrderedDataAndECC[0][i] = byteList[2 * i].DataWord;
+            //    this.OrderedDataAndECC[0][i + 13] = byteList[2 * i + 1].DataWord;
+            //}
+            //for (int i = 0; i < 22; i++)
+            //{
+            //    this.OrderedDataAndECC[1][i] = byteList[2 * i + 26].DataWord;
+            //    this.OrderedDataAndECC[1][i + 22] = byteList[2 * i + 1 + 26].DataWord;
+            //}
         }
 
-        private string[][] GetDataAndECCBlocks()
+        private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
         {
-            if (this.OrderedDataAndECC == null)
-                this.GenerateBlocks();
-            return this.OrderedDataAndECC;
+            switch (mode)
+            {
+                case MessageMode.Byte:
+                    return version < 10 ? 8 : 16;
+                case MessageMode.Alphanumeric:
+                    {
+                        if (version < 10)
+                            return 9;
+                        else if (version < 27)
+                            return 11;
+                        else
+                            return 13;
+                    }
+                case MessageMode.Kanji:
+                    {
+                        if (version < 10)
+                            return 8;
+                        else if (version < 27)
+                            return 10;
+                        else
+                            return 12;
+                    }
+                case MessageMode.Numeric:
+                    {
+                        if (version < 10)
+                            return 10;
+                        else if (version < 27)
+                            return 12;
+                        else
+                        return 14;
+                    }
+                case MessageMode.ECI:
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        
+        private static int GetCharacterLength(MessageMode mode)
+        {
+            switch (mode)
+            {
+                case MessageMode.Byte:
+                    return 8;
+                default:
+                    throw new NotImplementedException(); //ToDo split combined characters, find out final chunks character count
+            }
+        }
+        private static string GetMessageFromCharacters(List<string> characters, MessageMode mode)
+        {
+            var sb = new StringBuilder(characters.Count);
+            var unknownSymbol = '_';
+            switch (mode)
+            {
+                case MessageMode.Byte:
+                    {
+                        var encoding = Encoding.GetEncoding("iso-8859-1");
+                        var byteArr = new byte[characters.Count];
+                        for (int i = 0; i < characters.Count; i++)
+                        {
+                            try
+                            {
+                                var symbol = Convert.ToByte(characters[i], 2);
+                                sb.Append(encoding.GetString(new byte[] { symbol }));
+                            }
+                            catch(Exception e) when (e is ArgumentException || e is FormatException)
+                            {
+                                sb.Append(unknownSymbol);
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    throw new NotImplementedException(); //ToDo
+            }
+            return sb.ToString();
+        }
+        private string ReadMessage() //ToDo length check of messageBytes, 
+        {
+            var binaryBlocks = this.GenerateBlocks(); //ToDo: use ECC bytes
+            var messageBlob = string.Join("", binaryBlocks[0]);
+            int modeNibble;
+            try
+            {
+                modeNibble = Convert.ToInt32(messageBlob.Substring(0, 4), 2);
+            }
+            catch(FormatException fe)
+            {
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + messageBlob.Substring(0, 4), fe);
+            }
+            if (Enum.IsDefined(typeof(MessageMode), modeNibble))
+            {
+                var messageMode = (MessageMode)modeNibble;
+                var charIndicatorLength = GetCharacterCountIndicatorLength(this.Version, messageMode);
+                int characterCount;
+                try
+                {
+                    characterCount = Convert.ToInt32(messageBlob.Substring(4, charIndicatorLength), 2); //ToDo check if characterCount is a valid value
+                }
+                catch (FormatException fe)
+                {
+                    throw new QRCodeFormatException("Could not parse character count.", fe);
+                }
+                var characterList = new List<string>(characterCount);
+                var characterLength = GetCharacterLength(messageMode);
+                for (int i = 4; i < characterCount*characterLength; i+= characterLength)
+                {
+                    characterList.Add(messageBlob.Substring(i, characterLength));
+                }
+                return GetMessageFromCharacters(characterList, messageMode);
+            }
+            else
+            {
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + messageBlob.Substring(0, 4));
+            }
         }
         public static QRCode XOR(QRCode lhs, QRCode rhs)
         {
@@ -304,21 +441,19 @@ namespace QRCodeDiag
 
         public void PrintBlocks()
         {
-            var dataAndECC = this.GetDataAndECCBlocks();
-            var sb = new StringBuilder("Data bytes 1 to 26:");
-            sb.Append(Environment.NewLine);
-            foreach (var s in dataAndECC[0])
-            {
-                sb.AppendLine(s);
-            }
-            Console.WriteLine(sb.ToString());
-            sb = new StringBuilder("ECC bytes 1 to 44:");
-            sb.Append(Environment.NewLine);
-            foreach (var s in dataAndECC[1])
-            {
-                sb.AppendLine(s);
-            }
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(this.ReadMessage());
         }
+
+        //public void AnalyzeCode()
+        //{
+        //    //Determine Size/Version
+        //    //GetFormatBits
+        //    //ReadFormatBits //Mask, ECC level
+        //    //XORWithMask
+        //    //ReadModeIndicator
+        //    //ReadCharacterCountIndicator
+
+        //    //Byte encoding uses ISO 8859-1
+        //}
     }
 }

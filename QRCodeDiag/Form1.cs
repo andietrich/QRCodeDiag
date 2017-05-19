@@ -54,7 +54,14 @@ namespace QRCodeDiag
             }
             else
             {
-                this.displayCode.PrintBlocks();
+                //try
+                {
+                    this.displayCode.PrintBlocks();
+                }
+                //catch (QRCodeFormatException qe)
+                //{
+                //    MessageBox.Show(this, qe.Message);
+                //}
             }
         }
 
