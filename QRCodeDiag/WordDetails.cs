@@ -59,10 +59,19 @@ namespace QRCodeDiag
                 var p1 = new Vector2D(cell.X + 1, cell.Y);
                 var p2 = new Vector2D(cell.X + 1, cell.Y+1);
                 var p3 = new Vector2D(cell.X, cell.Y + 1);
-                edges.Add(new PolygonEdge(p0, p1));
-                edges.Add(new PolygonEdge(p1, p2));
-                edges.Add(new PolygonEdge(p2, p3));
-                edges.Add(new PolygonEdge(p3, p0));
+                var top = new PolygonEdge(p0, p1);
+                var right = new PolygonEdge(p1, p2);
+                var bottom = new PolygonEdge(p2, p3);
+                var left = new PolygonEdge(p3, p0);
+
+                if (!edges.Remove(top))
+                    edges.Add(top);
+                if (!edges.Remove(right))
+                    edges.Add(right);
+                if (!edges.Remove(bottom))
+                    edges.Add(bottom);
+                if (!edges.Remove(left))
+                    edges.Add(left);
             }
             return edges.ToList();
         }

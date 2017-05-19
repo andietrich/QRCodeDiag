@@ -74,35 +74,10 @@ namespace QRCodeDiag
                     //ToDo draw the contours
                     foreach(var edge in wd.GetContour())
                     {
-                        int startX, startY, endX, endY;
-                        switch(edge.GetDirection())
-                        {
-                            case PolygonEdge.Direction.Down:
-                                startX = edge.Start.X + 1;
-                                startY = edge.Start.Y;
-                                endX = startX;
-                                endY = startY + 1;
-                                break;
-                            case PolygonEdge.Direction.Up:
-                                startX = edge.Start.X;
-                                startY = edge.Start.Y + 1;
-                                endX = startX;
-                                endY = startY;
-                                break;
-                            case PolygonEdge.Direction.Left:
-                                startX = edge.Start.X;
-                                startY = edge.Start.Y + 1;
-                                endX = startX + 1;
-                                endY = startY;
-                                break;
-                            case PolygonEdge.Direction.Right:
-                            default://ToDo throw exception
-                                startX = edge.Start.X + 1;
-                                startY = edge.Start.Y;
-                                endX = startX;
-                                endY = startY;
-                                break; 
-                        }
+                        var startX = edge.Start.X;
+                        var startY = edge.Start.Y;
+                        var endX = edge.End.X;
+                        var endY = edge.End.Y;
                         g.DrawLine(p, startX * pixelWidth, startY * pixelHeight, endX * pixelWidth, endY * pixelHeight);
                     }
                 }
