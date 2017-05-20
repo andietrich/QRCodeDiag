@@ -9,19 +9,19 @@ namespace QRCodeDiag
     class WordDetails : ICloneable
     {
         private List<Vector2D> pixelCoordinates;
-        public string DataWord { get; private set; }
+        public string Word { get; private set; }
         public uint MaxLength { get; private set; }
         public WordDetails(uint maxLength)
         {
             this.MaxLength = maxLength;
-            this.DataWord = string.Empty;
+            this.Word = string.Empty;
             this.pixelCoordinates = new List<Vector2D>();
         }
         public void AddBit(char bit, int x, int y)
         {
             if (this.pixelCoordinates.Count == this.MaxLength)
                 throw new InvalidOperationException("The maximum word length " + this.MaxLength + " has already been reached.");
-            this.DataWord = this.DataWord + bit;
+            this.Word = this.Word + bit;
             this.pixelCoordinates.Add(new Vector2D(x, y));
         }
         public int GetWordLength()
@@ -33,10 +33,10 @@ namespace QRCodeDiag
             if (bitNumber < 0 || bitNumber >= this.pixelCoordinates.Count)
             {
                 throw new ArgumentOutOfRangeException(
-                      "bitNumber",
-                      String.Format("Pixel {0} does not exist. Word length is {1}",
-                        bitNumber,
-                        this.pixelCoordinates.Count));
+                    "bitNumber",
+                    String.Format("Pixel {0} does not exist. Word length is {1}",
+                    bitNumber,
+                    this.pixelCoordinates.Count));
             }
             return this.pixelCoordinates[bitNumber];
         }
@@ -46,7 +46,8 @@ namespace QRCodeDiag
             return this.pixelCoordinates.Count == this.MaxLength;
         }
 
-        //ToDo
+        //ToDo when drawing contours make sure they don't overlap with neighboring polygons
+        //ToDo generate point array and use drawPolygon method
         //Contour must contain all outside borders or word-pixels.
         //Every contour-line must know where the "inside" is, to avoid overlapping with other words
         //Define: Square at x, y has corner points at x, y, x+1, y+1
@@ -81,7 +82,7 @@ namespace QRCodeDiag
             var ret = new WordDetails(this.MaxLength);
             for(int i = 0; i < this.pixelCoordinates.Count; i++)
             {
-                ret.AddBit(this.DataWord[i], this.pixelCoordinates[i].X, this.pixelCoordinates[i].Y);
+                ret.AddBit(this.Word[i], this.pixelCoordinates[i].X, this.pixelCoordinates[i].Y);
             }
             return ret;
         }

@@ -56,8 +56,8 @@ namespace QRCodeDiag
             if (this.drawNextEvent && this.highlightEventQueue.TryDequeue(out WordDetails nextDraw))
             {
                 // Draw current Bit box
-                var x = nextDraw.GetPixelCoordinate(nextDraw.DataWord.Length - 1).X;
-                var y = nextDraw.GetPixelCoordinate(nextDraw.DataWord.Length - 1).Y;
+                var x = nextDraw.GetPixelCoordinate(nextDraw.Word.Length - 1).X;
+                var y = nextDraw.GetPixelCoordinate(nextDraw.Word.Length - 1).Y;
                 var g = e.Graphics;
                 this.qrCode.DrawCode(g);
                 var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
@@ -92,13 +92,13 @@ namespace QRCodeDiag
 
         private string GetCurrentSymbolInfo(WordDetails wd)
         {
-            if (wd.DataWord.Length > 0)
+            if (wd.Word.Length > 0)
             {
-                int len = wd.DataWord.Length;
+                int len = wd.Word.Length;
                 return String.Format(
                   "Current Symbol: {0}{4}Current Word: {1}{4}Current Position: {2}, {3}",
-                  wd.DataWord[len - 1],
-                  wd.DataWord,
+                  wd.Word[len - 1],
+                  wd.Word,
                   wd.GetPixelCoordinate(len - 1).X,
                   wd.GetPixelCoordinate(len - 1).Y,
                   Environment.NewLine);

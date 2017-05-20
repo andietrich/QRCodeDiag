@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZXing.Common.ReedSolomon;
 
 namespace QRCodeDiag
 {
@@ -20,9 +21,21 @@ namespace QRCodeDiag
             ECI = 7
         }
         public const int SIZE = 29; //ToDo adjust for other versions
-        private char[,] bits;
+        public const int DATAWORDS = 55;//ToDo adjust for other versions
+        public const int ECCWORDS = 15;//ToDo adjust for other versions
+        private char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
+        private string message;
+        private bool messageChanged;
         public int Version { get; private set; }
-
+        public string Message
+        {
+            get
+            {
+                if(this.messageChanged)
+                    this.message = this.ReadMessage();
+                return this.message;
+            }
+        }
         public QRCode(char[,] setBits)
         {
             if(setBits.GetLength(0) != SIZE ||setBits.GetLength(1) != SIZE)
@@ -30,6 +43,7 @@ namespace QRCodeDiag
 
             this.bits = setBits;
             this.Version = 3; // ToDo implement other versions
+            this.messageChanged = true;
         }
 
         public QRCode(string path) : this(GenerateBitsFromFile(path))
@@ -90,7 +104,29 @@ namespace QRCodeDiag
 
         public char[,] GetBits()
         {
-            return this.bits;
+            return (char[,])this.bits.Clone();
+        }
+
+        public void ToggleDataCell(int x, int y)
+        {
+            if (IsDataCell(x, y))
+            {
+                switch (bits[x, y])
+                {
+                    case '0':
+                        bits[x, y] = '1';
+                        break;
+                    case '1':
+                        bits[x, y] = 'u';
+                        break;
+                    case 'u':
+                        bits[x, y] = '0';
+                        break;
+                    default:
+                        break;
+                }
+                this.messageChanged = true;
+            }
         }
 
         private BitIterator GetBitIterator()
@@ -145,7 +181,7 @@ namespace QRCodeDiag
                 if (c == '0' || c == '1' || c == 'u')
                 {
                     wd.AddBit(c, it.XPos, it.YPos);
-                    DebugDrawingForm.DebugHighlightCell(this, wd);
+                    //DebugDrawingForm.DebugHighlightCell(this, wd);
                     if (wd.IsComplete())
                     {
                         wordList.Add(wd);
@@ -156,33 +192,15 @@ namespace QRCodeDiag
             return wordList;
         }
 
-        private string[][] GenerateBlocks() //ToDo dynamically find ECC and DATA block count and location for all versions
+        private string[] GenerateBlocks() //ToDo dynamically find count, location and order of ECC and DATA blocks for all versions
         {
-            var dataWords = 55; //For V3-L
-            var eccWords = 15; //For V3-L
-            var orderedDataAndECC = new string[2][];
-            orderedDataAndECC[0] = new string[dataWords]; //Data
-            orderedDataAndECC[1] = new string[eccWords]; //ECC
+            var orderedDataAndECC = new string[DATAWORDS + ECCWORDS];
             var byteList = this.GenerateWordList();
-            for(int i = 0; i < dataWords; i++)
+            for(int i = 0; i < DATAWORDS + ECCWORDS; i++)
             {
-                orderedDataAndECC[0][i] = byteList[i].DataWord;
-            }
-            for(int i = 0; i < eccWords; i++)
-            {
-                orderedDataAndECC[1][i] = byteList[dataWords + i].DataWord;
+                orderedDataAndECC[i] = byteList[i].Word;
             }
             return orderedDataAndECC;
-            //for (int i = 0; i < 13; i++)
-            //{
-            //    this.OrderedDataAndECC[0][i] = byteList[2 * i].DataWord;
-            //    this.OrderedDataAndECC[0][i + 13] = byteList[2 * i + 1].DataWord;
-            //}
-            //for (int i = 0; i < 22; i++)
-            //{
-            //    this.OrderedDataAndECC[1][i] = byteList[2 * i + 26].DataWord;
-            //    this.OrderedDataAndECC[1][i + 22] = byteList[2 * i + 1 + 26].DataWord;
-            //}
         }
 
         private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
@@ -263,10 +281,39 @@ namespace QRCodeDiag
             }
             return sb.ToString();
         }
+
+        private string RepairMessage(string[] byteStrings, char defaultBit = '0')
+        {
+            var codeAsInts = new int[byteStrings.Length];
+            for (int i = 0; i < byteStrings.Length; i++)
+            {
+                var byteString = byteStrings[i].ToCharArray();
+                for (int j = 0; j < byteString.Length; j++)
+                {
+                    if (byteString[j] != '0' && byteString[j] != '1')
+                        byteString[j] = defaultBit;
+                }
+                codeAsInts[i] = Convert.ToInt32(new String(byteString), 2);
+            }
+            var rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
+            if (rsDecoder.decode(codeAsInts, ECCWORDS))
+            {
+                var binarySB = new StringBuilder();
+                for (int i = 0; i < DATAWORDS; i++)
+                {
+                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2));
+                }
+                return binarySB.ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
             var binaryBlocks = this.GenerateBlocks(); //ToDo: use ECC bytes
-            var messageBlob = string.Join("", binaryBlocks[0]);
+            var messageBlob = this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
             int modeNibble;
             try
             {
@@ -441,7 +488,7 @@ namespace QRCodeDiag
 
         public void PrintBlocks()
         {
-            Console.WriteLine(this.ReadMessage());
+            Console.WriteLine(this.Message);
         }
 
         //public void AnalyzeCode()

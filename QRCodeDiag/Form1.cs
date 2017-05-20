@@ -22,7 +22,8 @@ namespace QRCodeDiag
             set
             {
                 this.displayCode = value;
-                this.panel1.Invalidate();
+                this.UpdateTextBox();
+                this.pictureBox1.Invalidate();
             }
         }
         public Form1()
@@ -54,18 +55,18 @@ namespace QRCodeDiag
             }
             else
             {
-                //try
+                try
                 {
                     this.displayCode.PrintBlocks();
                 }
-                //catch (QRCodeFormatException qe)
-                //{
-                //    MessageBox.Show(this, qe.Message);
-                //}
+                catch (QRCodeFormatException qe)
+                {
+                    MessageBox.Show(this, qe.Message);
+                }
             }
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             this.displayCode?.DrawCode(e.Graphics);
         }
@@ -86,6 +87,25 @@ namespace QRCodeDiag
         {
             if (this.qrcode != null)
                 this.DisplayCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            this.DisplayCode.ToggleDataCell(QRCode.SIZE * e.Location.X / pictureBox1.Size.Width, QRCode.SIZE * e.Location.Y / pictureBox1.Size.Height);
+            this.pictureBox1.Refresh();
+            this.UpdateTextBox();
+        }
+
+        private void UpdateTextBox()
+        {
+            try
+            {
+                this.textBox1.Text = "Message: " + this.DisplayCode.Message;
+            }
+            catch(QRCodeFormatException qfe)
+            {
+                this.textBox1.Text = qfe.Message;
+            }
         }
     }
 }
