@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.DataBlocks
 {
     internal abstract class CodeSymbol
     {
@@ -72,5 +72,15 @@ namespace QRCodeDiag
             return edges.ToList();
         }
         public abstract char[] GetDecodedSymbols();
+
+        public static string GenerateBitString<T>(IList<T> symbols) where T : CodeSymbol
+        {
+            var sb = new StringBuilder();
+            for(int i = 0; i < symbols.Count; i++)
+            {
+                sb.Append(symbols[i].BitString);
+            }
+            return sb.ToString();
+        }
     }
 }

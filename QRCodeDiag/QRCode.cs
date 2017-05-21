@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeDiag.DataBlocks;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -12,7 +13,7 @@ namespace QRCodeDiag
 {
     public class QRCode
     {
-        private enum MessageMode
+        internal enum MessageMode
         {
             Numeric = 1,
             Alphanumeric = 2,
@@ -215,18 +216,7 @@ namespace QRCodeDiag
             }
             return wordList;
         }
-
-        private string[] GenerateBlocks() //ToDo dynamically find count, location and order of ECC and DATA blocks for all versions
-        {
-            var orderedDataAndECC = new string[DATAWORDS + ECCWORDS];
-            var byteList = this.GenerateRawByteList();
-            for(int i = 0; i < DATAWORDS + ECCWORDS; i++)
-            {
-                orderedDataAndECC[i] = byteList[i].BitString;
-            }
-            return orderedDataAndECC;
-        }
-
+        
         private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
         {
             switch (mode)
@@ -340,10 +330,10 @@ namespace QRCodeDiag
                 return null;
             }
         }
+        //private List<>
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
-            var binaryBlocks = this.GenerateBlocks();
-            var messageBlob = string.Join("", binaryBlocks, 0, DATAWORDS); //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
+            var messageBlob = CodeSymbol.GenerateBitString(this.GenerateRawByteList()); //ToDo: get only the message bits, not the ecc bits //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
             int modeNibble;
             try
             {
