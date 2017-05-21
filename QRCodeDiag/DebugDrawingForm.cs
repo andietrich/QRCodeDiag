@@ -23,6 +23,17 @@ namespace QRCodeDiag
         private List<WordDetails> completeWordsList; // Contains the complete words
 
         [Conditional("DEBUG")]
+        internal static void ResetDebugWindow(QRCode debuggedQRCode)
+        {
+            if (debugFormOpen)
+                debugDrawingForm.RestartDebugging(debuggedQRCode);
+            else
+            {
+                debugDrawingForm = new DebugDrawingForm(debuggedQRCode);
+                debugDrawingForm.Show();
+            }
+        }
+        [Conditional("DEBUG")]
         internal static void DebugHighlightCell(QRCode debuggedQRCode, WordDetails currentWord) //ToDo: currentWord gets changed/completed before timer ticks
         {
             if (!debugFormOpen)
@@ -33,7 +44,7 @@ namespace QRCodeDiag
             debugDrawingForm.EnqueueDrawingEvent(currentWord.Clone() as WordDetails);
         }
 
-        private DebugDrawingForm(QRCode debuggedQRCode, int millisecondDelay = 250)
+        private DebugDrawingForm(QRCode debuggedQRCode, int millisecondDelay = 1)
         {
             InitializeComponent();
             this.qrCode = debuggedQRCode;
@@ -44,7 +55,15 @@ namespace QRCodeDiag
             this.completeWordsList = new List<WordDetails>();
             debugFormOpen = true;
         }
-
+        public void RestartDebugging(QRCode debuggedQRCode)
+        {
+            this.timer1.Stop(); //ToDo maybe mutex for paint/restart required
+            this.drawNextEvent = false;
+            this.qrCode = debuggedQRCode;
+            this.highlightEventQueue = new ConcurrentQueue<WordDetails>();
+            this.completeWordsList = new List<WordDetails>();
+            debugFormOpen = true;
+        }
         private void EnqueueDrawingEvent(WordDetails wd)
         {
             this.highlightEventQueue.Enqueue(wd);
@@ -68,11 +87,18 @@ namespace QRCodeDiag
                 // Draw Word boxes
                 if (nextDraw.IsComplete())
                     this.completeWordsList.Add(nextDraw);
-                foreach(var wd in completeWordsList)
+
+                var fontFamily = new FontFamily("Lucida Console");
+                var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+                var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+                var redBrush = new SolidBrush(Color.Red);
+                var blueBrush = new SolidBrush(Color.Blue);
+
+                for(int j = 0; j < completeWordsList.Count; j++)
                 {
+                    var wd = completeWordsList[j];
                     var p = new Pen(Color.Green, 2); //ToDo new color every word (or the correct one of 4 different ones)
-                    //ToDo draw the contours
-                    foreach(var edge in wd.GetContour())
+                    foreach (var edge in wd.GetContour())
                     {
                         var startX = edge.Start.X;
                         var startY = edge.Start.Y;
@@ -80,6 +106,13 @@ namespace QRCodeDiag
                         var endY = edge.End.Y;
                         g.DrawLine(p, startX * pixelWidth, startY * pixelHeight, endX * pixelWidth, endY * pixelHeight);
                     }
+                    for (int i = 0; i < wd.GetWordLength(); i++)
+                    {
+                        var pixCoord = wd.GetPixelCoordinate(i);
+                        g.DrawString(i.ToString(), smallFont, redBrush, new Point((int)((pixCoord.X + 0.4F) * pixelWidth), (int)((pixCoord.Y+ 0.4F) * pixelHeight)));
+                    }
+                    var firstPixCoord = wd.GetPixelCoordinate(4);
+                    g.DrawString(j.ToString(), largeFont, blueBrush, new Point((int)(firstPixCoord.X * pixelWidth), (int)(firstPixCoord.Y * pixelHeight)));
                 }
 
                 // Write textbox

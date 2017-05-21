@@ -25,6 +25,7 @@ namespace QRCodeDiag
         public const int ECCWORDS = 15;//ToDo adjust for other versions
         private char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
         private string message;
+        private string[] paddingBits;
         private bool messageChanged;
         public int Version { get; private set; }
         public string Message
@@ -49,6 +50,21 @@ namespace QRCodeDiag
         public QRCode(string path) : this(GenerateBitsFromFile(path))
         { }
 
+        public void SaveToFile(string path)
+        {
+            var sb = new StringBuilder();
+            for (int y = 0; y < this.bits.GetLength(0); y++)
+            {
+                for (int x = 0; x < this.bits.GetLength(1)-1; x++)
+                {
+                    sb.Append(this.bits[x, y]);
+                    sb.Append("\t");
+                }
+                sb.Append(this.bits[this.bits.GetLength(1) - 1, y]);
+                sb.Append(Environment.NewLine);
+            }
+            File.WriteAllText(path, sb.ToString());
+        }
         private static char[,] GenerateBitsFromFile(string path)
         {
             var bitMask = new char[QRCode.SIZE, QRCode.SIZE];
@@ -105,6 +121,14 @@ namespace QRCodeDiag
         public char[,] GetBits()
         {
             return (char[,])this.bits.Clone();
+        }
+
+        public string[] GetPaddingBits()
+        {
+            if (this.paddingBits != null)
+                return (string[])this.paddingBits.Clone();
+            else
+                throw new InvalidOperationException("Padding bits have not been initialized yet.");
         }
 
         public void ToggleDataCell(int x, int y)
@@ -168,6 +192,7 @@ namespace QRCodeDiag
         /// <returns></returns>
         private List<WordDetails> GenerateWordList()
         {
+            DebugDrawingForm.ResetDebugWindow(this);
             uint wordLength = 8; // Always read 8 bit blocks
             var wordList = new List<WordDetails>();
             var it = this.GetBitIterator();
@@ -181,7 +206,7 @@ namespace QRCodeDiag
                 if (c == '0' || c == '1' || c == 'u')
                 {
                     wd.AddBit(c, it.XPos, it.YPos);
-                    //DebugDrawingForm.DebugHighlightCell(this, wd);
+                    DebugDrawingForm.DebugHighlightCell(this, wd);
                     if (wd.IsComplete())
                     {
                         wordList.Add(wd);
@@ -260,7 +285,7 @@ namespace QRCodeDiag
             {
                 case MessageMode.Byte:
                     {
-                        var encoding = Encoding.GetEncoding("iso-8859-1");
+                        var encoding = Encoding.GetEncoding("iso-8859-1"); //ToDo FIXME try other encodings for decoding '/', end of string
                         var byteArr = new byte[characters.Count];
                         for (int i = 0; i < characters.Count; i++)
                         {
@@ -301,7 +326,7 @@ namespace QRCodeDiag
                 var binarySB = new StringBuilder();
                 for (int i = 0; i < DATAWORDS; i++)
                 {
-                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2));
+                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2)); //FIXME ToDo: probably bit order reversed
                 }
                 return binarySB.ToString();
             }
@@ -313,7 +338,7 @@ namespace QRCodeDiag
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
             var binaryBlocks = this.GenerateBlocks(); //ToDo: use ECC bytes
-            var messageBlob = this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
+            var messageBlob = string.Join("", binaryBlocks, 0, DATAWORDS); //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
             int modeNibble;
             try
             {
@@ -338,9 +363,15 @@ namespace QRCodeDiag
                 }
                 var characterList = new List<string>(characterCount);
                 var characterLength = GetCharacterLength(messageMode);
-                for (int i = 4; i < characterCount*characterLength; i+= characterLength)
+                for (int i = 4+charIndicatorLength; i < characterCount*characterLength; i+= characterLength)
                 {
                     characterList.Add(messageBlob.Substring(i, characterLength));
+                }
+                this.paddingBits = new string[DATAWORDS - (characterCount * characterLength + 4 + charIndicatorLength) / 8]; //ToDo automatically fix padding bits
+                var paddingStartPos = (DATAWORDS - paddingBits.Length) * 8;
+                for(int i = 0; i < paddingBits.Length; i++)
+                {
+                    paddingBits[i] = messageBlob.Substring(paddingStartPos + 8*i, 8);
                 }
                 return GetMessageFromCharacters(characterList, messageMode);
             }
