@@ -8,10 +8,8 @@ namespace QRCodeDiag.DataBlocks
 {
     class RawCodeByte : CodeSymbol
     {
-        private const uint RAWBYTELENGTH = 8;
-        public RawCodeByte() : base(RAWBYTELENGTH)
-        { }
-
+        public const uint RAWBYTELENGTH = 8;
+        public override uint SymbolLength => RAWBYTELENGTH;
         public object Clone()
         {
             var ret = new RawCodeByte();
@@ -20,10 +18,6 @@ namespace QRCodeDiag.DataBlocks
                 ret.AddBit(this.bitArray[i], this.bitCoordinates[i].X, this.bitCoordinates[i].Y);
             }
             return ret;
-        }
-        public override char[] GetDecodedSymbols()
-        {
-            throw new NotImplementedException();
         }
         public bool GetAsByte(out byte value)
         {
@@ -37,10 +31,10 @@ namespace QRCodeDiag.DataBlocks
                     {
                         bits++;
                     }
-                    else if (this.bitArray[i] != '1')
+                    else if (this.bitArray[i] == '1')
                     {
                         bits++;
-                        value += (byte)(1 << i);
+                        value += (byte)(0x80 >> i);
                     }
                 }
                 System.Diagnostics.Debug.Assert(bits != this.MaxBitCount || (Convert.ToByte(this.BitString, 2) == value));
@@ -50,6 +44,16 @@ namespace QRCodeDiag.DataBlocks
             {
                 return false;
             }
+        }
+        public static string DecodeSymbols<T>(IList<T> symbols, char unknownSymbol, Encoding encoding) where T : RawCodeByte
+        {
+            var unknownSymbolByte = encoding.GetBytes(new char[] { unknownSymbol })[0];
+            var symbolsAsBytes = new byte[symbols.Count];
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                symbolsAsBytes[i] = symbols[i].GetAsByte(out var value) ? value : unknownSymbolByte;
+            }
+            return encoding.GetString(symbolsAsBytes);
         }
     }
 }

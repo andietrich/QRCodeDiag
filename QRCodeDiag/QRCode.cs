@@ -266,42 +266,6 @@ namespace QRCodeDiag
                     throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
-        /// <summary>
-        /// Transforms the array of message mode (encoding) "characters" to a string containing the decoded symbols in human readable form.
-        /// </summary>
-        /// <param name="characters">List of strings where each string contains the binary representation of the "character" in the message mode encoding</param>
-        /// <param name="mode">The message mode that specifies the encoding of the "characters" in the characters parameter</param>
-        /// <returns>A string containing the decoded symbols in human readable form</returns>
-        private static string GetMessageFromCharacters(List<string> characters, MessageMode mode)
-        {
-            var sb = new StringBuilder(characters.Count);
-            var unknownSymbol = '_';
-            switch (mode)   //ToDo length check of the strings depending on mode
-            {
-                case MessageMode.Byte:
-                    {
-                        var encoding = Encoding.GetEncoding("iso-8859-1");
-                        var byteArr = new byte[characters.Count];
-                        for (int i = 0; i < characters.Count; i++)
-                        {
-                            try
-                            {
-                                var symbol = Convert.ToByte(characters[i], 2);
-                                sb.Append(encoding.GetString(new byte[] { symbol }));   //ToDo solution that handles invalid input without throwing
-                            }
-                            catch(FormatException)
-                            {
-                                sb.Append(unknownSymbol);
-                            }
-                        }
-                        break;
-                    }
-                default:
-                    throw new NotImplementedException("Decoding " + mode.ToString() + " is not implemented."); //ToDo implement other encodings
-            }
-            return sb.ToString();
-        }
-
         private string RepairMessage(string[] byteStrings, char defaultBit = '0')
         {
             var codeAsInts = new int[byteStrings.Length];
@@ -330,10 +294,11 @@ namespace QRCodeDiag
                 return null;
             }
         }
-        //private List<>
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
-            var messageBlob = CodeSymbol.GenerateBitString(this.GenerateRawByteList()); //ToDo: get only the message bits, not the ecc bits //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
+            //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS); // transform RawByteList to byte[] using RawCodeByte.GetAsByte() ?
+            var rawByteList = this.GenerateRawByteList(); //ToDo: get only the message bits, not the ecc bits 
+            var messageBlob = CodeSymbol.GenerateBitString(rawByteList); //ToDo: store bit->coordinate mapping somehow 
             int modeNibble;
             try
             {
@@ -354,21 +319,40 @@ namespace QRCodeDiag
                 }
                 catch (FormatException fe)
                 {
-                    throw new QRCodeFormatException("Could not parse character count.", fe);
+                    throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count
                 }
-                var characterList = new List<string>(characterCount);
-                var characterLength = GetCharacterLength(messageMode);
-                for (int i = 4+charIndicatorLength; i < characterCount*characterLength; i+= characterLength)
+                if (messageMode == MessageMode.Byte)
                 {
-                    characterList.Add(messageBlob.Substring(i, characterLength));
+                    var characterList = new List<ByteEncodingSymbol>(characterCount);
+                    var encodedCharacterLength = GetCharacterLength(messageMode);
+                    var rawByteLength = (int)RawCodeByte.RAWBYTELENGTH;
+                    var firstSymbolOffset = 4 + charIndicatorLength;
+                    var messageLenghtInBits = characterCount * encodedCharacterLength;
+                    var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
+                    for (int rawByteInMessageOffset = firstSymbolOffset; rawByteInMessageOffset < messageEndOffset; rawByteInMessageOffset += encodedCharacterLength)
+                    {
+                        var newSymbol = new ByteEncodingSymbol();
+                        characterList.Add(newSymbol);
+                        //ToDo all this gets simplified if messageBlob becomes a pair of bit array and corresponding coordinate pair array where matching length is guaranteed
+                        for (int j = 0; j < encodedCharacterLength; j++) // messageBlob bits are in order of rawByteList order. For bit i the coordinates are in rawByte i/8, bit i%8
+                        {
+                            int rawByteBitOffset = (j + rawByteInMessageOffset) % rawByteLength;
+                            int rawByteListPosition = (j + rawByteInMessageOffset) / rawByteLength;
+                            newSymbol.AddBit(messageBlob[rawByteInMessageOffset+j], rawByteList[rawByteListPosition].GetPixelCoordinate(rawByteBitOffset));
+                        }
+                    }
+                    this.paddingBits = new string[DATAWORDS - messageEndOffset / 8]; //ToDo automatically fix padding bits
+                    var paddingStartPos = messageEndOffset;
+                    for (int i = 0; i < paddingBits.Length; i++)
+                    {
+                        paddingBits[i] = messageBlob.Substring(paddingStartPos + 8 * i, 8);
+                    }
+                    return ByteEncodingSymbol.DecodeSymbols(characterList);
                 }
-                this.paddingBits = new string[DATAWORDS - (characterCount * characterLength + 4 + charIndicatorLength) / 8]; //ToDo automatically fix padding bits
-                var paddingStartPos = (DATAWORDS - paddingBits.Length) * 8;
-                for(int i = 0; i < paddingBits.Length; i++)
+                else
                 {
-                    paddingBits[i] = messageBlob.Substring(paddingStartPos + 8*i, 8);
+                    throw new NotImplementedException("Other encodings are not implemented yet."); //ToDo implement reading other encodings
                 }
-                return GetMessageFromCharacters(characterList, messageMode);
             }
             else
             {

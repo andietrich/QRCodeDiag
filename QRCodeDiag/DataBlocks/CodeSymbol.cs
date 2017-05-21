@@ -10,20 +10,25 @@ namespace QRCodeDiag.DataBlocks
     {
         protected List<Vector2D> bitCoordinates;
         protected char[] bitArray;
+        public abstract uint SymbolLength { get; }
         public string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
         public int MaxBitCount { get { return this.bitArray.Length; } }
         public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
-        protected CodeSymbol(uint symbolLength)
+        protected CodeSymbol()
         {
-            this.bitArray = new char[symbolLength];
-            this.bitCoordinates = new List<Vector2D>((int)symbolLength);
+            this.bitArray = new char[this.SymbolLength];
+            this.bitCoordinates = new List<Vector2D>((int)this.SymbolLength);
         }
         public void AddBit(char bit, int x, int y)
+        {
+            this.AddBit(bit, new Vector2D(x, y));
+        }
+        public void AddBit(char bit, Vector2D bitPosition)
         {
             if (this.bitCoordinates.Count == this.MaxBitCount)
                 throw new InvalidOperationException("The maximum symbol length " + this.MaxBitCount + " has already been reached.");
             this.bitArray[bitCoordinates.Count] = bit;
-            this.bitCoordinates.Add(new Vector2D(x, y));
+            this.bitCoordinates.Add(bitPosition);
         }
         public int GetCurrentWordLength()
         {
@@ -71,8 +76,6 @@ namespace QRCodeDiag.DataBlocks
             }
             return edges.ToList();
         }
-        public abstract char[] GetDecodedSymbols();
-
         public static string GenerateBitString<T>(IList<T> symbols) where T : CodeSymbol
         {
             var sb = new StringBuilder();

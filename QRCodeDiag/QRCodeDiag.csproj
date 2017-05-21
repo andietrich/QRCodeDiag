@@ -54,7 +54,7 @@
     <Compile Include="BitIterator.cs" />
     <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
     <Compile Include="DataBlocks\CodeSymbol.cs" />
-    <Compile Include="DataBlocks\EncodingSymbol.cs" />
+    <Compile Include="DataBlocks\IEncodingSymbol.cs" />
     <Compile Include="DebugDrawingForm.cs">
       <SubType>Form</SubType>
     </Compile>
