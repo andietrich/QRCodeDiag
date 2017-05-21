@@ -6,46 +6,41 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag
 {
-    class WordDetails : ICloneable
+    internal abstract class CodeSymbol
     {
-        private List<Vector2D> pixelCoordinates;
-        public string Word { get; private set; }
-        public uint MaxLength { get; private set; }
-        public WordDetails(uint maxLength)
+        protected List<Vector2D> bitCoordinates;
+        protected char[] bitArray;
+        public string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
+        public int MaxBitCount { get { return this.bitArray.Length; } }
+        public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
+        protected CodeSymbol(uint symbolLength)
         {
-            this.MaxLength = maxLength;
-            this.Word = string.Empty;
-            this.pixelCoordinates = new List<Vector2D>();
+            this.bitArray = new char[symbolLength];
+            this.bitCoordinates = new List<Vector2D>((int)symbolLength);
         }
         public void AddBit(char bit, int x, int y)
         {
-            if (this.pixelCoordinates.Count == this.MaxLength)
-                throw new InvalidOperationException("The maximum word length " + this.MaxLength + " has already been reached.");
-            this.Word = this.Word + bit;
-            this.pixelCoordinates.Add(new Vector2D(x, y));
+            if (this.bitCoordinates.Count == this.MaxBitCount)
+                throw new InvalidOperationException("The maximum symbol length " + this.MaxBitCount + " has already been reached.");
+            this.bitArray[bitCoordinates.Count] = bit;
+            this.bitCoordinates.Add(new Vector2D(x, y));
         }
-        public int GetWordLength()
+        public int GetCurrentWordLength()
         {
-            return this.pixelCoordinates.Count;
+            return this.bitCoordinates.Count;
         }
         public Vector2D GetPixelCoordinate(int bitNumber)
         {
-            if (bitNumber < 0 || bitNumber >= this.pixelCoordinates.Count)
+            if (bitNumber < 0 || bitNumber >= this.bitCoordinates.Count)
             {
                 throw new ArgumentOutOfRangeException(
                     "bitNumber",
-                    String.Format("Pixel {0} does not exist. Word length is {1}",
+                    String.Format("Bit number {0} does not exist. Current symbol length is {1}.",
                     bitNumber,
-                    this.pixelCoordinates.Count));
+                    this.bitCoordinates.Count));
             }
-            return this.pixelCoordinates[bitNumber];
+            return this.bitCoordinates[bitNumber];
         }
-
-        public bool IsComplete()
-        {
-            return this.pixelCoordinates.Count == this.MaxLength;
-        }
-
         //ToDo when drawing contours make sure they don't overlap with neighboring polygons
         //ToDo generate point array and use drawPolygon method
         //Contour must contain all outside borders or word-pixels.
@@ -54,11 +49,11 @@ namespace QRCodeDiag
         public List<PolygonEdge> GetContour()
         {
             var edges = new HashSet<PolygonEdge>();
-            foreach(var cell in pixelCoordinates)
+            foreach (var cell in bitCoordinates)
             {
                 var p0 = new Vector2D(cell.X, cell.Y);
                 var p1 = new Vector2D(cell.X + 1, cell.Y);
-                var p2 = new Vector2D(cell.X + 1, cell.Y+1);
+                var p2 = new Vector2D(cell.X + 1, cell.Y + 1);
                 var p3 = new Vector2D(cell.X, cell.Y + 1);
                 var top = new PolygonEdge(p0, p1);
                 var right = new PolygonEdge(p1, p2);
@@ -76,15 +71,6 @@ namespace QRCodeDiag
             }
             return edges.ToList();
         }
-
-        public object Clone()
-        {
-            var ret = new WordDetails(this.MaxLength);
-            for(int i = 0; i < this.pixelCoordinates.Count; i++)
-            {
-                ret.AddBit(this.Word[i], this.pixelCoordinates[i].X, this.pixelCoordinates[i].Y);
-            }
-            return ret;
-        }
+        public abstract char[] GetDecodedSymbols();
     }
 }

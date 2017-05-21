@@ -190,13 +190,12 @@ namespace QRCodeDiag
         /// After obtaining the bytes apply ECC checking/correction. After ECC read mode indicator, char count indicator, chars.
         /// </summary>
         /// <returns></returns>
-        private List<WordDetails> GenerateWordList()
+        private List<RawCodeByte> GenerateRawByteList()
         {
             DebugDrawingForm.ResetDebugWindow(this);
-            uint wordLength = 8; // Always read 8 bit blocks
-            var wordList = new List<WordDetails>();
+            var wordList = new List<RawCodeByte>();
             var it = this.GetBitIterator();
-            var wd = new WordDetails(wordLength);
+            var wd = new RawCodeByte();
             var c = it.CurrentChar;
             wd.AddBit(c, it.XPos, it.YPos);
 
@@ -207,10 +206,10 @@ namespace QRCodeDiag
                 {
                     wd.AddBit(c, it.XPos, it.YPos);
                     DebugDrawingForm.DebugHighlightCell(this, wd);
-                    if (wd.IsComplete())
+                    if (wd.IsComplete)
                     {
                         wordList.Add(wd);
-                        wd = new WordDetails(wordLength);
+                        wd = new RawCodeByte();
                     }
                 }
             }
@@ -220,10 +219,10 @@ namespace QRCodeDiag
         private string[] GenerateBlocks() //ToDo dynamically find count, location and order of ECC and DATA blocks for all versions
         {
             var orderedDataAndECC = new string[DATAWORDS + ECCWORDS];
-            var byteList = this.GenerateWordList();
+            var byteList = this.GenerateRawByteList();
             for(int i = 0; i < DATAWORDS + ECCWORDS; i++)
             {
-                orderedDataAndECC[i] = byteList[i].Word;
+                orderedDataAndECC[i] = byteList[i].BitString;
             }
             return orderedDataAndECC;
         }
@@ -274,27 +273,33 @@ namespace QRCodeDiag
                 case MessageMode.Byte:
                     return 8;
                 default:
-                    throw new NotImplementedException(); //ToDo split combined characters, find out final chunks character count
+                    throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
+        /// <summary>
+        /// Transforms the array of message mode (encoding) "characters" to a string containing the decoded symbols in human readable form.
+        /// </summary>
+        /// <param name="characters">List of strings where each string contains the binary representation of the "character" in the message mode encoding</param>
+        /// <param name="mode">The message mode that specifies the encoding of the "characters" in the characters parameter</param>
+        /// <returns>A string containing the decoded symbols in human readable form</returns>
         private static string GetMessageFromCharacters(List<string> characters, MessageMode mode)
         {
             var sb = new StringBuilder(characters.Count);
             var unknownSymbol = '_';
-            switch (mode)
+            switch (mode)   //ToDo length check of the strings depending on mode
             {
                 case MessageMode.Byte:
                     {
-                        var encoding = Encoding.GetEncoding("iso-8859-1"); //ToDo FIXME try other encodings for decoding '/', end of string
+                        var encoding = Encoding.GetEncoding("iso-8859-1");
                         var byteArr = new byte[characters.Count];
                         for (int i = 0; i < characters.Count; i++)
                         {
                             try
                             {
                                 var symbol = Convert.ToByte(characters[i], 2);
-                                sb.Append(encoding.GetString(new byte[] { symbol }));
+                                sb.Append(encoding.GetString(new byte[] { symbol }));   //ToDo solution that handles invalid input without throwing
                             }
-                            catch(Exception e) when (e is ArgumentException || e is FormatException)
+                            catch(FormatException)
                             {
                                 sb.Append(unknownSymbol);
                             }
@@ -302,7 +307,7 @@ namespace QRCodeDiag
                         break;
                     }
                 default:
-                    throw new NotImplementedException(); //ToDo
+                    throw new NotImplementedException("Decoding " + mode.ToString() + " is not implemented."); //ToDo implement other encodings
             }
             return sb.ToString();
         }
@@ -337,7 +342,7 @@ namespace QRCodeDiag
         }
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
-            var binaryBlocks = this.GenerateBlocks(); //ToDo: use ECC bytes
+            var binaryBlocks = this.GenerateBlocks();
             var messageBlob = string.Join("", binaryBlocks, 0, DATAWORDS); //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS);
             int modeNibble;
             try

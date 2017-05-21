@@ -17,10 +17,10 @@ namespace QRCodeDiag
     {
         private static DebugDrawingForm debugDrawingForm;
         private static bool debugFormOpen = false;
-        private ConcurrentQueue<WordDetails> highlightEventQueue;
+        private ConcurrentQueue<RawCodeByte> highlightEventQueue;
         private QRCode qrCode;
         private bool drawNextEvent;
-        private List<WordDetails> completeWordsList; // Contains the complete words
+        private List<RawCodeByte> completeWordsList; // Contains the complete words
 
         [Conditional("DEBUG")]
         internal static void ResetDebugWindow(QRCode debuggedQRCode)
@@ -34,14 +34,14 @@ namespace QRCodeDiag
             }
         }
         [Conditional("DEBUG")]
-        internal static void DebugHighlightCell(QRCode debuggedQRCode, WordDetails currentWord) //ToDo: currentWord gets changed/completed before timer ticks
+        internal static void DebugHighlightCell(QRCode debuggedQRCode, RawCodeByte currentWord) //ToDo: currentWord gets changed/completed before timer ticks
         {
             if (!debugFormOpen)
             {
                 debugDrawingForm = new DebugDrawingForm(debuggedQRCode);
                 debugDrawingForm.Show();
             }
-            debugDrawingForm.EnqueueDrawingEvent(currentWord.Clone() as WordDetails);
+            debugDrawingForm.EnqueueDrawingEvent(currentWord.Clone() as RawCodeByte);
         }
 
         private DebugDrawingForm(QRCode debuggedQRCode, int millisecondDelay = 1)
@@ -51,8 +51,8 @@ namespace QRCodeDiag
             this.pictureBox1.Paint += this.PaintDebugEvents;
             this.drawNextEvent = false;
             this.timer1.Interval = millisecondDelay;
-            this.highlightEventQueue = new ConcurrentQueue<WordDetails>();
-            this.completeWordsList = new List<WordDetails>();
+            this.highlightEventQueue = new ConcurrentQueue<RawCodeByte>();
+            this.completeWordsList = new List<RawCodeByte>();
             debugFormOpen = true;
         }
         public void RestartDebugging(QRCode debuggedQRCode)
@@ -60,11 +60,11 @@ namespace QRCodeDiag
             this.timer1.Stop(); //ToDo maybe mutex for paint/restart required
             this.drawNextEvent = false;
             this.qrCode = debuggedQRCode;
-            this.highlightEventQueue = new ConcurrentQueue<WordDetails>();
-            this.completeWordsList = new List<WordDetails>();
+            this.highlightEventQueue = new ConcurrentQueue<RawCodeByte>();
+            this.completeWordsList = new List<RawCodeByte>();
             debugFormOpen = true;
         }
-        private void EnqueueDrawingEvent(WordDetails wd)
+        private void EnqueueDrawingEvent(RawCodeByte wd)
         {
             this.highlightEventQueue.Enqueue(wd);
             if (!this.timer1.Enabled)
@@ -72,11 +72,11 @@ namespace QRCodeDiag
         }
         private void PaintDebugEvents(object sender, System.Windows.Forms.PaintEventArgs e)
         {
-            if (this.drawNextEvent && this.highlightEventQueue.TryDequeue(out WordDetails nextDraw))
+            if (this.drawNextEvent && this.highlightEventQueue.TryDequeue(out RawCodeByte nextDraw))
             {
                 // Draw current Bit box
-                var x = nextDraw.GetPixelCoordinate(nextDraw.Word.Length - 1).X;
-                var y = nextDraw.GetPixelCoordinate(nextDraw.Word.Length - 1).Y;
+                var x = nextDraw.GetPixelCoordinate(nextDraw.BitString.Length - 1).X;
+                var y = nextDraw.GetPixelCoordinate(nextDraw.BitString.Length - 1).Y;
                 var g = e.Graphics;
                 this.qrCode.DrawCode(g);
                 var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
@@ -85,7 +85,7 @@ namespace QRCodeDiag
                 g.DrawRectangle(pen, pixelWidth * x, pixelHeight * y, pixelWidth, pixelHeight);
 
                 // Draw Word boxes
-                if (nextDraw.IsComplete())
+                if (nextDraw.IsComplete)
                     this.completeWordsList.Add(nextDraw);
 
                 var fontFamily = new FontFamily("Lucida Console");
@@ -106,7 +106,7 @@ namespace QRCodeDiag
                         var endY = edge.End.Y;
                         g.DrawLine(p, startX * pixelWidth, startY * pixelHeight, endX * pixelWidth, endY * pixelHeight);
                     }
-                    for (int i = 0; i < wd.GetWordLength(); i++)
+                    for (int i = 0; i < wd.GetCurrentWordLength(); i++)
                     {
                         var pixCoord = wd.GetPixelCoordinate(i);
                         g.DrawString(i.ToString(), smallFont, redBrush, new Point((int)((pixCoord.X + 0.4F) * pixelWidth), (int)((pixCoord.Y+ 0.4F) * pixelHeight)));
@@ -123,17 +123,17 @@ namespace QRCodeDiag
             }
         }
 
-        private string GetCurrentSymbolInfo(WordDetails wd)
+        private string GetCurrentSymbolInfo(RawCodeByte wd)
         {
-            if (wd.Word.Length > 0)
+            var word = wd.BitString;
+            if (word.Length > 0)
             {
-                int len = wd.Word.Length;
                 return String.Format(
                   "Current Symbol: {0}{4}Current Word: {1}{4}Current Position: {2}, {3}",
-                  wd.Word[len - 1],
-                  wd.Word,
-                  wd.GetPixelCoordinate(len - 1).X,
-                  wd.GetPixelCoordinate(len - 1).Y,
+                  word[word.Length - 1],
+                  word,
+                  wd.GetPixelCoordinate(word.Length - 1).X,
+                  wd.GetPixelCoordinate(word.Length - 1).Y,
                   Environment.NewLine);
             }
             else
