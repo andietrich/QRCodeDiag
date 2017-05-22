@@ -193,7 +193,7 @@ namespace QRCodeDiag
         /// <returns></returns>
         private List<RawCodeByte> GenerateRawByteList()
         {
-            DebugDrawingForm.ResetDebugWindow(this);
+            DebugDrawingForm.ResetDebugWindow(this, 0);
             var wordList = new List<RawCodeByte>();
             var it = this.GetBitIterator();
             var wd = new RawCodeByte();
@@ -206,7 +206,7 @@ namespace QRCodeDiag
                 if (c == '0' || c == '1' || c == 'u')
                 {
                     wd.AddBit(c, it.XPos, it.YPos);
-                    DebugDrawingForm.DebugHighlightCell(this, wd);
+                    DebugDrawingForm.DebugHighlightCell(this, wd, 0);
                     if (wd.IsComplete)
                     {
                         wordList.Add(wd);
@@ -323,6 +323,7 @@ namespace QRCodeDiag
                 }
                 if (messageMode == MessageMode.Byte)
                 {
+                    DebugDrawingForm.ResetDebugWindow(XOR(this, QRCode.GetMask111()), 1);
                     var characterList = new List<ByteEncodingSymbol>(characterCount);
                     var encodedCharacterLength = GetCharacterLength(messageMode);
                     var rawByteLength = (int)RawCodeByte.RAWBYTELENGTH;
@@ -340,6 +341,7 @@ namespace QRCodeDiag
                             int rawByteListPosition = (j + rawByteInMessageOffset) / rawByteLength;
                             newSymbol.AddBit(messageBlob[rawByteInMessageOffset+j], rawByteList[rawByteListPosition].GetPixelCoordinate(rawByteBitOffset));
                         }
+                        DebugDrawingForm.DebugHighlightCell(this, newSymbol, 1);
                     }
                     this.paddingBits = new string[DATAWORDS - messageEndOffset / 8]; //ToDo automatically fix padding bits
                     var paddingStartPos = messageEndOffset;

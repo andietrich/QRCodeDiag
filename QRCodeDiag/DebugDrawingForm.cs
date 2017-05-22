@@ -16,45 +16,47 @@ namespace QRCodeDiag
 {
     public partial class DebugDrawingForm : Form
     {
-        private static DebugDrawingForm debugDrawingForm;
-        private static bool debugFormOpen = false;
+        private static DebugDrawingForm[] debugDrawingForm = new DebugDrawingForm[2];
+        private static bool[] debugFormOpen = { false, false };
+
+        private int windowInstance;
         private ConcurrentQueue<RawCodeByte> highlightEventQueue;
         private QRCode qrCode;
         private bool drawNextEvent;
         private List<RawCodeByte> completeWordsList; // Contains the complete words
 
         [Conditional("DEBUG")]
-        internal static void ResetDebugWindow(QRCode debuggedQRCode)
+        internal static void ResetDebugWindow(QRCode debuggedQRCode, int instance, int millisecondDelay = 1)
         {
-            if (debugFormOpen)
-                debugDrawingForm.RestartDebugging(debuggedQRCode);
+            if (debugFormOpen[instance])
+                debugDrawingForm[instance].RestartDebugging(debuggedQRCode);
             else
             {
-                debugDrawingForm = new DebugDrawingForm(debuggedQRCode);
-                debugDrawingForm.Show();
+                debugDrawingForm[instance] = new DebugDrawingForm(debuggedQRCode, instance, millisecondDelay);
+                debugDrawingForm[instance].Show();
             }
         }
         [Conditional("DEBUG")]
-        internal static void DebugHighlightCell(QRCode debuggedQRCode, RawCodeByte currentWord) //ToDo: currentWord gets changed/completed before timer ticks
+        internal static void DebugHighlightCell(QRCode debuggedQRCode, RawCodeByte currentWord, int instance) //ToDo: currentWord gets changed/completed before timer ticks
         {
-            if (!debugFormOpen)
+            if (!debugFormOpen[instance])
             {
-                debugDrawingForm = new DebugDrawingForm(debuggedQRCode);
-                debugDrawingForm.Show();
+                debugDrawingForm[instance] = new DebugDrawingForm(debuggedQRCode, instance);
+                debugDrawingForm[instance].Show();
             }
-            debugDrawingForm.EnqueueDrawingEvent(currentWord.Clone() as RawCodeByte);
+            debugDrawingForm[instance].EnqueueDrawingEvent(currentWord.Clone() as RawCodeByte);
         }
-
-        private DebugDrawingForm(QRCode debuggedQRCode, int millisecondDelay = 1)
+        private DebugDrawingForm(QRCode debuggedQRCode, int instance, int millisecondDelay = 1)
         {
             InitializeComponent();
+            this.windowInstance = instance;
             this.qrCode = debuggedQRCode;
             this.pictureBox1.Paint += this.PaintDebugEvents;
             this.drawNextEvent = false;
             this.timer1.Interval = millisecondDelay;
             this.highlightEventQueue = new ConcurrentQueue<RawCodeByte>();
             this.completeWordsList = new List<RawCodeByte>();
-            debugFormOpen = true;
+            debugFormOpen[this.windowInstance] = true;
         }
         public void RestartDebugging(QRCode debuggedQRCode)
         {
@@ -63,7 +65,7 @@ namespace QRCodeDiag
             this.qrCode = debuggedQRCode;
             this.highlightEventQueue = new ConcurrentQueue<RawCodeByte>();
             this.completeWordsList = new List<RawCodeByte>();
-            debugFormOpen = true;
+            debugFormOpen[this.windowInstance] = true;
         }
         private void EnqueueDrawingEvent(RawCodeByte wd)
         {
@@ -93,7 +95,7 @@ namespace QRCodeDiag
                 var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
                 var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
                 var redBrush = new SolidBrush(Color.Red);
-                var blueBrush = new SolidBrush(Color.Blue);
+                var orangeBrush = new SolidBrush(Color.Orange);
 
                 for(int j = 0; j < completeWordsList.Count; j++)
                 {
@@ -113,7 +115,19 @@ namespace QRCodeDiag
                         g.DrawString(i.ToString(), smallFont, redBrush, new Point((int)((pixCoord.X + 0.4F) * pixelWidth), (int)((pixCoord.Y+ 0.4F) * pixelHeight)));
                     }
                     var firstPixCoord = wd.GetPixelCoordinate(4);
-                    g.DrawString(j.ToString(), largeFont, blueBrush, new Point((int)(firstPixCoord.X * pixelWidth), (int)(firstPixCoord.Y * pixelHeight)));
+                    string drawSymbol;
+                    if (wd is ByteEncodingSymbol)
+                    {
+                        if (((ByteEncodingSymbol)wd).GetAsByte(out var symbolByte))
+                            drawSymbol = Encoding.GetEncoding("iso-8859-1").GetString(new byte[] { symbolByte });
+                        else
+                            drawSymbol = "_";
+                    }
+                    else
+                    {
+                        drawSymbol = j.ToString();
+                    }
+                    g.DrawString(drawSymbol, largeFont, orangeBrush, new Point((int)(firstPixCoord.X * pixelWidth), (int)(firstPixCoord.Y * pixelHeight)));
                 }
 
                 // Write textbox
@@ -150,7 +164,7 @@ namespace QRCodeDiag
 
         private void DebugDrawingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            debugFormOpen = false;
+            debugFormOpen[this.windowInstance] = false;
         }
     }
 }

@@ -14,5 +14,14 @@ namespace QRCodeDiag.DataBlocks
         {
             return RawCodeByte.DecodeSymbols(symbols, unknownSymbol, Encoding.GetEncoding("iso-8859-1"));
         }
+        public override object Clone()
+        {
+            var ret = new ByteEncodingSymbol();
+            for (int i = 0; i < this.bitCoordinates.Count; i++)
+            {
+                ret.AddBit(this.bitArray[i], this.bitCoordinates[i]);
+            }
+            return ret;
+        }
     }
 }

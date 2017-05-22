@@ -10,7 +10,7 @@ namespace QRCodeDiag.DataBlocks
     {
         public const uint RAWBYTELENGTH = 8;
         public override uint SymbolLength => RAWBYTELENGTH;
-        public object Clone()
+        public virtual object Clone()
         {
             var ret = new RawCodeByte();
             for(int i = 0; i < this.bitCoordinates.Count; i++)
