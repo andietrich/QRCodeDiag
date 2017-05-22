@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,7 +52,6 @@ namespace QRCodeDiag.DataBlocks
                 if (c == '0' || c == '1' || c == 'u')
                 {
                     wd.AddBit(c, it.Position);
-                    DebugDrawingForm.DebugHighlightCell(wd, 0);
                     if (wd.IsComplete)
                     {
                         rawCodeByteList.Add(wd);
@@ -125,13 +125,37 @@ namespace QRCodeDiag.DataBlocks
         {
             return new FullCode<T2>(this.GetBitIterator(startIndex, length));
         }
-
         public string DecodeSymbols(char unknownSymbol, Encoding encoding) //Encoding.GetEncoding("iso-8859-1"), unknownSymbol = '_'
         {
             var unknownSymbolByte = encoding.GetBytes(new char[] { unknownSymbol })[0];
-            return encoding.GetString(ToByteArray(unknownSymbolByte));
+            return encoding.GetString(this.ToByteArray(unknownSymbolByte));
+        }
+        public string DecodeSymbols(Encoding encoding) //Encoding.GetEncoding("iso-8859-1")
+        {
+            return encoding.GetString(this.ToByteArray());
         }
 
+        public void DrawCode(Graphics g, bool drawBitIndices, bool drawSymbolIndices)
+        {
+            var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
+            var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.SIZE;
+
+            var fontFamily = new FontFamily("Lucida Console");
+            var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+            var orangeBrush = new SolidBrush(Color.Orange);
+
+
+            for (int j = 0; j < this.rawCodeByteList.Count; j++)
+            {
+                var wd = this.rawCodeByteList[j];
+                wd.DrawSymbol(g, drawBitIndices);
+                if (drawSymbolIndices && wd.CurrentSymbolLength > 0)
+                {
+                    var drawIndexCoord = wd.GetBitCoordinate(Math.Min(4, wd.CurrentSymbolLength));
+                    g.DrawString(j.ToString(), largeFont, orangeBrush, new Point((int)(drawIndexCoord.X * pixelWidth), (int)(drawIndexCoord.Y * pixelHeight)));
+                }
+            }
+        }
         //ToDo change RawCodeByte to CodeSymbol
         //public static FullCode<EncodingSymbol> CreateEncodingSpecificSymbols<EncodingSymbol>(FullCode<RawCodeByte> fc) where EncodingSymbol : RawCodeByte, IEncodingSymbol, new()
         //{

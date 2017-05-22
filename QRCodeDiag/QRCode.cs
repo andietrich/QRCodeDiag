@@ -30,14 +30,17 @@ namespace QRCodeDiag
         private bool messageChanged;
         private FullCode<RawCodeByte> rawCode;
         private FullCode<RawCodeByte> paddingBits;
+        private FullCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
 
         public int Version { get; private set; }
         public string Message
         {
             get
             {
-                if(this.messageChanged)
+                if (this.messageChanged)
+                {
                     this.message = this.ReadMessage();
+                }
                 return this.message;
             }
         }
@@ -127,7 +130,7 @@ namespace QRCodeDiag
             return (char[,])this.bits.Clone();
         }
 
-        public string[] GetPaddingBits()
+        public string[] GetPaddingBits() //ToDo: If message changed read again
         {
             if (this.paddingBits != null)
             {
@@ -198,10 +201,6 @@ namespace QRCodeDiag
 
             return ret;
         }
-        private void ParseRawBytes()
-        {
-            this.rawCode = new FullCode<RawCodeByte>(this.GetBitIterator());
-        }
         private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
         {
             switch (mode)
@@ -240,7 +239,6 @@ namespace QRCodeDiag
                     throw new NotImplementedException();
             }
         }
-        
         private static int GetCharacterLength(MessageMode mode)
         {
             switch (mode)
@@ -251,7 +249,7 @@ namespace QRCodeDiag
                     throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
-        private string RepairMessage(string[] byteStrings, char defaultBit = '0')
+        private string RepairMessage(string[] byteStrings, char defaultBit = '0') //ToDo move to FullCode
         {
             var codeAsInts = new int[byteStrings.Length];
             for (int i = 0; i < byteStrings.Length; i++)
@@ -282,7 +280,7 @@ namespace QRCodeDiag
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
             //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS); // transform RawByteList to byte[] using RawCodeByte.GetAsByte() ?
-            this.ParseRawBytes();
+            this.rawCode = new FullCode<RawCodeByte>(this.GetBitIterator());
 
             int modeNibble;
             try
@@ -300,7 +298,7 @@ namespace QRCodeDiag
                 int characterCount;
                 try
                 {
-                    characterCount = Convert.ToInt32(this.rawCode.GetBitString(4, charIndicatorLength), 2); //ToDo check if characterCount is a valid value
+                    characterCount = Convert.ToInt32(this.rawCode.GetBitString(4, charIndicatorLength), 2); //ToDo check if characterCount is in range
                 }
                 catch (FormatException fe)
                 {
@@ -308,19 +306,13 @@ namespace QRCodeDiag
                 }
                 if (messageMode == MessageMode.Byte)
                 {
-                    DebugDrawingForm.ResetDebugWindow(XOR(this, QRCode.GetMask111()), 0);
-                   
-
                     var encodedCharacterLength = GetCharacterLength(messageMode);
                     var firstSymbolOffset = 4 + charIndicatorLength;
                     var messageLenghtInBits = characterCount * encodedCharacterLength;
                     var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
-
-                    var encodedBytes = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
-                                       
-                    var pbs = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset, DATAWORDS * 8 - messageEndOffset);
-
-                    return encodedBytes.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
+                    this.encodedSymbols = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
+                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset, DATAWORDS * 8 - messageEndOffset);
+                    return encodedSymbols.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else
                 {
@@ -431,7 +423,15 @@ namespace QRCodeDiag
             }
             return new QRCode(mask);
         }
-
+        public void DrawRawByteLocations(Graphics g, bool drawBitIndices, bool drawByteIndices)
+        {
+            this.rawCode?.DrawCode(g, drawBitIndices, drawByteIndices);
+            this.paddingBits?.DrawCode(g, drawByteIndices, drawByteIndices);
+        }
+        public void DrawData(Graphics g, bool drawBitIndices, bool drawSymbolIndices)
+        {
+            this.encodedSymbols?.DrawCode(g, drawBitIndices, drawSymbolIndices);
+        }
         public void DrawCode(Graphics g)
         {
             var width = g.VisibleClipBounds.Size.Width;

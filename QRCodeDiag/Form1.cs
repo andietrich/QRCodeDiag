@@ -86,7 +86,9 @@ namespace QRCodeDiag
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            this.displayCode?.DrawCode(e.Graphics);
+            this.backgroundCode?.DrawCode(e.Graphics);
+            this.backgroundCode?.DrawData(e.Graphics, true, true);
+            //this.displayCode?.DrawRawByteLocations(e.Graphics, true, true);
         }
 
         private void xor001toolStripButton_Click(object sender, EventArgs e)

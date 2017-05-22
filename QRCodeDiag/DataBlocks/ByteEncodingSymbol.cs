@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,25 @@ namespace QRCodeDiag.DataBlocks
                 ret.AddBit(this.bitArray[i], this.bitCoordinates[i]);
             }
             return ret;
+        }
+        public override void DrawSymbol(Graphics g, bool drawBitIndices)
+        {
+            base.DrawSymbol(g, drawBitIndices);
+            if (this.CurrentSymbolLength > 0)
+            {
+                var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
+                var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.SIZE;
+                var drawLocation = this.GetBitCoordinate(Math.Min(4, this.CurrentSymbolLength - 1));
+                var fontFamily = new FontFamily("Lucida Console");
+                var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+                var orangeBrush = new SolidBrush(Color.Orange);
+                g.DrawString(this.ToString(), largeFont, orangeBrush, new Point((int)(drawLocation.X * pixelWidth), (int)(drawLocation.Y * pixelHeight)));
+            }
+        }
+        public override string ToString()
+        {
+            this.GetAsByte(out var thisAsByte);
+            return Encoding.GetEncoding("iso-8859-1").GetString(new byte[] { thisAsByte });
         }
     }
 }
