@@ -10,10 +10,6 @@ namespace QRCodeDiag.DataBlocks
     class ByteEncodingSymbol : RawCodeByte, IEncodingSymbol
     {
         public MessageMode EncodingType { get { return MessageMode.Byte; } }
-        public static string DecodeSymbols(IList<ByteEncodingSymbol> symbols, char unknownSymbol = '_')
-        {
-            return RawCodeByte.DecodeSymbols(symbols, unknownSymbol, Encoding.GetEncoding("iso-8859-1"));
-        }
         public override object Clone()
         {
             var ret = new ByteEncodingSymbol();

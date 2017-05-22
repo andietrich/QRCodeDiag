@@ -51,10 +51,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitIterator.cs" />
+    <Compile Include="DataBlocks\AlphaNumericEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\BitIterator.cs" />
     <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
     <Compile Include="DataBlocks\CodeSymbol.cs" />
+    <Compile Include="DataBlocks\FullCodeBitIterator.cs" />
+    <Compile Include="DataBlocks\IBitIterator.cs" />
     <Compile Include="DataBlocks\IEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\FullCode.cs" />
+    <Compile Include="DataBlocks\NumericEncodingSymbol.cs" />
     <Compile Include="DebugDrawingForm.cs">
       <SubType>Form</SubType>
     </Compile>

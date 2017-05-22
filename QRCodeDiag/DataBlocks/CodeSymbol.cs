@@ -11,6 +11,7 @@ namespace QRCodeDiag.DataBlocks
         protected List<Vector2D> bitCoordinates;
         protected char[] bitArray;
         public abstract uint SymbolLength { get; }
+        public int CurrentSymbolLength { get { return this.bitCoordinates.Count; } }
         public string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
         public int MaxBitCount { get { return this.bitArray.Length; } }
         public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
@@ -30,11 +31,7 @@ namespace QRCodeDiag.DataBlocks
             this.bitArray[bitCoordinates.Count] = bit;
             this.bitCoordinates.Add(bitPosition);
         }
-        public int GetCurrentWordLength()
-        {
-            return this.bitCoordinates.Count;
-        }
-        public Vector2D GetPixelCoordinate(int bitNumber)
+        public Vector2D GetBitCoordinate(int bitNumber)
         {
             if (bitNumber < 0 || bitNumber >= this.bitCoordinates.Count)
             {
@@ -75,15 +72,6 @@ namespace QRCodeDiag.DataBlocks
                     edges.Add(left);
             }
             return edges.ToList();
-        }
-        public static string GenerateBitString<T>(IList<T> symbols) where T : CodeSymbol
-        {
-            var sb = new StringBuilder();
-            for(int i = 0; i < symbols.Count; i++)
-            {
-                sb.Append(symbols[i].BitString);
-            }
-            return sb.ToString();
         }
     }
 }

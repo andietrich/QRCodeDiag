@@ -32,6 +32,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.showEncodedButton = new System.Windows.Forms.Button();
+            this.showRawButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -43,7 +45,7 @@
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(630, 75);
+            this.textBox1.Size = new System.Drawing.Size(465, 75);
             this.textBox1.TabIndex = 1;
             // 
             // timer1
@@ -61,11 +63,33 @@
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             // 
+            // showEncodedButton
+            // 
+            this.showEncodedButton.Location = new System.Drawing.Point(483, 648);
+            this.showEncodedButton.Name = "showEncodedButton";
+            this.showEncodedButton.Size = new System.Drawing.Size(159, 23);
+            this.showEncodedButton.TabIndex = 3;
+            this.showEncodedButton.Text = "Show Encoded";
+            this.showEncodedButton.UseVisualStyleBackColor = true;
+            this.showEncodedButton.Click += new System.EventHandler(this.showEncodedButton_Click);
+            // 
+            // showRawButton
+            // 
+            this.showRawButton.Location = new System.Drawing.Point(483, 677);
+            this.showRawButton.Name = "showRawButton";
+            this.showRawButton.Size = new System.Drawing.Size(159, 23);
+            this.showRawButton.TabIndex = 4;
+            this.showRawButton.Text = "Show Raw";
+            this.showRawButton.UseVisualStyleBackColor = true;
+            this.showRawButton.Click += new System.EventHandler(this.showRawButton_Click);
+            // 
             // DebugDrawingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(654, 735);
+            this.Controls.Add(this.showRawButton);
+            this.Controls.Add(this.showEncodedButton);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBox1);
             this.Name = "DebugDrawingForm";
@@ -81,5 +105,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Button showEncodedButton;
+        private System.Windows.Forms.Button showRawButton;
     }
 }

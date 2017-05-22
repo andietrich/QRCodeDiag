@@ -24,10 +24,13 @@ namespace QRCodeDiag
         public const int SIZE = 29; //ToDo adjust for other versions
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
+
         private char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
         private string message;
-        private string[] paddingBits;
         private bool messageChanged;
+        private FullCode<RawCodeByte> rawCode;
+        private FullCode<RawCodeByte> paddingBits;
+
         public int Version { get; private set; }
         public string Message
         {
@@ -127,9 +130,19 @@ namespace QRCodeDiag
         public string[] GetPaddingBits()
         {
             if (this.paddingBits != null)
-                return (string[])this.paddingBits.Clone();
-            else
-                throw new InvalidOperationException("Padding bits have not been initialized yet.");
+            {
+                var pbs = this.paddingBits.ToByteArray();
+                string[] ret = new string[pbs.Length];
+                for(int i = 0; i < pbs.Length; i++)
+                {
+                    ret[i] = Convert.ToString(pbs[i], 2).PadLeft(8, '0');
+                }
+                return ret;
+            }
+            else//throw new InvalidOperationException("Padding bits have not been initialized yet.");
+            {
+                return new string[] { "Padding bits have not been initialized yet." };
+            }
         }
 
         public void ToggleDataCell(int x, int y)
@@ -154,9 +167,9 @@ namespace QRCodeDiag
             }
         }
 
-        private BitIterator GetBitIterator()
+        private QRCodeBitIterator GetBitIterator()
         {
-            return new BitIterator(this.bits);
+            return new QRCodeBitIterator(this.bits);
         }
 
         public static bool IsDataCell(int x, int y)
@@ -185,38 +198,10 @@ namespace QRCodeDiag
 
             return ret;
         }
-
-        /// <summary>
-        /// Reads blocks of 8 bits in placement order. For larger QR-Codes the bytes have to be reordered to obtain the message and ECC bytes.
-        /// After obtaining the bytes apply ECC checking/correction. After ECC read mode indicator, char count indicator, chars.
-        /// </summary>
-        /// <returns></returns>
-        private List<RawCodeByte> GenerateRawByteList()
+        private void ParseRawBytes()
         {
-            DebugDrawingForm.ResetDebugWindow(this, 0);
-            var wordList = new List<RawCodeByte>();
-            var it = this.GetBitIterator();
-            var wd = new RawCodeByte();
-            var c = it.CurrentChar;
-            wd.AddBit(c, it.XPos, it.YPos);
-
-            while (c != 'e')
-            {
-                c = it.NextBit();
-                if (c == '0' || c == '1' || c == 'u')
-                {
-                    wd.AddBit(c, it.XPos, it.YPos);
-                    DebugDrawingForm.DebugHighlightCell(this, wd, 0);
-                    if (wd.IsComplete)
-                    {
-                        wordList.Add(wd);
-                        wd = new RawCodeByte();
-                    }
-                }
-            }
-            return wordList;
+            this.rawCode = new FullCode<RawCodeByte>(this.GetBitIterator());
         }
-        
         private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
         {
             switch (mode)
@@ -297,16 +282,16 @@ namespace QRCodeDiag
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
             //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS); // transform RawByteList to byte[] using RawCodeByte.GetAsByte() ?
-            var rawByteList = this.GenerateRawByteList(); //ToDo: get only the message bits, not the ecc bits 
-            var messageBlob = CodeSymbol.GenerateBitString(rawByteList); //ToDo: store bit->coordinate mapping somehow 
+            this.ParseRawBytes();
+
             int modeNibble;
             try
             {
-                modeNibble = Convert.ToInt32(messageBlob.Substring(0, 4), 2);
+                modeNibble = Convert.ToInt32(this.rawCode.GetBitString(0, 4), 2);
             }
-            catch(FormatException fe)
+            catch (FormatException fe)
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + messageBlob.Substring(0, 4), fe);
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawCode.GetBitString(0, 4), fe);
             }
             if (Enum.IsDefined(typeof(MessageMode), modeNibble))
             {
@@ -315,7 +300,7 @@ namespace QRCodeDiag
                 int characterCount;
                 try
                 {
-                    characterCount = Convert.ToInt32(messageBlob.Substring(4, charIndicatorLength), 2); //ToDo check if characterCount is a valid value
+                    characterCount = Convert.ToInt32(this.rawCode.GetBitString(4, charIndicatorLength), 2); //ToDo check if characterCount is a valid value
                 }
                 catch (FormatException fe)
                 {
@@ -323,33 +308,19 @@ namespace QRCodeDiag
                 }
                 if (messageMode == MessageMode.Byte)
                 {
-                    DebugDrawingForm.ResetDebugWindow(XOR(this, QRCode.GetMask111()), 1);
-                    var characterList = new List<ByteEncodingSymbol>(characterCount);
+                    DebugDrawingForm.ResetDebugWindow(XOR(this, QRCode.GetMask111()), 0);
+                   
+
                     var encodedCharacterLength = GetCharacterLength(messageMode);
-                    var rawByteLength = (int)RawCodeByte.RAWBYTELENGTH;
                     var firstSymbolOffset = 4 + charIndicatorLength;
                     var messageLenghtInBits = characterCount * encodedCharacterLength;
                     var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
-                    for (int rawByteInMessageOffset = firstSymbolOffset; rawByteInMessageOffset < messageEndOffset; rawByteInMessageOffset += encodedCharacterLength)
-                    {
-                        var newSymbol = new ByteEncodingSymbol();
-                        characterList.Add(newSymbol);
-                        //ToDo all this gets simplified if messageBlob becomes a pair of bit array and corresponding coordinate pair array where matching length is guaranteed
-                        for (int j = 0; j < encodedCharacterLength; j++) // messageBlob bits are in order of rawByteList order. For bit i the coordinates are in rawByte i/8, bit i%8
-                        {
-                            int rawByteBitOffset = (j + rawByteInMessageOffset) % rawByteLength;
-                            int rawByteListPosition = (j + rawByteInMessageOffset) / rawByteLength;
-                            newSymbol.AddBit(messageBlob[rawByteInMessageOffset+j], rawByteList[rawByteListPosition].GetPixelCoordinate(rawByteBitOffset));
-                        }
-                        DebugDrawingForm.DebugHighlightCell(this, newSymbol, 1);
-                    }
-                    this.paddingBits = new string[DATAWORDS - messageEndOffset / 8]; //ToDo automatically fix padding bits
-                    var paddingStartPos = messageEndOffset;
-                    for (int i = 0; i < paddingBits.Length; i++)
-                    {
-                        paddingBits[i] = messageBlob.Substring(paddingStartPos + 8 * i, 8);
-                    }
-                    return ByteEncodingSymbol.DecodeSymbols(characterList);
+
+                    var encodedBytes = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
+                                       
+                    var pbs = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset, DATAWORDS * 8 - messageEndOffset);
+
+                    return encodedBytes.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else
                 {
@@ -358,7 +329,7 @@ namespace QRCodeDiag
             }
             else
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + messageBlob.Substring(0, 4));
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawCode.GetBitString(0, 4));
             }
         }
         public static QRCode XOR(QRCode lhs, QRCode rhs)

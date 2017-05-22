@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.DataBlocks
 {
     /*
      * ToDo:
@@ -13,13 +13,15 @@ namespace QRCodeDiag
      * Draw borders around bytes/words
      * Get word size from format information or user input
      */
-    class BitIterator
+    class QRCodeBitIterator : IBitIterator
     {
         private char[,] bits;
         private int xPos, yPos;
+        private bool directionUp;
+        private bool rightCell;
         public int XPos
         {
-            get { return xPos; }
+            get { return this.xPos; }
             private set
             {
                 if (value < 0)
@@ -30,7 +32,7 @@ namespace QRCodeDiag
         }
         public int YPos
         {
-            get { return yPos; }
+            get { return this.yPos; }
             private set
             {
                 if (value < 0)
@@ -39,13 +41,12 @@ namespace QRCodeDiag
                     this.yPos = value;
             }
         }
-        private bool directionUp;
-        private bool rightCell;
+        public Vector2D Position { get { return new Vector2D(this.xPos, this.yPos); } }
 
         public bool EndReached { get; private set; }
         public char CurrentChar { get { return this.bits[this.XPos, this.YPos]; } }
 
-        public BitIterator(char[,] setBits)
+        public QRCodeBitIterator(char[,] setBits)
         {
             if (setBits.GetLength(0) != setBits.GetLength(1) || setBits.GetLength(0) != QRCode.SIZE)
                 throw new ArgumentException("Must be 29x29 elements.", "setbits");

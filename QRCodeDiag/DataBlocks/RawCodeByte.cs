@@ -19,41 +19,31 @@ namespace QRCodeDiag.DataBlocks
             }
             return ret;
         }
+        /// <summary>
+        /// Gets the byte representation of the RawCodeByte.
+        /// If there are unknown bits they will be replaced by 0 and the function will return false.
+        /// If not all bits have been set, the missing bits will be treated as unknown.
+        /// </summary>
+        /// <param name="value">The byte representation will be written to this parameter.</param>
+        /// <returns>True if all bits are known, otherwise false.</returns>
         public bool GetAsByte(out byte value)
         {
             int bits = 0;
             value = 0;
-            if (this.IsComplete)
+            for (int i = 0; i < this.bitCoordinates.Count; i++)
             {
-                for (int i = 0; i < this.bitArray.Length; i++)
+                if (this.bitArray[i] == '0')
                 {
-                    if (this.bitArray[i] == '0')
-                    {
-                        bits++;
-                    }
-                    else if (this.bitArray[i] == '1')
-                    {
-                        bits++;
-                        value += (byte)(0x80 >> i);
-                    }
+                    bits++;
                 }
-                System.Diagnostics.Debug.Assert(bits != this.MaxBitCount || (Convert.ToByte(this.BitString, 2) == value));
-                return bits == this.MaxBitCount;
+                else if (this.bitArray[i] == '1')
+                {
+                    bits++;
+                    value += (byte)(0x80 >> i);
+                }
             }
-            else
-            {
-                return false;
-            }
-        }
-        public static string DecodeSymbols<T>(IList<T> symbols, char unknownSymbol, Encoding encoding) where T : RawCodeByte
-        {
-            var unknownSymbolByte = encoding.GetBytes(new char[] { unknownSymbol })[0];
-            var symbolsAsBytes = new byte[symbols.Count];
-            for (int i = 0; i < symbols.Count; i++)
-            {
-                symbolsAsBytes[i] = symbols[i].GetAsByte(out var value) ? value : unknownSymbolByte;
-            }
-            return encoding.GetString(symbolsAsBytes);
+            System.Diagnostics.Debug.Assert(bits != this.MaxBitCount || (Convert.ToByte(this.BitString, 2) == value));
+            return bits == this.MaxBitCount;
         }
     }
 }
