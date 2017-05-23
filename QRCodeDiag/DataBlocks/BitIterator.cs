@@ -6,13 +6,6 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
-    /*
-     * ToDo:
-     * Map x-y-coordinates to bit-position: for clicking a pixel and setting (toggling) the value
-     * Map bit-position to x-y-coordinate: for highlighting a bit position
-     * Draw borders around bytes/words
-     * Get word size from format information or user input
-     */
     class QRCodeBitIterator : IBitIterator
     {
         private char[,] bits;

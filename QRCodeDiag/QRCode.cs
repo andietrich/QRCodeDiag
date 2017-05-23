@@ -509,7 +509,7 @@ namespace QRCodeDiag
             return new QRCode(mask);
         }
 
-        public static QRCode GetMask111() //TODO ( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
+        public static QRCode GetMask111() //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
             var mask = new char[VERSIONSIZE, VERSIONSIZE];
             for (int y = 0; y < VERSIONSIZE; y++)

@@ -34,7 +34,7 @@ namespace QRCodeDiag
                 return false;
             }
         }
-        public override int GetHashCode() //ToDo Make sure upper bound for coordinates is always correct or improve hash code
+        public override int GetHashCode() //ToDo Make sure upper bound for coordinates is always correct or improve hash code when implementing other versions
         {
             return this.X * 64 + this.Y; //Upper bound is currently QRCode.SIZE = 29 < 64
         }

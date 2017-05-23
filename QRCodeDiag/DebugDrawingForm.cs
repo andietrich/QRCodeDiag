@@ -38,7 +38,7 @@ namespace QRCodeDiag
             }
         }
         [Conditional("DEBUG")]
-        internal static void DebugHighlightCell(RawCodeByte currentWord, int instance) //ToDo: currentWord gets changed/completed before timer ticks
+        internal static void DebugHighlightCell(RawCodeByte currentWord, int instance)
         {
             if (debugFormOpen[instance])
             {
@@ -62,7 +62,7 @@ namespace QRCodeDiag
         }
         public void RestartDebugging(QRCode debuggedQRCode)
         {
-            this.timer1.Stop(); //ToDo maybe mutex for paint/restart required
+            this.timer1.Stop();
             this.drawNextEvent = false;
             this.qrCode = debuggedQRCode;
             this.highlightEventQueue = new ConcurrentQueue<RawCodeByte>();
@@ -93,7 +93,7 @@ namespace QRCodeDiag
                 if (wd.GetType() == this.typeToShow)
                 {
                     // Draw symbol edges
-                    var p = new Pen(Color.Green, 2); //ToDo new color every word (or the correct one of 4 different ones)
+                    var p = new Pen(Color.Green, 2);
                     foreach (var edge in wd.GetContour())
                     {
                         var startX = edge.Start.X;

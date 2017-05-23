@@ -44,10 +44,7 @@ namespace QRCodeDiag.DataBlocks
             }
             return this.bitCoordinates[bitNumber];
         }
-        //ToDo when drawing contours make sure they don't overlap with neighboring polygons
         //ToDo generate point array and use drawPolygon method
-        //Contour must contain all outside borders or word-pixels.
-        //Every contour-line must know where the "inside" is, to avoid overlapping with other words
         //Define: Square at x, y has corner points at x, y, x+1, y+1
         public List<PolygonEdge> GetContour()
         {
@@ -81,7 +78,7 @@ namespace QRCodeDiag.DataBlocks
             var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
             var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
             float penWidth = 2;
-            var p = new Pen(color, penWidth); //ToDo new color every word (or the correct one of 4 different ones)
+            var p = new Pen(color, penWidth);
             var fontFamily = new FontFamily("Lucida Console");
             var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var solidrush = new SolidBrush(color);

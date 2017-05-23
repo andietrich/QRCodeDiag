@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace QRCodeDiag
 {
-    public partial class Form1 : Form //ToDo: Bytes anzeigen, Byte anklicken/auswählen und Wert ändern/anzeigen
+    public partial class Form1 : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
         private enum MaskUsed
         {
