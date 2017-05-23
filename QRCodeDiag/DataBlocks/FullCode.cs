@@ -135,24 +135,26 @@ namespace QRCodeDiag.DataBlocks
             return encoding.GetString(this.ToByteArray());
         }
 
-        public void DrawCode(Graphics g, bool drawBitIndices, bool drawSymbolIndices)
+        public void DrawCode(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
-            var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
-            var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.SIZE;
+            var preferredSymbolDrawLocation = 2;
+
+            var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
+            var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
 
             var fontFamily = new FontFamily("Lucida Console");
             var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var orangeBrush = new SolidBrush(Color.Orange);
+            var lightBlueBrush = new SolidBrush(Color.LightBlue);
 
 
             for (int j = 0; j < this.rawCodeByteList.Count; j++)
             {
                 var wd = this.rawCodeByteList[j];
-                wd.DrawSymbol(g, drawBitIndices);
+                wd.DrawSymbol(g, size, drawBitIndices);
                 if (drawSymbolIndices && wd.CurrentSymbolLength > 0)
                 {
-                    var drawIndexCoord = wd.GetBitCoordinate(Math.Min(4, wd.CurrentSymbolLength));
-                    g.DrawString(j.ToString(), largeFont, orangeBrush, new Point((int)(drawIndexCoord.X * pixelWidth), (int)(drawIndexCoord.Y * pixelHeight)));
+                    var drawIndexCoord = wd.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, wd.CurrentSymbolLength));
+                    g.DrawString(j.ToString(), largeFont, lightBlueBrush, new Point((int)(drawIndexCoord.X * pixelWidth), (int)(drawIndexCoord.Y * pixelHeight)));
                 }
             }
         }

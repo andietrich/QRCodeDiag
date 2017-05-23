@@ -75,11 +75,11 @@ namespace QRCodeDiag.DataBlocks
             return edges.ToList();
         }
 
-        public virtual void DrawSymbol(Graphics g, bool drawBitIndices)
+        public virtual void DrawSymbol(Graphics g, Size size, bool drawBitIndices)
         {
             // Draw symbol edges
-            var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
-            var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.SIZE;
+            var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
+            var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
             var p = new Pen(Color.Green, 2); //ToDo new color every word (or the correct one of 4 different ones)
             var fontFamily = new FontFamily("Lucida Console");
             var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);

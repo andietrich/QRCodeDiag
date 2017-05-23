@@ -48,11 +48,11 @@ namespace QRCodeDiag.DataBlocks
 
         public QRCodeBitIterator(char[,] setBits)
         {
-            if (setBits.GetLength(0) != setBits.GetLength(1) || setBits.GetLength(0) != QRCode.SIZE)
+            if (setBits.GetLength(0) != setBits.GetLength(1) || setBits.GetLength(0) != QRCode.VERSIONSIZE)
                 throw new ArgumentException("Must be 29x29 elements.", "setbits");
             this.bits = setBits;
-            this.XPos = QRCode.SIZE - 1;
-            this.YPos = QRCode.SIZE - 1;
+            this.XPos = QRCode.VERSIONSIZE - 1;
+            this.YPos = QRCode.VERSIONSIZE - 1;
             this.directionUp = true;
             this.rightCell = true;
             this.EndReached = false;
@@ -72,7 +72,7 @@ namespace QRCodeDiag.DataBlocks
                     if (this.XPos == 6)
                         this.XPos--;
                 }
-                else if (this.YPos == QRCode.SIZE -1 && !this.directionUp && !this.rightCell)
+                else if (this.YPos == QRCode.VERSIONSIZE -1 && !this.directionUp && !this.rightCell)
                 {
                     // go to left neighbor lane, right bottom cell
                     this.directionUp = true;

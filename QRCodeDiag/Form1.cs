@@ -43,6 +43,19 @@ namespace QRCodeDiag
                 this.pictureBox1.Invalidate();
             }
         }
+        private QRCode BackgroundCode //ToDo better solution needed
+        {
+            get
+            {
+                return this.backgroundCode;
+            }
+            set
+            {
+                this.backgroundCode = value;
+                this.UpdateTextBox();
+                this.pictureBox1.Invalidate();
+            }
+        }
         public Form1()
         {
             InitializeComponent();
@@ -86,16 +99,16 @@ namespace QRCodeDiag
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            this.backgroundCode?.DrawCode(e.Graphics);
-            this.backgroundCode?.DrawData(e.Graphics, true, true);
-            //this.displayCode?.DrawRawByteLocations(e.Graphics, true, true);
+            this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
+            this.BackgroundCode?.DrawData(e.Graphics, this.pictureBox1.Size, true, true);
+            //this.displayCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
         }
 
         private void xor001toolStripButton_Click(object sender, EventArgs e)
         {
             if (this.qrcode != null)
             {
-                this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
                 this.CurrentMaskUsed = MaskUsed.Mask001;
             }
         }
@@ -104,7 +117,7 @@ namespace QRCodeDiag
         {
             if (this.qrcode != null)
             {
-                this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
                 this.CurrentMaskUsed = MaskUsed.Mask100;
             }
         }
@@ -113,14 +126,14 @@ namespace QRCodeDiag
         {
             if (this.qrcode != null)
             {
-                this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
                 this.CurrentMaskUsed = MaskUsed.Mask111;
             }
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            this.DisplayCode.ToggleDataCell(QRCode.SIZE * e.Location.X / pictureBox1.Size.Width, QRCode.SIZE * e.Location.Y / pictureBox1.Size.Height);
+            this.DisplayCode.ToggleDataCell(QRCode.VERSIONSIZE * e.Location.X / pictureBox1.Size.Width, QRCode.VERSIONSIZE * e.Location.Y / pictureBox1.Size.Height);
             this.UpdateBackgroundCode();
             this.pictureBox1.Refresh();
             this.UpdateTextBox();
@@ -128,14 +141,14 @@ namespace QRCodeDiag
 
         private void UpdateTextBox()
         {
-            if (this.backgroundCode != null)
+            if (this.BackgroundCode != null)
             {
                 var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
                 {
-                    sb.AppendLine("Message: " + this.backgroundCode.Message);
+                    sb.AppendLine("Message: " + this.BackgroundCode.Message);
                     sb.AppendLine("Padding bits: ");
-                    foreach (var s in this.backgroundCode.GetPaddingBits())
+                    foreach (var s in this.BackgroundCode.GetPaddingBits())
                     {
                         sb.AppendLine(s);
                     }
@@ -162,16 +175,16 @@ namespace QRCodeDiag
                 switch (this.CurrentMaskUsed)
                 {
                     case MaskUsed.Mask001:
-                        this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
+                        this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
                         break;
                     case MaskUsed.Mask100:
-                        this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
+                        this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
                         break;
                     case MaskUsed.Mask111:
-                        this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
+                        this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
                         break;
                     default:
-                        this.backgroundCode = this.displayCode;
+                        this.BackgroundCode = this.displayCode;
                         break;
                 }
             }
@@ -183,7 +196,7 @@ namespace QRCodeDiag
             {
                 try
                 {
-                    this.backgroundCode?.SaveToFile(this.saveFileDialog1.FileName);
+                    this.BackgroundCode?.SaveToFile(this.saveFileDialog1.FileName);
                 }
                 catch (Exception ex)
                 {

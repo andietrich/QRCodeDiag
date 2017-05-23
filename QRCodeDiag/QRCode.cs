@@ -21,7 +21,7 @@ namespace QRCodeDiag
             Kanji = 8,
             ECI = 7
         }
-        public const int SIZE = 29; //ToDo adjust for other versions
+        public const int VERSIONSIZE = 29; //ToDo adjust for other versions
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
@@ -46,7 +46,7 @@ namespace QRCodeDiag
         }
         public QRCode(char[,] setBits)
         {
-            if(setBits.GetLength(0) != SIZE ||setBits.GetLength(1) != SIZE)
+            if(setBits.GetLength(0) != VERSIONSIZE ||setBits.GetLength(1) != VERSIONSIZE)
                 throw new ArgumentException("Bad QR Code size", "setBits");
 
             this.bits = setBits;
@@ -74,7 +74,7 @@ namespace QRCodeDiag
         }
         private static char[,] GenerateBitsFromFile(string path)
         {
-            var bitMask = new char[QRCode.SIZE, QRCode.SIZE];
+            var bitMask = new char[QRCode.VERSIONSIZE, QRCode.VERSIONSIZE];
             List<string[]> cells = new List<string[]>();
             try
             {
@@ -91,21 +91,21 @@ namespace QRCodeDiag
                 throw new QRCodeFormatException("Can't read file.", ex);
             }
             bool valid = true;
-            if (cells.Count != QRCode.SIZE) // column length OK?
+            if (cells.Count != QRCode.VERSIONSIZE) // column length OK?
             {
                 valid = false;
             }
             else
             {
-                for (int y = 0; y < QRCode.SIZE && valid; y++)
+                for (int y = 0; y < QRCode.VERSIONSIZE && valid; y++)
                 {
-                    if (cells[y].Length != QRCode.SIZE) // row length OK?
+                    if (cells[y].Length != QRCode.VERSIONSIZE) // row length OK?
                     {
                         valid = false;
                     }
                     else
                     {
-                        for (int x = 0; x < QRCode.SIZE && valid; x++)
+                        for (int x = 0; x < QRCode.VERSIONSIZE && valid; x++)
                         {
                             if (cells[y][x].Length != 1)  // string in cell = 1 char length?
                             {
@@ -178,7 +178,7 @@ namespace QRCodeDiag
         public static bool IsDataCell(int x, int y)
         {
             bool ret = true;
-            if (x > SIZE || y > SIZE || x < 0 || y < 0)
+            if (x > VERSIONSIZE || y > VERSIONSIZE || x < 0 || y < 0)
                 return false;
 
             if (x < 9)
@@ -331,12 +331,12 @@ namespace QRCodeDiag
             if(rhs == null)
                 throw new ArgumentNullException("rhs");
 
-            var xored = new char[SIZE, SIZE];
+            var xored = new char[VERSIONSIZE, VERSIONSIZE];
             var lhsBits = lhs.GetBits();
             var rhsBits = rhs.GetBits();
-            for(int y = 0; y < SIZE; y++)
+            for(int y = 0; y < VERSIONSIZE; y++)
             {
-                for (int x = 0; x < SIZE; x++)
+                for (int x = 0; x < VERSIONSIZE; x++)
                 {
                     var lhsbit = lhsBits[x, y];
                     var rhsbit = rhsBits[x, y];
@@ -378,10 +378,10 @@ namespace QRCodeDiag
          * */
         public static QRCode GetMask100() // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
         {
-            var mask = new char[SIZE, SIZE];
-            for (int y = 0; y < SIZE; y++)
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
             {
-                for (int x = 0; x < SIZE; x++)
+                for (int x = 0; x < VERSIONSIZE; x++)
                 {
                     if (((y / 2 + x / 3) % 2) == 0)
                         mask[x, y] = '1';
@@ -394,10 +394,10 @@ namespace QRCodeDiag
 
         public static QRCode GetMask001() // (row) mod 2 == 0
         {
-            var mask = new char[SIZE, SIZE];
-            for (int y = 0; y < SIZE; y ++)
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y ++)
             {
-                for (int x = 0; x < SIZE; x++)
+                for (int x = 0; x < VERSIONSIZE; x++)
                 {
                     if((y % 2) == 0)
                         mask[x, y] = '1';
@@ -410,10 +410,10 @@ namespace QRCodeDiag
 
         public static QRCode GetMask111() //TODO ( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
-            var mask = new char[SIZE, SIZE];
-            for (int y = 0; y < SIZE; y++)
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
             {
-                for (int x = 0; x < SIZE; x++)
+                for (int x = 0; x < VERSIONSIZE; x++)
                 {
                     if ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0)
                         mask[x, y] = '1';
@@ -423,29 +423,27 @@ namespace QRCodeDiag
             }
             return new QRCode(mask);
         }
-        public void DrawRawByteLocations(Graphics g, bool drawBitIndices, bool drawByteIndices)
+        public void DrawRawByteLocations(Graphics g, Size size, bool drawBitIndices, bool drawByteIndices)
         {
-            this.rawCode?.DrawCode(g, drawBitIndices, drawByteIndices);
-            this.paddingBits?.DrawCode(g, drawByteIndices, drawByteIndices);
+            this.rawCode?.DrawCode(g, size, drawBitIndices, drawByteIndices);
+            this.paddingBits?.DrawCode(g, size, drawByteIndices, drawByteIndices);
         }
-        public void DrawData(Graphics g, bool drawBitIndices, bool drawSymbolIndices)
+        public void DrawData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
-            this.encodedSymbols?.DrawCode(g, drawBitIndices, drawSymbolIndices);
+            this.encodedSymbols?.DrawCode(g, size, drawBitIndices, drawSymbolIndices);
         }
-        public void DrawCode(Graphics g)
+        public void DrawCode(Graphics g, Size size)
         {
-            var width = g.VisibleClipBounds.Size.Width;
-            var height = g.VisibleClipBounds.Size.Height;
-            var pixelWidth = width / SIZE;
-            var pixelHeight = height / SIZE;
+            float pixelWidth = (float)size.Width / VERSIONSIZE;
+            float pixelHeight = (float)size.Height / VERSIONSIZE;
 
             var blackBrush = new SolidBrush(Color.Black);
             var whiteBrush = new SolidBrush(Color.White);
             var grayBrush = new SolidBrush(Color.Gray);
 
-            for (int y = 0; y < SIZE; y++)
+            for (int y = 0; y < VERSIONSIZE; y++)
             {
-                for (int x = 0; x < SIZE; x++)
+                for (int x = 0; x < VERSIONSIZE; x++)
                 {
                     SolidBrush b;
                     switch (this.bits[x,y])

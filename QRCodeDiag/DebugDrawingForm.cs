@@ -78,14 +78,14 @@ namespace QRCodeDiag
         private void PaintDebugEvents(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             var g = e.Graphics;
-            var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.SIZE;
-            var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.SIZE;
+            var pixelWidth = g.VisibleClipBounds.Size.Width / QRCode.VERSIONSIZE;
+            var pixelHeight = g.VisibleClipBounds.Size.Height / QRCode.VERSIONSIZE;
             var fontFamily = new FontFamily("Lucida Console");
             var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var redBrush = new SolidBrush(Color.Red);
             var orangeBrush = new SolidBrush(Color.Orange);
-            this.qrCode.DrawCode(g);
+            this.qrCode.DrawCode(g, this.pictureBox1.Size);
             
             for(int j = 0; j < completeWordsList.Count; j++)
             {
@@ -170,7 +170,7 @@ namespace QRCodeDiag
         private void timer1_Tick(object sender, EventArgs e)
         {
             this.drawNextEvent = true;
-            this.pictureBox1.Invalidate();
+            this.pictureBox1.Refresh();
         }
 
         private void DebugDrawingForm_FormClosed(object sender, FormClosedEventArgs e)
