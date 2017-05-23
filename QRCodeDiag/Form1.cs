@@ -25,6 +25,7 @@ namespace QRCodeDiag
         private bool showRawOverlay;
         private bool showEncodingOverlay;
         private bool showPaddingOverlay;
+        private bool showXORed;
         private MaskUsed CurrentMaskUsed
         {
             get { return this.maskUsed; }
@@ -64,7 +65,8 @@ namespace QRCodeDiag
             InitializeComponent();
             this.showRawOverlay = false;
             this.showEncodingOverlay = true;
-            this.showPaddingOverlay = true;            
+            this.showPaddingOverlay = true;
+            this.showXORed = false;
             this.CurrentMaskUsed = MaskUsed.None;
         }
 
@@ -105,7 +107,10 @@ namespace QRCodeDiag
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
+            if(this.showXORed)
+                this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
+            else
+                this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
             if (this.showRawOverlay)
                 this.BackgroundCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
             if (this.showEncodingOverlay)
@@ -234,6 +239,12 @@ namespace QRCodeDiag
         private void paddingToolStripButton_Click(object sender, EventArgs e)
         {
             this.showPaddingOverlay = !this.showPaddingOverlay;
+            this.pictureBox1.Invalidate();
+        }
+
+        private void showXORedToolStripButton_Click(object sender, EventArgs e)
+        {
+            this.showXORed = !this.showXORed;
             this.pictureBox1.Invalidate();
         }
     }

@@ -43,6 +43,7 @@
             this.rawOverlayToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.showXORedToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -58,7 +59,8 @@
             this.xor111toolStripButton,
             this.rawOverlayToolStripButton,
             this.encodingToolStripButton,
-            this.paddingToolStripButton});
+            this.paddingToolStripButton,
+            this.showXORedToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(574, 25);
@@ -185,6 +187,16 @@
             this.paddingToolStripButton.Text = "Padding and Terminator overlay on/off";
             this.paddingToolStripButton.Click += new System.EventHandler(this.paddingToolStripButton_Click);
             // 
+            // showXORedToolStripButton
+            // 
+            this.showXORedToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.showXORedToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("showXORedToolStripButton.Image")));
+            this.showXORedToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.showXORedToolStripButton.Name = "showXORedToolStripButton";
+            this.showXORedToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.showXORedToolStripButton.Text = "Show XORed code on/off";
+            this.showXORedToolStripButton.Click += new System.EventHandler(this.showXORedToolStripButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -220,6 +232,7 @@
         private System.Windows.Forms.ToolStripButton rawOverlayToolStripButton;
         private System.Windows.Forms.ToolStripButton encodingToolStripButton;
         private System.Windows.Forms.ToolStripButton paddingToolStripButton;
+        private System.Windows.Forms.ToolStripButton showXORedToolStripButton;
     }
 }
 
