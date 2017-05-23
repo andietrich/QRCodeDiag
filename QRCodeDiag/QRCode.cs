@@ -425,12 +425,12 @@ namespace QRCodeDiag
         }
         public void DrawRawByteLocations(Graphics g, Size size, bool drawBitIndices, bool drawByteIndices)
         {
-            this.rawCode?.DrawCode(g, size, drawBitIndices, drawByteIndices);
-            this.paddingBits?.DrawCode(g, size, drawByteIndices, drawByteIndices);
+            this.rawCode?.DrawCode(g, size, Color.Orange, Color.Cyan, drawBitIndices, drawByteIndices);
         }
         public void DrawData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
-            this.encodedSymbols?.DrawCode(g, size, drawBitIndices, drawSymbolIndices);
+            this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices);
+            this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices);
         }
         public void DrawCode(Graphics g, Size size)
         {

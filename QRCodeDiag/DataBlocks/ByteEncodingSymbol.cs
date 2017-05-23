@@ -20,9 +20,9 @@ namespace QRCodeDiag.DataBlocks
             }
             return ret;
         }
-        public override void DrawSymbol(Graphics g, Size size, bool drawBitIndices)
+        public override void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices)
         {
-            base.DrawSymbol(g, size, drawBitIndices);
+            base.DrawSymbol(g, size, color, drawBitIndices);
             if (this.CurrentSymbolLength > 0)
             {
                 var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
@@ -30,8 +30,8 @@ namespace QRCodeDiag.DataBlocks
                 var drawLocation = this.GetBitCoordinate(Math.Min(4, this.CurrentSymbolLength - 1));
                 var fontFamily = new FontFamily("Lucida Console");
                 var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-                var orangeBrush = new SolidBrush(Color.Orange);
-                g.DrawString(this.ToString(), largeFont, orangeBrush, new Point((int)(drawLocation.X * pixelWidth), (int)(drawLocation.Y * pixelHeight)));
+                var solidBrush = new SolidBrush(Color.Orange);
+                g.DrawString(this.ToString(), largeFont, solidBrush, new Point((int)(drawLocation.X * pixelWidth), (int)(drawLocation.Y * pixelHeight)));
             }
         }
         public override string ToString()
