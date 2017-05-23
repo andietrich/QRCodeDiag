@@ -40,6 +40,9 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.rawOverlayToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -52,7 +55,10 @@
             this.toolStripButton1,
             this.xor001toolStripButton,
             this.xor100toolStripButton,
-            this.xor111toolStripButton});
+            this.xor111toolStripButton,
+            this.rawOverlayToolStripButton,
+            this.encodingToolStripButton,
+            this.paddingToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(574, 25);
@@ -149,6 +155,36 @@
             // 
             this.saveFileDialog1.Filter = "Text Files|*.txt";
             // 
+            // rawOverlayToolStripButton
+            // 
+            this.rawOverlayToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.rawOverlayToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("rawOverlayToolStripButton.Image")));
+            this.rawOverlayToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.rawOverlayToolStripButton.Name = "rawOverlayToolStripButton";
+            this.rawOverlayToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.rawOverlayToolStripButton.Text = "Raw byte overlay on/off";
+            this.rawOverlayToolStripButton.Click += new System.EventHandler(this.rawOverlayToolStripButton_Click);
+            // 
+            // encodingToolStripButton
+            // 
+            this.encodingToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.encodingToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("encodingToolStripButton.Image")));
+            this.encodingToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.encodingToolStripButton.Name = "encodingToolStripButton";
+            this.encodingToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.encodingToolStripButton.Text = "Encoded message overlay on/off";
+            this.encodingToolStripButton.Click += new System.EventHandler(this.encodingToolStripButton_Click);
+            // 
+            // paddingToolStripButton
+            // 
+            this.paddingToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.paddingToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("paddingToolStripButton.Image")));
+            this.paddingToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.paddingToolStripButton.Name = "paddingToolStripButton";
+            this.paddingToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.paddingToolStripButton.Text = "Padding and Terminator overlay on/off";
+            this.paddingToolStripButton.Click += new System.EventHandler(this.paddingToolStripButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -181,6 +217,9 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.ToolStripButton rawOverlayToolStripButton;
+        private System.Windows.Forms.ToolStripButton encodingToolStripButton;
+        private System.Windows.Forms.ToolStripButton paddingToolStripButton;
     }
 }
 

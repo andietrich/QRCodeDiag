@@ -440,11 +440,17 @@ namespace QRCodeDiag
         {
             this.rawCode?.DrawCode(g, size, Color.Orange, Color.Cyan, drawBitIndices, drawByteIndices);
         }
-        public void DrawData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
+        public void DrawEncodedData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
             this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices);
-            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices);
+        }
+        public void DrawPadding(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
+        {   
             this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices);
+        }
+        public void DrawTerminator(Graphics g, Size size, bool drawBitIndices)
+        {
+            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices);
         }
         public void DrawCode(Graphics g, Size size)
         {

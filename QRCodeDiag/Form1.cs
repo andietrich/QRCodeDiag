@@ -22,6 +22,9 @@ namespace QRCodeDiag
         private QRCode displayCode;
         private QRCode backgroundCode; //qrcode that is used for decoding ToDo: Make MaskUsed property of QRCode, let QRCode decide which mask to use
         private MaskUsed maskUsed; // ToDo use better solution when mask application gets automated
+        private bool showRawOverlay;
+        private bool showEncodingOverlay;
+        private bool showPaddingOverlay;
         private MaskUsed CurrentMaskUsed
         {
             get { return this.maskUsed; }
@@ -59,6 +62,9 @@ namespace QRCodeDiag
         public Form1()
         {
             InitializeComponent();
+            this.showRawOverlay = false;
+            this.showEncodingOverlay = true;
+            this.showPaddingOverlay = true;            
             this.CurrentMaskUsed = MaskUsed.None;
         }
 
@@ -100,8 +106,15 @@ namespace QRCodeDiag
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
-            this.BackgroundCode?.DrawData(e.Graphics, this.pictureBox1.Size, true, false);
-            //this.displayCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
+            if (this.showRawOverlay)
+                this.BackgroundCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
+            if (this.showEncodingOverlay)
+                this.BackgroundCode?.DrawEncodedData(e.Graphics, this.pictureBox1.Size, true, false);
+            if (this.showPaddingOverlay)
+            {
+                this.BackgroundCode?.DrawPadding(e.Graphics, this.pictureBox1.Size, true, false);
+                this.BackgroundCode?.DrawTerminator(e.Graphics, this.pictureBox1.Size, true);
+            }            
         }
 
         private void xor001toolStripButton_Click(object sender, EventArgs e)
@@ -204,6 +217,24 @@ namespace QRCodeDiag
                     MessageBox.Show(this, "Could not save file: " + ex.Message);
                 }
             }
+        }
+
+        private void rawOverlayToolStripButton_Click(object sender, EventArgs e)
+        {
+            this.showRawOverlay = !this.showRawOverlay;
+            this.pictureBox1.Invalidate();
+        }
+
+        private void encodingToolStripButton_Click(object sender, EventArgs e)
+        {
+            this.showEncodingOverlay = !this.showEncodingOverlay;
+            this.pictureBox1.Invalidate();
+        }
+
+        private void paddingToolStripButton_Click(object sender, EventArgs e)
+        {
+            this.showPaddingOverlay = !this.showPaddingOverlay;
+            this.pictureBox1.Invalidate();
         }
     }
 }
