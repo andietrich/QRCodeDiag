@@ -100,7 +100,7 @@ namespace QRCodeDiag
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
-            this.BackgroundCode?.DrawData(e.Graphics, this.pictureBox1.Size, true, true);
+            this.BackgroundCode?.DrawData(e.Graphics, this.pictureBox1.Size, true, false);
             //this.displayCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
         }
 

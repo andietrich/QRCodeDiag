@@ -44,7 +44,17 @@ namespace QRCodeDiag.DataBlocks
         public Vector2D Position { get { return new Vector2D(this.xPos, this.yPos); } }
 
         public bool EndReached { get; private set; }
-        public char CurrentChar { get { return this.bits[this.XPos, this.YPos]; } }
+        public bool IsInitial { get; private set; }
+        public char CurrentChar
+        {
+            get
+            {
+                if (this.IsInitial)
+                    return '\0';
+                else
+                    return this.bits[this.XPos, this.YPos];
+            }
+        }
 
         public QRCodeBitIterator(char[,] setBits)
         {
@@ -56,14 +66,21 @@ namespace QRCodeDiag.DataBlocks
             this.directionUp = true;
             this.rightCell = true;
             this.EndReached = false;
+            this.IsInitial = true;
         }
         
         public char NextBit()
         {
+            if(this.IsInitial)
+            {
+                this.IsInitial = false;
+                if(QRCode.IsDataCell(this.XPos, this.YPos))
+                    return this.bits[this.XPos, this.YPos];
+            }
             bool nextFound = false;
             while (!this.EndReached && !nextFound)
             {
-                if (this.YPos == 0 && this.directionUp && !this.rightCell)
+                if (this.YPos == 0 && this.directionUp && !this.rightCell) // Top end of a line reached
                 {
                     // go to left neighbor lane, right top cell
                     this.directionUp = false;
@@ -72,7 +89,7 @@ namespace QRCodeDiag.DataBlocks
                     if (this.XPos == 6)
                         this.XPos--;
                 }
-                else if (this.YPos == QRCode.VERSIONSIZE -1 && !this.directionUp && !this.rightCell)
+                else if (this.YPos == QRCode.VERSIONSIZE -1 && !this.directionUp && !this.rightCell) // Bottom end of a line reached
                 {
                     // go to left neighbor lane, right bottom cell
                     this.directionUp = true;
@@ -81,7 +98,7 @@ namespace QRCodeDiag.DataBlocks
                     if (this.XPos == 6)
                         this.XPos--;
                 }
-                else
+                else // Somewhere in the line
                 {
                     if (this.rightCell)
                     {
@@ -102,22 +119,19 @@ namespace QRCodeDiag.DataBlocks
                         }
                     }
                 }
-                //var str = string.Format("({0}, {1})", this.XPos, this.YPos);
-                //System.Diagnostics.Debug.Write(str);
                 if (QRCode.IsDataCell(this.XPos, this.YPos))
                 {
                     nextFound = true;
-                    //System.Diagnostics.Debug.Write(" " + this.bits[this.XPos, this.YPos] + Environment.NewLine);
                 }
-                //else
-                //    System.Diagnostics.Debug.Write(" invalid" + Environment.NewLine);
             }
             if (nextFound)
             {
                 return this.bits[this.XPos, this.YPos];
             }
             else
+            {
                 return 'e';
+            }
         }
     }
 }

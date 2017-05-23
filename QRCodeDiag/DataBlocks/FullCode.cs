@@ -43,21 +43,18 @@ namespace QRCodeDiag.DataBlocks
             this.rawCodeByteList = new List<T>();
 
             var wd = new T();
-            var c = it.CurrentChar;
-            wd.AddBit(c, it.Position);
-
-            while (c != 'e')
+            char c = it.NextBit();
+            while(c != 'e')
             {
-                c = it.NextBit();
-                if (c == '0' || c == '1' || c == 'u')
+                if (c != '0' && c != '1' && c != 'u')
+                    throw new NotImplementedException("Bit value " + c + " was not defined.");
+                wd.AddBit(c, it.Position);
+                if (wd.IsComplete)
                 {
-                    wd.AddBit(c, it.Position);
-                    if (wd.IsComplete)
-                    {
-                        rawCodeByteList.Add(wd);
-                        wd = new T();
-                    }
+                    rawCodeByteList.Add(wd);
+                    wd = new T();
                 }
+                c = it.NextBit();
             }
 
             this.InitializeBitString();
