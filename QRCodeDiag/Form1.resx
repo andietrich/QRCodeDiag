@@ -121,6 +121,22 @@
     <value>17, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="newCodeToolStripButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJMSURBVFhH7ZexTsMwEED7Ccx8ASM/wc4ndOnc/gBLJWYm
+        5s4sDJ0rISG1G3RhyYTUBbaCRNUBqebOvnMv10uTuglCKE86JfbZ59eocZLOv8DtgYb8LrBud7PZzOF4
+        Qu1C/AQAxo8wqNkcsGY3LO0cS4aWc49XpzEYnINi1MQ5zUlC/Sj3vf70R1jwwZ8AlqCUE3Pql4S6Ue79
+        +c7Nrs/c19sL9QQsQSa7H7in24tmJKFeTo4ltGSRIMpxfyOSUOjGVwTkYhhSUvYzerwSnNMSx4O/1lcF
+        iiRlnzVOy8HB7wK1USYp2yij243I+YoFaMmikHJVqfwjwnCbj9fZzpXSgVc2FZBcwuGcVGzC0PwNUBQS
+        K6+D6fV6uej3+26xWPhcqaQfBVgL6JBYeR2MFmTJLMt8niQvSSmPHwFYC+iQWHkdFlp0Op1SxtMlrS2U
+        KKTsRtGbeRlaEGMymVDWX80BqQWo36TqXXyIpCWIMRrFHQ4l7ScQJmiMuQnva1eVtOQ4pCQpbSmTw31O
+        9lnjqkhaYjIY0gqAXOGzWG7Csp+xJNfLsIVYWFIyGFILQNt8m5FyiBSRSEk8T2GvIAJ9OUkth1iCq9XK
+        H1EsVQ4pFUSgP0oy8r9pCQ6Hwyh5DJUEEchFSb7dqWkKYlGUPJbKggjk8asu7kVhio0unMpBghqaY/In
+        BC2oTiuYDNVpBZOhOq1gMlSnFUyG6sTCdQVDy6QDj8JXLIRvwdZCKTEej70c1qZl0oE6O28+NWJ/gh4K
+        FuIrWQdUa/fTsyWZTucHVF4r5w7zSQAAAAAASUVORK5CYII=
+</value>
+  </data>
   <data name="openToolStripButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8

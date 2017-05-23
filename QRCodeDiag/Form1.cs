@@ -247,5 +247,11 @@ namespace QRCodeDiag
             this.showXORed = !this.showXORed;
             this.pictureBox1.Invalidate();
         }
+
+        private void newCodeToolStripButton_Click(object sender, EventArgs e)
+        {
+            this.qrcode = new QRCode(3); //ToDo ask to save modified codes
+            this.DisplayCode = this.qrcode;
+        }
     }
 }

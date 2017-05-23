@@ -22,6 +22,7 @@ namespace QRCodeDiag
             ECI = 7
         }
         public const int VERSIONSIZE = 29; //ToDo adjust for other versions
+        public const int VERSION = 3;
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
@@ -55,8 +56,95 @@ namespace QRCodeDiag
             this.messageChanged = true;
         }
 
+        /// <summary>
+        /// Generates an empty QRCode of the specified <paramref name="version"/>
+        /// </summary>
+        /// <param name="version">The version defines the size of the QR Code. Valid versions are 1-40</param>
+        public QRCode(int version)
+        {
+            if(version == 3)
+            {
+                this.bits = new char[VERSIONSIZE, VERSIONSIZE];
+                for(int x=0; x < this.bits.GetLength(0); x++)
+                {
+                    for(int y = 0; y < this.bits.GetLength(0); y++)
+                    {
+                        this.bits[x, y] = 'u';
+                    }
+                }
+                this.PlaceStaticElements();
+            }
+            else
+            {
+                throw new NotImplementedException("Only version 3 is implemented so far."); //ToDo implement other versions
+            }
+        }
+
         public QRCode(string path) : this(GenerateBitsFromFile(path))
         { }
+
+        private void PlaceStaticElements()
+        {
+            char[,] finderPattern = new char[,] 
+            {
+                { '1', '1', '1', '1', '1', '1', '1'},
+                { '1', '0', '0', '0', '0', '0', '1'},
+                { '1', '0', '1', '1', '1', '0', '1'},
+                { '1', '0', '1', '1', '1', '0', '1'},
+                { '1', '0', '1', '1', '1', '0', '1'},
+                { '1', '0', '0', '0', '0', '0', '1'},
+                { '1', '1', '1', '1', '1', '1', '1'}
+            };
+            // Place Finder Patterns
+            for(int x = 0; x < 7; x++)
+            {
+                for (int y = 0; y < 7; y++)
+                {
+                    this.bits[x, y] = finderPattern[x, y]; // Top Left
+                    this.bits[VERSIONSIZE - 1 - x, y] = finderPattern[x, y]; // Top Right
+                    this.bits[x, VERSIONSIZE - 1 - y] = finderPattern[x, y]; // Bottom Left
+                }
+            }
+            // Place separators
+            for(int i = 0; i < 8; i++)
+            {
+                // Top Left
+                this.bits[7, i] = '0';
+                this.bits[i, 7] = '0';
+                // Top Right
+                this.bits[VERSIONSIZE - 1 - i, 7] = '0';
+                this.bits[VERSIONSIZE - 8, i] = '0';
+                // Bottom Left
+                this.bits[7, VERSIONSIZE - 1 - i] = '0';
+                this.bits[i, VERSIONSIZE - 8] = '0';
+            }
+            // Place Alignment Patterns
+            char[,] alignmentPattern = new char[,]
+            {
+                { '1', '1', '1', '1', '1', },
+                { '1', '0', '0', '0', '1', },
+                { '1', '0', '1', '0', '1', },
+                { '1', '0', '0', '0', '1', },
+                { '1', '1', '1', '1', '1', }
+            };
+            // Version 3 Center Module: 22, 22 // ToDo: Implement for all versions
+            for(int x = 0; x < alignmentPattern.GetLength(0); x++)
+            {
+                for (int y = 0; y < alignmentPattern.GetLength(1); y++)
+                {
+                    this.bits[x + 20, y + 20] = alignmentPattern[x, y];
+                }
+            }
+            // Place timing
+            for(int i = 6; i < VERSIONSIZE-7; i++)
+            {
+                this.bits[6, i] = i % 2 == 0 ? '1' : '0';
+                this.bits[i, 6] = i % 2 == 0 ? '1' : '0';
+            }
+            // Place dark module
+            this.bits[8, (4 * VERSION) + 9] = '1';
+            // ToDo: Place version information where needed
+        }
 
         public void SaveToFile(string path)
         {
@@ -133,7 +221,7 @@ namespace QRCodeDiag
 
         public string GetTerminator()
         {
-            return this.terminator.BitString;
+            return this.terminator?.BitString ?? "No terminator found.";
         }
 
         public string[] GetPaddingBits() //ToDo: If message changed read again

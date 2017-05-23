@@ -44,6 +44,7 @@
             this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.showXORedToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -51,6 +52,7 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newCodeToolStripButton,
             this.openToolStripButton,
             this.saveToolStripButton,
             this.toolStripButton1,
@@ -197,6 +199,16 @@
             this.showXORedToolStripButton.Text = "Show XORed code on/off";
             this.showXORedToolStripButton.Click += new System.EventHandler(this.showXORedToolStripButton_Click);
             // 
+            // newCodeToolStripButton
+            // 
+            this.newCodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.newCodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newCodeToolStripButton.Image")));
+            this.newCodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.newCodeToolStripButton.Name = "newCodeToolStripButton";
+            this.newCodeToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.newCodeToolStripButton.Text = "Create empty code";
+            this.newCodeToolStripButton.Click += new System.EventHandler(this.newCodeToolStripButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -233,6 +245,7 @@
         private System.Windows.Forms.ToolStripButton encodingToolStripButton;
         private System.Windows.Forms.ToolStripButton paddingToolStripButton;
         private System.Windows.Forms.ToolStripButton showXORedToolStripButton;
+        private System.Windows.Forms.ToolStripButton newCodeToolStripButton;
     }
 }
 
