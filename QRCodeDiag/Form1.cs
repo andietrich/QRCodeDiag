@@ -147,6 +147,7 @@ namespace QRCodeDiag
                 try
                 {
                     sb.AppendLine("Message: " + this.BackgroundCode.Message);
+                    sb.AppendLine("Terminator: " + this.BackgroundCode.GetTerminator());
                     sb.AppendLine("Padding bits: ");
                     foreach (var s in this.BackgroundCode.GetPaddingBits())
                     {

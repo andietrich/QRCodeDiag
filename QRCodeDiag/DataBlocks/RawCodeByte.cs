@@ -9,7 +9,8 @@ namespace QRCodeDiag.DataBlocks
     class RawCodeByte : CodeSymbol
     {
         public const uint RAWBYTELENGTH = 8;
-        public override uint SymbolLength => RAWBYTELENGTH;
+        public RawCodeByte() : base(RAWBYTELENGTH)
+        { }
         public virtual object Clone()
         {
             var ret = new RawCodeByte();
@@ -42,8 +43,8 @@ namespace QRCodeDiag.DataBlocks
                     value += (byte)(0x80 >> i);
                 }
             }
-            System.Diagnostics.Debug.Assert(bits != this.MaxBitCount || (Convert.ToByte(this.BitString, 2) == value));
-            return bits == this.MaxBitCount;
+            System.Diagnostics.Debug.Assert(bits != this.SymbolLength || (Convert.ToByte(this.BitString, 2) == value));
+            return bits == this.SymbolLength;
         }
     }
 }

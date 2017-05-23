@@ -10,9 +10,21 @@ namespace QRCodeDiag
     {
         public enum Direction
         {
+            /// <summary>
+            /// Decreasing Y-Direction! (y=0 is top)
+            /// </summary>
             Up,
+            /// <summary>
+            /// Increasing Y-Direction! (y=0 is top)
+            /// </summary>
             Down,
+            /// <summary>
+            /// Decreasing X-Direction
+            /// </summary>
             Left,
+            /// <summary>
+            /// Increasing X-Direction
+            /// </summary>
             Right
         }
         public Vector2D Start { get; private set; }

@@ -9,8 +9,13 @@ namespace QRCodeDiag.DataBlocks
 {
     class NumericEncodingSymbol : CodeSymbol, IEncodingSymbol
     {
-        public override uint SymbolLength => throw new NotImplementedException();
-
         public MessageMode EncodingType { get { return MessageMode.Numeric; } }
+        public NumericEncodingSymbol() : base(GetSymbolLength())
+        { }
+
+        private static uint GetSymbolLength()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

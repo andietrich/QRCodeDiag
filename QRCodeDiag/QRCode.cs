@@ -31,6 +31,7 @@ namespace QRCodeDiag
         private FullCode<RawCodeByte> rawCode;
         private FullCode<RawCodeByte> paddingBits;
         private FullCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
+        private TerminatorSymbol terminator;
 
         public int Version { get; private set; }
         public string Message
@@ -128,6 +129,11 @@ namespace QRCodeDiag
         public char[,] GetBits()
         {
             return (char[,])this.bits.Clone();
+        }
+
+        public string GetTerminator()
+        {
+            return this.terminator.BitString;
         }
 
         public string[] GetPaddingBits() //ToDo: If message changed read again
@@ -310,8 +316,15 @@ namespace QRCodeDiag
                     var firstSymbolOffset = 4 + charIndicatorLength;
                     var messageLenghtInBits = characterCount * encodedCharacterLength;
                     var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
+                    var terminatorLength = 4; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode
+                    var terminatorLocation = new Vector2D[terminatorLength];
+                    for (int i = 0, bitNumber = messageEndOffset; i < terminatorLength; i++, bitNumber++)
+                    {
+                        terminatorLocation[i] = this.rawCode.GetBitPosition(bitNumber);
+                    }
                     this.encodedSymbols = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
-                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset, DATAWORDS * 8 - messageEndOffset);
+                    this.terminator = new TerminatorSymbol(this.rawCode.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
+                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset + terminatorLength, DATAWORDS * 8 - (messageEndOffset + terminatorLength));
                     return encodedSymbols.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else
@@ -430,6 +443,7 @@ namespace QRCodeDiag
         public void DrawData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
             this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices);
+            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices);
             this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices);
         }
         public void DrawCode(Graphics g, Size size)

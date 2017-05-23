@@ -11,15 +11,15 @@ namespace QRCodeDiag.DataBlocks
     {
         protected List<Vector2D> bitCoordinates;
         protected char[] bitArray;
-        public abstract uint SymbolLength { get; }
+        public uint SymbolLength { get; private set; }
         public int CurrentSymbolLength { get { return this.bitCoordinates.Count; } }
-        public string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
-        public int MaxBitCount { get { return this.bitArray.Length; } }
+        public virtual string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
         public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
-        protected CodeSymbol()
+        protected CodeSymbol(uint symbolLength)
         {
-            this.bitArray = new char[this.SymbolLength];
-            this.bitCoordinates = new List<Vector2D>((int)this.SymbolLength);
+            this.SymbolLength = symbolLength;
+            this.bitArray = new char[symbolLength];
+            this.bitCoordinates = new List<Vector2D>((int)symbolLength);
         }
         public void AddBit(char bit, int x, int y)
         {
@@ -27,8 +27,8 @@ namespace QRCodeDiag.DataBlocks
         }
         public void AddBit(char bit, Vector2D bitPosition)
         {
-            if (this.bitCoordinates.Count == this.MaxBitCount)
-                throw new InvalidOperationException("The maximum symbol length " + this.MaxBitCount + " has already been reached.");
+            if (this.bitCoordinates.Count == this.SymbolLength)
+                throw new InvalidOperationException("The maximum symbol length " + this.SymbolLength + " has already been reached.");
             this.bitArray[bitCoordinates.Count] = bit;
             this.bitCoordinates.Add(bitPosition);
         }
@@ -80,13 +80,47 @@ namespace QRCodeDiag.DataBlocks
             // Draw symbol edges
             var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
             var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
-            var p = new Pen(color, 2); //ToDo new color every word (or the correct one of 4 different ones)
+            float penWidth = 2;
+            var p = new Pen(color, penWidth); //ToDo new color every word (or the correct one of 4 different ones)
             var fontFamily = new FontFamily("Lucida Console");
             var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var solidrush = new SolidBrush(color);            
+            var solidrush = new SolidBrush(color);
             foreach (var edge in this.GetContour())
             {
-                g.DrawLine(p, edge.Start.X * pixelWidth, edge.Start.Y * pixelHeight, edge.End.X * pixelWidth, edge.End.Y * pixelHeight);
+                var edgeStartX = edge.Start.X * pixelWidth;
+                var edgeStartY = edge.Start.Y * pixelHeight;
+                var edgeEndX = edge.End.X * pixelWidth;
+                var edgeEndY = edge.End.Y * pixelHeight;
+                switch (edge.GetDirection()) // Inside is on the right looking in edge direction.
+                {
+                    case PolygonEdge.Direction.Down:
+                        edgeStartX -= (penWidth / 2); // shift left
+                        edgeEndX -= (penWidth / 2);   // shift left
+                        edgeStartY += (penWidth / 2); // push down
+                        edgeEndY  -= (penWidth / 2);  // pull up
+                        break;
+                    case PolygonEdge.Direction.Up:
+                        edgeStartX += (penWidth / 2); // shift right
+                        edgeEndX += (penWidth / 2);   // shift right
+                        edgeStartY -= (penWidth / 2); // push up
+                        edgeEndY += (penWidth / 2);   // pull down
+                        break;
+                    case PolygonEdge.Direction.Left:
+                        edgeStartX -= (penWidth / 2); // shift left
+                        edgeEndX += (penWidth / 2);   // shift right
+                        edgeStartY -= (penWidth / 2); // pull up
+                        edgeEndY -= (penWidth / 2);   // pull up
+                        break;
+                    case PolygonEdge.Direction.Right:
+                        edgeStartX += (penWidth / 2); // shift right
+                        edgeEndX -= (penWidth / 2);   // shift left
+                        edgeStartY += (penWidth / 2); // push down
+                        edgeEndY += (penWidth / 2);   // push down
+                        break;
+                    default:
+                        throw new NotImplementedException("Drawing Direction type " + edge.GetDirection().ToString() + " is not implemented.");
+                }
+                g.DrawLine(p, edgeStartX, edgeStartY, edgeEndX, edgeEndY);
             }
             // Draw bit index
             if (drawBitIndices)

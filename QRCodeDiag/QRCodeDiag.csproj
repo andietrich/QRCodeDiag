@@ -60,6 +60,7 @@
     <Compile Include="DataBlocks\IEncodingSymbol.cs" />
     <Compile Include="DataBlocks\FullCode.cs" />
     <Compile Include="DataBlocks\NumericEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\TerminatorSymbol.cs" />
     <Compile Include="DebugDrawingForm.cs">
       <SubType>Form</SubType>
     </Compile>
