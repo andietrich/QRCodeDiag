@@ -171,6 +171,8 @@ namespace QRCodeDiag
                     {
                         sb.AppendLine(s);
                     }
+                    sb.AppendLine("RepairMessage():");
+                    sb.AppendLine(this.backgroundCode.RepairMessage());
                 }
                 catch (QRCodeFormatException qfe)
                 {

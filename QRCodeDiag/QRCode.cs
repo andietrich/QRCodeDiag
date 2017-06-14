@@ -343,32 +343,28 @@ namespace QRCodeDiag
                     throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
-        private string RepairMessage(string[] byteStrings, char defaultBit = '0') //ToDo move to FullCode
+        public string RepairMessage() //ToDo move to FullCode
         {
-            var codeAsInts = new int[byteStrings.Length];
-            for (int i = 0; i < byteStrings.Length; i++)
+            var fullCode = new FullCode<RawCodeByte>(this.GetBitIterator());
+            var codeBytes = fullCode.ToByteArray();
+            var codeAsInts = new int[codeBytes.Length];
+            for (int i = 0; i < codeBytes.Length; i++)
             {
-                var byteString = byteStrings[i].ToCharArray();
-                for (int j = 0; j < byteString.Length; j++)
-                {
-                    if (byteString[j] != '0' && byteString[j] != '1')
-                        byteString[j] = defaultBit;
-                }
-                codeAsInts[i] = Convert.ToInt32(new String(byteString), 2);
+                codeAsInts[i] = codeBytes[i] & 0xFF; //ToDo remaining zeros in int ignored by decoder? - using as in zxing example app
             }
             var rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
             if (rsDecoder.decode(codeAsInts, ECCWORDS))
             {
                 var binarySB = new StringBuilder();
-                for (int i = 0; i < DATAWORDS; i++)
+                for (int i = 0; i < codeAsInts.Length; i++) // also repair the ecc bytes, the goal is to completely restore the broken qr code
                 {
-                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2)); //FIXME ToDo: probably bit order reversed
+                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2).PadLeft(8, '0'));
                 }
-                return binarySB.ToString();
+                return fullCode.GetBitString() + Environment.NewLine + binarySB.ToString();
             }
             else
             {
-                return null;
+                return "Could not repair";
             }
         }
         private string ReadMessage() //ToDo length check of messageBytes, 
