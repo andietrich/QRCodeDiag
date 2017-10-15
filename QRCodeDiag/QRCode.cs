@@ -554,14 +554,16 @@ namespace QRCodeDiag
         {
             this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices);
         }
-        public void DrawCode(Graphics g, Size size)
+        public void DrawCode(Graphics g, Size size, bool transparent = false)
         {
+            byte alpha = transparent ? (byte)128 : (byte)255;
+
             float pixelWidth = (float)size.Width / VERSIONSIZE;
             float pixelHeight = (float)size.Height / VERSIONSIZE;
 
-            var blackBrush = new SolidBrush(Color.Black);
-            var whiteBrush = new SolidBrush(Color.White);
-            var grayBrush = new SolidBrush(Color.Gray);
+            var blackBrush = new SolidBrush(Color.FromArgb(alpha, Color.Black.R, Color.Black.G, Color.Black.B));
+            var whiteBrush = new SolidBrush(Color.FromArgb(alpha, Color.White.R, Color.White.G, Color.White.B));
+            var grayBrush = new SolidBrush(Color.FromArgb(alpha, Color.Gray.R, Color.Gray.G, Color.Gray.B));
 
             for (int y = 0; y < VERSIONSIZE; y++)
             {

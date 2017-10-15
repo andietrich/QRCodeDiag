@@ -93,10 +93,11 @@ namespace QRCodeDiag
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
+            bool drawTransparent = this.pictureBox1.BackgroundImage != null;
             if(this.showXORed)
-                this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
+                this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
             else
-                this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size);
+                this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
             if (this.showRawOverlay)
                 this.BackgroundCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
             if (this.showEncodingOverlay)
@@ -105,15 +106,18 @@ namespace QRCodeDiag
             {
                 this.BackgroundCode?.DrawPadding(e.Graphics, this.pictureBox1.Size, true, false);
                 this.BackgroundCode?.DrawTerminator(e.Graphics, this.pictureBox1.Size, true);
-            }            
+            }
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            this.DisplayCode.ToggleDataCell(QRCode.VERSIONSIZE * e.Location.X / pictureBox1.Size.Width, QRCode.VERSIONSIZE * e.Location.Y / pictureBox1.Size.Height);
-            this.UpdateBackgroundCode();
-            this.pictureBox1.Refresh();
-            this.UpdateTextBox();
+            if (this.DisplayCode != null)
+            {
+                this.DisplayCode.ToggleDataCell(QRCode.VERSIONSIZE * e.Location.X / pictureBox1.Size.Width, QRCode.VERSIONSIZE * e.Location.Y / pictureBox1.Size.Height);
+                this.UpdateBackgroundCode();
+                this.pictureBox1.Refresh();
+                this.UpdateTextBox();
+            }
         }
 
         private void UpdateTextBox()
@@ -284,6 +288,21 @@ namespace QRCodeDiag
             {
                 this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
                 this.CurrentMaskUsed = MaskUsed.Mask111;
+            }
+        }
+
+        private void bgImgToolStripButton_Click(object sender, EventArgs e)
+        {
+            if(this.bgImgOpenFileDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    this.pictureBox1.BackgroundImage = System.Drawing.Image.FromFile(this.bgImgOpenFileDialog.FileName);
+                }
+                catch(OutOfMemoryException ex)
+                {
+                    MessageBox.Show("Could not open background image: " + ex.Message);
+                }
             }
         }
     }

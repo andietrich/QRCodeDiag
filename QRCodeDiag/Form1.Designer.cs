@@ -30,6 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -37,10 +41,6 @@
             this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.showXORedToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.mask000ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mask001ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +50,8 @@
             this.mask101ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mask110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mask111ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bgImgToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.bgImgOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -64,12 +66,44 @@
             this.encodingToolStripButton,
             this.paddingToolStripButton,
             this.showXORedToolStripButton,
-            this.toolStripDropDownButton1});
+            this.toolStripDropDownButton1,
+            this.bgImgToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(574, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(12, 584);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(550, 116);
+            this.textBox1.TabIndex = 2;
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
+            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             // 
             // newCodeToolStripButton
             // 
@@ -140,36 +174,6 @@
             this.showXORedToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.showXORedToolStripButton.Text = "Show XORed code on/off";
             this.showXORedToolStripButton.Click += new System.EventHandler(this.showXORedToolStripButton_Click);
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.Filter = "Text Files|*.txt";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
-            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(12, 584);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(550, 116);
-            this.textBox1.TabIndex = 2;
-            // 
-            // saveFileDialog1
-            // 
-            this.saveFileDialog1.Filter = "Text Files|*.txt";
             // 
             // toolStripDropDownButton1
             // 
@@ -253,6 +257,20 @@
             this.mask111ToolStripMenuItem.Text = "Mask 111";
             this.mask111ToolStripMenuItem.Click += new System.EventHandler(this.mask111ToolStripMenuItem_Click);
             // 
+            // bgImgToolStripButton
+            // 
+            this.bgImgToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.bgImgToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("bgImgToolStripButton.Image")));
+            this.bgImgToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.bgImgToolStripButton.Name = "bgImgToolStripButton";
+            this.bgImgToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.bgImgToolStripButton.Text = "Set background image";
+            this.bgImgToolStripButton.Click += new System.EventHandler(this.bgImgToolStripButton_Click);
+            // 
+            // bgImgOpenFileDialog
+            // 
+            this.bgImgOpenFileDialog.Filter = "Portable Network Graphics (.png)|*.png|Bitmap (.bmp)|*.bmp";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -295,6 +313,8 @@
         private System.Windows.Forms.ToolStripMenuItem mask101ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mask110ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mask111ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton bgImgToolStripButton;
+        private System.Windows.Forms.OpenFileDialog bgImgOpenFileDialog;
     }
 }
 
