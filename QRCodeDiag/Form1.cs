@@ -13,9 +13,14 @@ namespace QRCodeDiag
     {
         private enum MaskUsed
         {
-            None = 0,
+            None,
+            Mask000 = 0,
             Mask001 = 1,
+            Mask010 = 2,
+            Mask011 = 3,
             Mask100 = 4,
+            Mask101 = 5,
+            Mask110 = 6,
             Mask111 = 7
         }
         private QRCode qrcode;
@@ -86,25 +91,6 @@ namespace QRCodeDiag
             }
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e) // Print Data
-        {
-            if (this.displayCode == null)
-            {
-                MessageBox.Show(this, "No valid code loaded.");
-            }
-            else
-            {
-                try
-                {
-                    this.displayCode.PrintBlocks();
-                }
-                catch (QRCodeFormatException qe)
-                {
-                    MessageBox.Show(this, qe.Message);
-                }
-            }
-        }
-
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             if(this.showXORed)
@@ -120,33 +106,6 @@ namespace QRCodeDiag
                 this.BackgroundCode?.DrawPadding(e.Graphics, this.pictureBox1.Size, true, false);
                 this.BackgroundCode?.DrawTerminator(e.Graphics, this.pictureBox1.Size, true);
             }            
-        }
-
-        private void xor001toolStripButton_Click(object sender, EventArgs e)
-        {
-            if (this.qrcode != null)
-            {
-                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
-                this.CurrentMaskUsed = MaskUsed.Mask001;
-            }
-        }
-
-        private void xor100toolStripButton_Click(object sender, EventArgs e)
-        {
-            if (this.qrcode != null)
-            {
-                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
-                this.CurrentMaskUsed = MaskUsed.Mask100;
-            }
-        }
-
-        private void xor111toolStripButton_Click(object sender, EventArgs e)
-        {
-            if (this.qrcode != null)
-            {
-                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
-                this.CurrentMaskUsed = MaskUsed.Mask111;
-            }
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -254,6 +213,78 @@ namespace QRCodeDiag
         {
             this.qrcode = new QRCode(3); //ToDo ask to save modified codes
             this.DisplayCode = this.qrcode;
+        }
+
+        private void mask000ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask000());
+                this.CurrentMaskUsed = MaskUsed.Mask000;
+            }
+        }
+
+        private void mask001ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask001());
+                this.CurrentMaskUsed = MaskUsed.Mask001;
+            }
+        }
+
+        private void mask010ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask010());
+                this.CurrentMaskUsed = MaskUsed.Mask010;
+            }
+        }
+
+        private void mask011ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask011());
+                this.CurrentMaskUsed = MaskUsed.Mask011;
+            }
+        }
+
+        private void mask100ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask100());
+                this.CurrentMaskUsed = MaskUsed.Mask100;
+            }
+        }
+
+        private void mask101ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask101());
+                this.CurrentMaskUsed = MaskUsed.Mask101;
+            }
+        }
+
+        private void mask110ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask110());
+                this.CurrentMaskUsed = MaskUsed.Mask110;
+            }
+        }
+
+        private void mask111ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.qrcode != null)
+            {
+                this.BackgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask111());
+                this.CurrentMaskUsed = MaskUsed.Mask111;
+            }
         }
     }
 }

@@ -171,7 +171,7 @@ namespace QRCodeDiag
                 {
                     while (!f.EndOfStream)
                     {
-                        cells.Add(f.ReadLine().Split(null));
+                        cells.Add(f.ReadLine().Trim().Split(null));
                     }
                 }
             }
@@ -473,51 +473,69 @@ namespace QRCodeDiag
          * 
          *  row = y, column = x
          * */
+
+        public static QRCode GetMask000()
+        {
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
+                for (int x = 0; x < VERSIONSIZE; x++)
+                    mask[x, y] = ((x + y) % 2 == 0) ? '1' : '0';
+            return new QRCode(mask);
+        }
+        public static QRCode GetMask001() // (row) mod 2 == 0
+        {
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
+                for (int x = 0; x < VERSIONSIZE; x++)
+                    mask[x, y] = (y % 2 == 0) ? '1' : '0';
+            return new QRCode(mask);
+        }
+        public static QRCode GetMask010()
+        {
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
+                for (int x = 0; x < VERSIONSIZE; x++)
+                    mask[x, y] = (x % 3 == 0) ? '1' : '0';
+            return new QRCode(mask);
+        }
+        public static QRCode GetMask011()
+        {
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
+                for (int x = 0; x < VERSIONSIZE; x++)
+                    mask[x, y] = ((x + y) % 3 == 0) ? '1' : '0';
+            return new QRCode(mask);
+        }
         public static QRCode GetMask100() // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
         {
             var mask = new char[VERSIONSIZE, VERSIONSIZE];
             for (int y = 0; y < VERSIONSIZE; y++)
-            {
                 for (int x = 0; x < VERSIONSIZE; x++)
-                {
-                    if (((y / 2 + x / 3) % 2) == 0)
-                        mask[x, y] = '1';
-                    else
-                        mask[x, y] = '0';
-                }
-            }
+                    mask[x, y] = (((y / 2 + x / 3) % 2) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
-
-        public static QRCode GetMask001() // (row) mod 2 == 0
+        public static QRCode GetMask101()
         {
             var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y ++)
-            {
+            for (int y = 0; y < VERSIONSIZE; y++)
                 for (int x = 0; x < VERSIONSIZE; x++)
-                {
-                    if((y % 2) == 0)
-                        mask[x, y] = '1';
-                    else
-                        mask[x, y] = '0';
-                }
-            }
+                    mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
-
+        public static QRCode GetMask110()
+        {
+            var mask = new char[VERSIONSIZE, VERSIONSIZE];
+            for (int y = 0; y < VERSIONSIZE; y++)
+                for (int x = 0; x < VERSIONSIZE; x++)
+                    mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
+            return new QRCode(mask);
+        }
         public static QRCode GetMask111() //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
             var mask = new char[VERSIONSIZE, VERSIONSIZE];
             for (int y = 0; y < VERSIONSIZE; y++)
-            {
                 for (int x = 0; x < VERSIONSIZE; x++)
-                {
-                    if ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0)
-                        mask[x, y] = '1';
-                    else
-                        mask[x, y] = '0';
-                }
-            }
+                    mask[x, y] = ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public void DrawRawByteLocations(Graphics g, Size size, bool drawBitIndices, bool drawByteIndices)

@@ -30,21 +30,26 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.xor001toolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.xor100toolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.xor111toolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.rawOverlayToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.showXORedToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.mask000ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask001ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask010ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask011ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask100ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask101ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mask111ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -55,19 +60,26 @@
             this.newCodeToolStripButton,
             this.openToolStripButton,
             this.saveToolStripButton,
-            this.toolStripButton1,
-            this.xor001toolStripButton,
-            this.xor100toolStripButton,
-            this.xor111toolStripButton,
             this.rawOverlayToolStripButton,
             this.encodingToolStripButton,
             this.paddingToolStripButton,
-            this.showXORedToolStripButton});
+            this.showXORedToolStripButton,
+            this.toolStripDropDownButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(574, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // newCodeToolStripButton
+            // 
+            this.newCodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.newCodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newCodeToolStripButton.Image")));
+            this.newCodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.newCodeToolStripButton.Name = "newCodeToolStripButton";
+            this.newCodeToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.newCodeToolStripButton.Text = "Create empty code";
+            this.newCodeToolStripButton.Click += new System.EventHandler(this.newCodeToolStripButton_Click);
             // 
             // openToolStripButton
             // 
@@ -88,76 +100,6 @@
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "Save Data";
             this.saveToolStripButton.Click += new System.EventHandler(this.saveToolStripButton_Click);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton1.Text = "Print Bytes";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
-            // 
-            // xor001toolStripButton
-            // 
-            this.xor001toolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.xor001toolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("xor001toolStripButton.Image")));
-            this.xor001toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.xor001toolStripButton.Name = "xor001toolStripButton";
-            this.xor001toolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.xor001toolStripButton.Text = "XOR with Mask 001";
-            this.xor001toolStripButton.Click += new System.EventHandler(this.xor001toolStripButton_Click);
-            // 
-            // xor100toolStripButton
-            // 
-            this.xor100toolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.xor100toolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("xor100toolStripButton.Image")));
-            this.xor100toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.xor100toolStripButton.Name = "xor100toolStripButton";
-            this.xor100toolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.xor100toolStripButton.Text = "XOR with Mask 100";
-            this.xor100toolStripButton.Click += new System.EventHandler(this.xor100toolStripButton_Click);
-            // 
-            // xor111toolStripButton
-            // 
-            this.xor111toolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.xor111toolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("xor111toolStripButton.Image")));
-            this.xor111toolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.xor111toolStripButton.Name = "xor111toolStripButton";
-            this.xor111toolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.xor111toolStripButton.Text = "XOR with Mask 111";
-            this.xor111toolStripButton.Click += new System.EventHandler(this.xor111toolStripButton_Click);
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.Filter = "Text Files|*.txt";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
-            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(12, 584);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(550, 116);
-            this.textBox1.TabIndex = 2;
-            // 
-            // saveFileDialog1
-            // 
-            this.saveFileDialog1.Filter = "Text Files|*.txt";
             // 
             // rawOverlayToolStripButton
             // 
@@ -199,15 +141,117 @@
             this.showXORedToolStripButton.Text = "Show XORed code on/off";
             this.showXORedToolStripButton.Click += new System.EventHandler(this.showXORedToolStripButton_Click);
             // 
-            // newCodeToolStripButton
+            // openFileDialog1
             // 
-            this.newCodeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.newCodeToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newCodeToolStripButton.Image")));
-            this.newCodeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.newCodeToolStripButton.Name = "newCodeToolStripButton";
-            this.newCodeToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.newCodeToolStripButton.Text = "Create empty code";
-            this.newCodeToolStripButton.Click += new System.EventHandler(this.newCodeToolStripButton_Click);
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
+            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(12, 584);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(550, 116);
+            this.textBox1.TabIndex = 2;
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mask000ToolStripMenuItem,
+            this.mask001ToolStripMenuItem,
+            this.mask010ToolStripMenuItem,
+            this.mask011ToolStripMenuItem,
+            this.mask100ToolStripMenuItem,
+            this.mask101ToolStripMenuItem,
+            this.mask110ToolStripMenuItem,
+            this.mask111ToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::QRCodeDiag.Properties.Resources.mask000;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(29, 22);
+            this.toolStripDropDownButton1.Text = "Select XOR Mask";
+            // 
+            // mask000ToolStripMenuItem
+            // 
+            this.mask000ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask000;
+            this.mask000ToolStripMenuItem.Name = "mask000ToolStripMenuItem";
+            this.mask000ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask000ToolStripMenuItem.Text = "Mask 000";
+            this.mask000ToolStripMenuItem.Click += new System.EventHandler(this.mask000ToolStripMenuItem_Click);
+            // 
+            // mask001ToolStripMenuItem
+            // 
+            this.mask001ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask001;
+            this.mask001ToolStripMenuItem.Name = "mask001ToolStripMenuItem";
+            this.mask001ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask001ToolStripMenuItem.Text = "Mask 001";
+            this.mask001ToolStripMenuItem.Click += new System.EventHandler(this.mask001ToolStripMenuItem_Click);
+            // 
+            // mask010ToolStripMenuItem
+            // 
+            this.mask010ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask010;
+            this.mask010ToolStripMenuItem.Name = "mask010ToolStripMenuItem";
+            this.mask010ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask010ToolStripMenuItem.Text = "Mask 010";
+            this.mask010ToolStripMenuItem.Click += new System.EventHandler(this.mask010ToolStripMenuItem_Click);
+            // 
+            // mask011ToolStripMenuItem
+            // 
+            this.mask011ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask011;
+            this.mask011ToolStripMenuItem.Name = "mask011ToolStripMenuItem";
+            this.mask011ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask011ToolStripMenuItem.Text = "Mask 011";
+            this.mask011ToolStripMenuItem.Click += new System.EventHandler(this.mask011ToolStripMenuItem_Click);
+            // 
+            // mask100ToolStripMenuItem
+            // 
+            this.mask100ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask100;
+            this.mask100ToolStripMenuItem.Name = "mask100ToolStripMenuItem";
+            this.mask100ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask100ToolStripMenuItem.Text = "Mask 100";
+            this.mask100ToolStripMenuItem.Click += new System.EventHandler(this.mask100ToolStripMenuItem_Click);
+            // 
+            // mask101ToolStripMenuItem
+            // 
+            this.mask101ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask101;
+            this.mask101ToolStripMenuItem.Name = "mask101ToolStripMenuItem";
+            this.mask101ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask101ToolStripMenuItem.Text = "Mask 101";
+            this.mask101ToolStripMenuItem.Click += new System.EventHandler(this.mask101ToolStripMenuItem_Click);
+            // 
+            // mask110ToolStripMenuItem
+            // 
+            this.mask110ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask110;
+            this.mask110ToolStripMenuItem.Name = "mask110ToolStripMenuItem";
+            this.mask110ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask110ToolStripMenuItem.Text = "Mask 110";
+            this.mask110ToolStripMenuItem.Click += new System.EventHandler(this.mask110ToolStripMenuItem_Click);
+            // 
+            // mask111ToolStripMenuItem
+            // 
+            this.mask111ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask111;
+            this.mask111ToolStripMenuItem.Name = "mask111ToolStripMenuItem";
+            this.mask111ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask111ToolStripMenuItem.Text = "Mask 111";
+            this.mask111ToolStripMenuItem.Click += new System.EventHandler(this.mask111ToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -233,10 +277,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton openToolStripButton;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
-        private System.Windows.Forms.ToolStripButton xor001toolStripButton;
-        private System.Windows.Forms.ToolStripButton xor100toolStripButton;
-        private System.Windows.Forms.ToolStripButton xor111toolStripButton;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;
@@ -246,6 +286,15 @@
         private System.Windows.Forms.ToolStripButton paddingToolStripButton;
         private System.Windows.Forms.ToolStripButton showXORedToolStripButton;
         private System.Windows.Forms.ToolStripButton newCodeToolStripButton;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem mask000ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask001ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask010ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask011ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask100ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask101ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask110ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mask111ToolStripMenuItem;
     }
 }
 
