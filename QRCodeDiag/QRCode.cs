@@ -11,7 +11,7 @@ using ZXing.Common.ReedSolomon;
 
 namespace QRCodeDiag
 {
-    public class QRCode
+    internal class QRCode
     {
         internal enum MessageMode
         {
@@ -21,6 +21,19 @@ namespace QRCodeDiag
             Kanji = 8,
             ECI = 7
         }
+        internal enum MaskType
+        {
+            None,
+            Mask000 = 0,
+            Mask001 = 1,
+            Mask010 = 2,
+            Mask011 = 3,
+            Mask100 = 4,
+            Mask101 = 5,
+            Mask110 = 6,
+            Mask111 = 7
+        }
+
         public const int VERSIONSIZE = 29; //ToDo adjust for other versions
         public const int VERSION = 3;
         public const int DATAWORDS = 55;//ToDo adjust for other versions
@@ -474,6 +487,30 @@ namespace QRCodeDiag
          *  row = y, column = x
          * */
 
+        public static QRCode GetMask(MaskType mtype)
+        {
+            switch (mtype)
+            {
+                case MaskType.Mask000:
+                    return GetMask000();
+                case MaskType.Mask001:
+                    return GetMask001();
+                case MaskType.Mask010:
+                    return GetMask010();
+                case MaskType.Mask011:
+                    return GetMask011();
+                case MaskType.Mask100:
+                    return GetMask100();
+                case MaskType.Mask101:
+                    return GetMask101();
+                case MaskType.Mask110:
+                    return GetMask110();
+                case MaskType.Mask111:
+                    return GetMask111();
+                default:
+                    throw new ArgumentException("Cannot get null mask.");
+            }
+        }
         public static QRCode GetMask000()
         {
             var mask = new char[VERSIONSIZE, VERSIONSIZE];

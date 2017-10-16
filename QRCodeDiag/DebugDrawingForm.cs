@@ -60,7 +60,7 @@ namespace QRCodeDiag
             this.typeToShow = typeof(RawCodeByte);
             debugFormOpen[this.windowInstance] = true;
         }
-        public void RestartDebugging(QRCode debuggedQRCode)
+        internal void RestartDebugging(QRCode debuggedQRCode)
         {
             this.timer1.Stop();
             this.drawNextEvent = false;
