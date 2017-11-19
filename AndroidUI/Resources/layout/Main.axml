@@ -5,9 +5,17 @@
     android:layout_height="match_parent"
     android:minWidth="25px"
     android:minHeight="25px">
+    <TextView
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/debugTextView" />
     <ImageView
         android:src="@android:drawable/ic_menu_gallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/QRCodeImageViewID" />
+        android:id="@+id/QRCodeImageViewID"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true" />
 </LinearLayout>
