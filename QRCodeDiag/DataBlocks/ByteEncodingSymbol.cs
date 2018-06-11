@@ -25,8 +25,8 @@ namespace QRCodeDiag.DataBlocks
             base.DrawSymbol(g, size, color, drawBitIndices);
             if (this.CurrentSymbolLength > 0)
             {
-                var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
-                var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
+                var pixelWidth = (float)size.Width / QRCode.VERSION3SIZE;
+                var pixelHeight = (float)size.Height / QRCode.VERSION3SIZE;
                 var drawLocation = this.GetBitCoordinate(Math.Min(4, this.CurrentSymbolLength - 1));
                 var fontFamily = new FontFamily("Lucida Console");
                 var largeFont = new Font(fontFamily, pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);

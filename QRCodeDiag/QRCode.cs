@@ -34,8 +34,8 @@ namespace QRCodeDiag
             Mask111 = 7
         }
 
-        public const int VERSIONSIZE = 29; //ToDo adjust for other versions
-        public const int VERSION = 3;
+        public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
+        public const int VERSION3SIZE = BASESIZE + 8; //ToDo adjust for other versions
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
@@ -47,7 +47,7 @@ namespace QRCodeDiag
         private FullCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
         private TerminatorSymbol terminator;
 
-        public int Version { get; private set; }
+        public int Version { get { return QRCode.GetVersionFromSize(this.bits.GetLength(0)); } }
         public string Message
         {
             get
@@ -61,11 +61,15 @@ namespace QRCodeDiag
         }
         public QRCode(char[,] setBits)
         {
-            if(setBits.GetLength(0) != VERSIONSIZE ||setBits.GetLength(1) != VERSIONSIZE)
-                throw new ArgumentException("Bad QR Code size", "setBits");
-
+            if ((setBits.GetLength(0) - QRCode.BASESIZE) % 4 != 0)
+            {
+                throw new ArgumentException("Bad QR Code size: Not a valid version number", "setBits");
+            }
+            if (setBits.GetLength(0) != setBits.GetLength(1))
+            {
+                throw new ArgumentException("Bad QR Code size: Not a square", "setBits");
+            }
             this.bits = setBits;
-            this.Version = 3; // ToDo implement other versions
             this.messageChanged = true;
         }
 
@@ -75,29 +79,46 @@ namespace QRCodeDiag
         /// <param name="version">The version defines the size of the QR Code. Valid versions are 1-40</param>
         public QRCode(int version)
         {
-            if(version == 3)
+            if(version > 40 ||version < 1)
             {
-                this.bits = new char[VERSIONSIZE, VERSIONSIZE];
-                for(int x=0; x < this.bits.GetLength(0); x++)
+                throw new ArgumentOutOfRangeException("version");
+            }
+
+            var size = QRCode.GetEdgeSizeFromVersion(version);
+            this.bits = new char[size, size];
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
                 {
-                    for(int y = 0; y < this.bits.GetLength(0); y++)
-                    {
-                        this.bits[x, y] = 'u';
-                    }
+                    this.bits[x, y] = 'u';
                 }
-                this.PlaceStaticElements();
             }
-            else
-            {
-                throw new NotImplementedException("Only version 3 is implemented so far."); //ToDo implement other versions
-            }
+
+            this.PlaceStaticElements();
         }
 
         public QRCode(string path) : this(GenerateBitsFromFile(path))
         { }
 
+        public static int GetVersionFromSize(int pixelCount)
+        {
+            int v = pixelCount - QRCode.BASESIZE;
+            if(v % 4 != 0)
+            {
+                throw new ArgumentException("Not a valid pixel count", "pixelCount");
+            }
+            return 1 + (v / 4);
+        }
+
+        private static int GetEdgeSizeFromVersion(int version)
+        {
+            return QRCode.BASESIZE + 4 * (version - 1);
+        }
+
         private void PlaceStaticElements()
         {
+            int edgeLength = this.bits.GetLength(0);
+
             char[,] finderPattern = new char[,] 
             {
                 { '1', '1', '1', '1', '1', '1', '1'},
@@ -114,8 +135,8 @@ namespace QRCodeDiag
                 for (int y = 0; y < 7; y++)
                 {
                     this.bits[x, y] = finderPattern[x, y]; // Top Left
-                    this.bits[VERSIONSIZE - 1 - x, y] = finderPattern[x, y]; // Top Right
-                    this.bits[x, VERSIONSIZE - 1 - y] = finderPattern[x, y]; // Bottom Left
+                    this.bits[edgeLength - 1 - x, y] = finderPattern[x, y]; // Top Right
+                    this.bits[x, edgeLength - 1 - y] = finderPattern[x, y]; // Bottom Left
                 }
             }
             // Place separators
@@ -125,13 +146,28 @@ namespace QRCodeDiag
                 this.bits[7, i] = '0';
                 this.bits[i, 7] = '0';
                 // Top Right
-                this.bits[VERSIONSIZE - 1 - i, 7] = '0';
-                this.bits[VERSIONSIZE - 8, i] = '0';
+                this.bits[edgeLength - 1 - i, 7] = '0';
+                this.bits[edgeLength - 8, i] = '0';
                 // Bottom Left
-                this.bits[7, VERSIONSIZE - 1 - i] = '0';
-                this.bits[i, VERSIONSIZE - 8] = '0';
+                this.bits[7, edgeLength - 1 - i] = '0';
+                this.bits[i, edgeLength - 8] = '0';
             }
             // Place Alignment Patterns
+            this.PlaceAlignmentPatterns();
+
+            // Place timing
+            for(int i = 6; i < edgeLength - 7; i++)
+            {
+                this.bits[6, i] = i % 2 == 0 ? '1' : '0';
+                this.bits[i, 6] = i % 2 == 0 ? '1' : '0';
+            }
+            // Place dark module
+            this.bits[8, (4 * this.Version) + 9] = '1';
+            // ToDo: Place version information where needed
+        }
+
+        private void InsertAlignmentPattern(int centerX, int centerY)
+        {
             char[,] alignmentPattern = new char[,]
             {
                 { '1', '1', '1', '1', '1', },
@@ -140,23 +176,54 @@ namespace QRCodeDiag
                 { '1', '0', '0', '0', '1', },
                 { '1', '1', '1', '1', '1', }
             };
-            // Version 3 Center Module: 22, 22 // ToDo: Implement for all versions
-            for(int x = 0; x < alignmentPattern.GetLength(0); x++)
+
+            for (int x = 0; x < alignmentPattern.GetLength(0); x++)
             {
                 for (int y = 0; y < alignmentPattern.GetLength(1); y++)
                 {
-                    this.bits[x + 20, y + 20] = alignmentPattern[x, y];
+                    this.bits[centerX + x - 2, centerY + y - 2] = alignmentPattern[x, y];
                 }
             }
-            // Place timing
-            for(int i = 6; i < VERSIONSIZE-7; i++)
+        }
+
+        private void PlaceAlignmentPatterns()
+        {
+            int num_total = this.Version == 1 ? 0 : (this.Version / 7) + 2; // number of coordinates
+
+            int[] coordValues = new int[num_total];
+            
+            if (num_total > 1)
             {
-                this.bits[6, i] = i % 2 == 0 ? '1' : '0';
-                this.bits[i, 6] = i % 2 == 0 ? '1' : '0';
+                coordValues[0] = 6; // first coordinate is always 6
+
+                coordValues[num_total - 1] = 4 * this.Version + 10; // last coordinate is always 7 pixels from the right/bottom border of the code
+
+                if (num_total > 2)
+                {
+                    coordValues[num_total - 2] = 2 * ((coordValues[0] + coordValues[num_total - 1] * (num_total - 2)) / ((num_total - 1) * 2));
+
+                    if (num_total > 3)
+                    {
+                        int step = coordValues[num_total - 1] - coordValues[num_total - 2];
+
+                        for (int i = num_total - 3; i > 0; i--)
+                        {
+                            coordValues[i] = coordValues[i + 1] - step;
+                        }
+                    }
+                }
             }
-            // Place dark module
-            this.bits[8, (4 * VERSION) + 9] = '1';
-            // ToDo: Place version information where needed
+
+            foreach(var x in coordValues)
+            {
+                foreach(var y in coordValues)
+                {
+                    if(!(x <= 10 && (y <= 10 || y >= this.Version - 10)) && !(y <= 10 && (x <= 10 || x >= this.Version - 10))) // no collision with finder pattern
+                    {
+                        this.InsertAlignmentPattern(x, y);
+                    }
+                }
+            }
         }
 
         public void SaveToFile(string path)
@@ -176,7 +243,6 @@ namespace QRCodeDiag
         }
         private static char[,] GenerateBitsFromFile(string path)
         {
-            var bitMask = new char[QRCode.VERSIONSIZE, QRCode.VERSIONSIZE];
             List<string[]> cells = new List<string[]>();
             try
             {
@@ -192,39 +258,34 @@ namespace QRCodeDiag
             {
                 throw new QRCodeFormatException("Can't read file.", ex);
             }
-            bool valid = true;
-            if (cells.Count != QRCode.VERSIONSIZE) // column length OK?
+            try
             {
-                valid = false;
-            }
-            else
-            {
-                for (int y = 0; y < QRCode.VERSIONSIZE && valid; y++)
+                var version = QRCode.GetVersionFromSize(cells.Count); // check column length
+                var bitMask = new char[cells.Count, cells.Count];
+                for (int y = 0; y < cells.Count; y++)
                 {
-                    if (cells[y].Length != QRCode.VERSIONSIZE) // row length OK?
+                    if (cells[y].Length != cells.Count) // compare row length to column length
                     {
-                        valid = false;
+                        throw new QRCodeFormatException("QR Code row length is wrong in row " + y);
                     }
-                    else
+                    for (int x = 0; x < cells.Count; x++)
                     {
-                        for (int x = 0; x < QRCode.VERSIONSIZE && valid; x++)
+                        if (cells[y][x].Length != 1)  // string in cell = 1 char length?
                         {
-                            if (cells[y][x].Length != 1)  // string in cell = 1 char length?
-                            {
-                                valid = false;
-                            }
-                            else
-                            {
-                                bitMask[x, y] = cells[y][x][0];
-                            }
+                            throw new QRCodeFormatException("Invalid QR Code data");
+                        }
+                        else
+                        {
+                            bitMask[x, y] = cells[y][x][0];
                         }
                     }
                 }
-            }
-            if (!valid)
-                throw new QRCodeFormatException("QR Code Size is wrong.");
-            else
                 return bitMask;
+            }
+            catch(ArgumentException ae)
+            {
+                throw new QRCodeFormatException("QR Code column count is wrong.", ae);
+            }
         }
 
         public char[,] GetBits()
@@ -257,7 +318,7 @@ namespace QRCodeDiag
 
         public void ToggleDataCell(int x, int y)
         {
-            if (IsDataCell(x, y))
+            if (IsDataCell(x, y, this.Version))
             {
                 switch (bits[x, y])
                 {
@@ -282,22 +343,23 @@ namespace QRCodeDiag
             return new QRCodeBitIterator(this.bits);
         }
 
-        public static bool IsDataCell(int x, int y)
+        public static bool IsDataCell(int x, int y, int version)
         {
+            var versionSize = QRCode.GetEdgeSizeFromVersion(version);
             bool ret = true;
-            if (x > VERSIONSIZE || y > VERSIONSIZE || x < 0 || y < 0)
+            if (x > versionSize || y > versionSize || x < 0 || y < 0)
                 return false;
 
             if (x < 9)
             {
-                if (y < 9 || y > 20) // Left side position elements
+                if (y < 9 || y > 20) // Left side fidner patterns
                     ret = false;
             }
-            else if (x > 20 && y < 9) // Right side position element
+            else if (x > 20 && y < 9) // Right side finder pattern
             {
                 ret = false;
             }
-            if (x > 19 && x < 25 && y > 19 && y < 25) // Alignment
+            if (x > 19 && x < 25 && y > 19 && y < 25) // Alignment TODO for all versions
             {
                 ret = false;
             }
@@ -441,12 +503,12 @@ namespace QRCodeDiag
             if(rhs == null)
                 throw new ArgumentNullException("rhs");
 
-            var xored = new char[VERSIONSIZE, VERSIONSIZE];
+            var xored = new char[VERSION3SIZE, VERSION3SIZE];
             var lhsBits = lhs.GetBits();
             var rhsBits = rhs.GetBits();
-            for(int y = 0; y < VERSIONSIZE; y++)
+            for(int y = 0; y < VERSION3SIZE; y++)
             {
-                for (int x = 0; x < VERSIONSIZE; x++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                 {
                     var lhsbit = lhsBits[x, y];
                     var rhsbit = rhsBits[x, y];
@@ -513,65 +575,65 @@ namespace QRCodeDiag
         }
         public static QRCode GetMask000()
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = ((x + y) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask001() // (row) mod 2 == 0
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = (y % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask010()
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = (x % 3 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask011()
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = ((x + y) % 3 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask100() // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = (((y / 2 + x / 3) % 2) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask101()
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask110()
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         public static QRCode GetMask111() //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
-            var mask = new char[VERSIONSIZE, VERSIONSIZE];
-            for (int y = 0; y < VERSIONSIZE; y++)
-                for (int x = 0; x < VERSIONSIZE; x++)
+            var mask = new char[VERSION3SIZE, VERSION3SIZE];
+            for (int y = 0; y < VERSION3SIZE; y++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                     mask[x, y] = ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
@@ -595,16 +657,16 @@ namespace QRCodeDiag
         {
             byte alpha = transparent ? (byte)128 : (byte)255;
 
-            float pixelWidth = (float)size.Width / VERSIONSIZE;
-            float pixelHeight = (float)size.Height / VERSIONSIZE;
+            float pixelWidth = (float)size.Width / VERSION3SIZE;
+            float pixelHeight = (float)size.Height / VERSION3SIZE;
 
             var blackBrush = new SolidBrush(Color.FromArgb(alpha, Color.Black.R, Color.Black.G, Color.Black.B));
             var whiteBrush = new SolidBrush(Color.FromArgb(alpha, Color.White.R, Color.White.G, Color.White.B));
             var grayBrush = new SolidBrush(Color.FromArgb(alpha, Color.Gray.R, Color.Gray.G, Color.Gray.B));
 
-            for (int y = 0; y < VERSIONSIZE; y++)
+            for (int y = 0; y < VERSION3SIZE; y++)
             {
-                for (int x = 0; x < VERSIONSIZE; x++)
+                for (int x = 0; x < VERSION3SIZE; x++)
                 {
                     SolidBrush b;
                     switch (this.bits[x,y])
@@ -631,6 +693,11 @@ namespace QRCodeDiag
         public void PrintBlocks()
         {
             Console.WriteLine(this.Message);
+        }
+
+        public int GetEdgeLength()
+        {
+            return this.bits.GetLength(0);
         }
 
         //public void AnalyzeCode()

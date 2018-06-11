@@ -61,12 +61,6 @@
     <Compile Include="DataBlocks\FullCode.cs" />
     <Compile Include="DataBlocks\NumericEncodingSymbol.cs" />
     <Compile Include="DataBlocks\TerminatorSymbol.cs" />
-    <Compile Include="DebugDrawingForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DebugDrawingForm.Designer.cs">
-      <DependentUpon>DebugDrawingForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,9 +74,6 @@
     <Compile Include="QRCodeFormatException.cs" />
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\RawCodeByte.cs" />
-    <EmbeddedResource Include="DebugDrawingForm.resx">
-      <DependentUpon>DebugDrawingForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

@@ -75,8 +75,8 @@ namespace QRCodeDiag.DataBlocks
         public virtual void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices)
         {
             // Draw symbol edges
-            var pixelWidth = (float)size.Width / QRCode.VERSIONSIZE;
-            var pixelHeight = (float)size.Height / QRCode.VERSIONSIZE;
+            var pixelWidth = (float)size.Width / QRCode.VERSION3SIZE;
+            var pixelHeight = (float)size.Height / QRCode.VERSION3SIZE;
             float penWidth = 2;
             var p = new Pen(color, penWidth);
             var fontFamily = new FontFamily("Lucida Console");

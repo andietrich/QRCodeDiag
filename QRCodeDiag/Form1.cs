@@ -107,7 +107,8 @@ namespace QRCodeDiag
         {
             if (this.DisplayCode != null)
             {
-                this.DisplayCode.ToggleDataCell(QRCode.VERSIONSIZE * e.Location.X / pictureBox1.Size.Width, QRCode.VERSIONSIZE * e.Location.Y / pictureBox1.Size.Height);
+                var edgeLength = this.DisplayCode.GetEdgeLength();
+                this.DisplayCode.ToggleDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height);
                 this.UpdateBackgroundCode();
                 this.pictureBox1.Invalidate();
                 this.UpdateTextBox();
