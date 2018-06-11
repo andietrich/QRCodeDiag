@@ -13,8 +13,8 @@ namespace QRCodeDiag
     public partial class Form1 : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
         private QRCode qrcode;
-        private QRCode displayCode;
-        private QRCode backgroundCode; //qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
+        private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
+        private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
         private MaskType maskUsed; // ToDo use better solution when mask application gets automated
         private bool showRawOverlay;
         private bool showEncodingOverlay;
@@ -27,7 +27,7 @@ namespace QRCodeDiag
             {
                 maskUsed = value;
                 if (this.DisplayCode != null)
-                    this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : QRCode.XOR(this.DisplayCode, QRCode.GetMask(value));
+                    this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : QRCode.XOR(this.DisplayCode, QRCode.GetMask(value, this.DisplayCode.Version));
             }
         }
         private QRCode DisplayCode
@@ -39,7 +39,7 @@ namespace QRCodeDiag
             set
             {
                 this.backgroundCode = value;
-                this.CurrentMaskUsed = MaskType.None;
+                this.CurrentMaskUsed = MaskType.None; // resetting the backgroundCode
 
                 this.displayCode = value;
                 this.UpdateTextBox();
@@ -154,7 +154,7 @@ namespace QRCodeDiag
                 if (this.CurrentMaskUsed == MaskType.None)
                     this.backgroundCode = this.displayCode;
                 else
-                    this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask(this.CurrentMaskUsed));
+                    this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask(this.CurrentMaskUsed, this.qrcode.Version));
             }
         }
 
