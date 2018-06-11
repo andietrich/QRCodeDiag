@@ -109,65 +109,65 @@ namespace QRCodeDiag
         }
         private static QRCode GetMask000(int versionSize)
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((x + y) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask001(int versionSize) // (row) mod 2 == 0
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (y % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask010(int versionSize)
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (x % 3 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask011(int versionSize)
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((x + y) % 3 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask100(int versionSize) // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (((y / 2 + x / 3) % 2) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask101(int versionSize)
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask110(int versionSize)
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }
         private static QRCode GetMask111(int versionSize) //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
-            var mask = new char[VERSION3SIZE, VERSION3SIZE];
-            for (int y = 0; y < VERSION3SIZE; y++)
-                for (int x = 0; x < VERSION3SIZE; x++)
+            var mask = new char[versionSize, versionSize];
+            for (int y = 0; y < versionSize; y++)
+                for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
             return new QRCode(mask);
         }

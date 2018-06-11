@@ -516,17 +516,18 @@ namespace QRCodeDiag
         public void DrawCode(Graphics g, Size size, bool transparent = false)
         {
             byte alpha = transparent ? (byte)128 : (byte)255;
+            var edgeLength = this.bits.GetLength(0);
 
-            float pixelWidth = (float)size.Width / VERSION3SIZE;
-            float pixelHeight = (float)size.Height / VERSION3SIZE;
+            float pixelWidth = (float)size.Width / edgeLength;
+            float pixelHeight = (float)size.Height / edgeLength;
 
             var blackBrush = new SolidBrush(Color.FromArgb(alpha, Color.Black.R, Color.Black.G, Color.Black.B));
             var whiteBrush = new SolidBrush(Color.FromArgb(alpha, Color.White.R, Color.White.G, Color.White.B));
             var grayBrush = new SolidBrush(Color.FromArgb(alpha, Color.Gray.R, Color.Gray.G, Color.Gray.B));
 
-            for (int y = 0; y < VERSION3SIZE; y++)
+            for (int y = 0; y < edgeLength; y++)
             {
-                for (int x = 0; x < VERSION3SIZE; x++)
+                for (int x = 0; x < edgeLength; x++)
                 {
                     SolidBrush b;
                     switch (this.bits[x,y])
