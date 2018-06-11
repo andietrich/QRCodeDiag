@@ -12,7 +12,6 @@ namespace QRCodeDiag
 {
     public partial class Form1 : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
-        private QRCode qrcode;
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
         private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
         private MaskType maskUsed; // ToDo use better solution when mask application gets automated
@@ -75,13 +74,12 @@ namespace QRCodeDiag
             {
                 try
                 {
-                    this.qrcode = new QRCode(this.openFileDialog1.FileName);
+                    this.DisplayCode = new QRCode(this.openFileDialog1.FileName);
                 }
                 catch(QRCodeFormatException ex)
                 {
                     MessageBox.Show(this, ex.Message + Environment.NewLine + ex.InnerException?.Message);
                 }
-                this.DisplayCode = this.qrcode;
             }
         }
 
@@ -154,7 +152,7 @@ namespace QRCodeDiag
                 if (this.CurrentMaskUsed == MaskType.None)
                     this.backgroundCode = this.displayCode;
                 else
-                    this.backgroundCode = QRCode.XOR(this.qrcode, QRCode.GetMask(this.CurrentMaskUsed, this.qrcode.Version));
+                    this.backgroundCode = QRCode.XOR(this.DisplayCode, QRCode.GetMask(this.CurrentMaskUsed, this.DisplayCode.Version));
             }
         }
 
@@ -199,8 +197,7 @@ namespace QRCodeDiag
 
         private void newCodeToolStripButton_Click(object sender, EventArgs e)
         {
-            this.qrcode = new QRCode(3); //ToDo ask to save modified codes
-            this.DisplayCode = this.qrcode;
+            this.DisplayCode = new QRCode(3);//ToDo ask to save modified codes and select version
         }
 
         private void mask000ToolStripMenuItem_Click(object sender, EventArgs e)
