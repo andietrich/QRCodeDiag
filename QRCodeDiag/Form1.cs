@@ -26,7 +26,9 @@ namespace QRCodeDiag
             {
                 maskUsed = value;
                 if (this.DisplayCode != null)
-                    this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : QRCode.XOR(this.DisplayCode, QRCode.GetMask(value, this.DisplayCode.Version));
+                {
+                    this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : XORMask.XOR(this.DisplayCode, value);
+                }
             }
         }
         private QRCode DisplayCode
@@ -150,9 +152,13 @@ namespace QRCodeDiag
             if(this.displayCode != null)
             {
                 if (this.CurrentMaskUsed == MaskType.None)
+                {
                     this.backgroundCode = this.displayCode;
+                }
                 else
-                    this.backgroundCode = QRCode.XOR(this.DisplayCode, QRCode.GetMask(this.CurrentMaskUsed, this.DisplayCode.Version));
+                {
+                    this.backgroundCode = XORMask.XOR(this.DisplayCode, this.CurrentMaskUsed);
+                }
             }
         }
 
