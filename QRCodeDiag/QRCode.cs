@@ -23,7 +23,6 @@ namespace QRCodeDiag
         }
         internal enum MaskType
         {
-            None,
             Mask000 = 0,
             Mask001 = 1,
             Mask010 = 2,
@@ -31,7 +30,8 @@ namespace QRCodeDiag
             Mask100 = 4,
             Mask101 = 5,
             Mask110 = 6,
-            Mask111 = 7
+            Mask111 = 7,
+            None
         }
 
         public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version

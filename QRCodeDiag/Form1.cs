@@ -24,7 +24,7 @@ namespace QRCodeDiag
             get { return this.maskUsed; }
             set
             {
-                maskUsed = value;
+                this.maskUsed = value;
                 if (this.DisplayCode != null)
                 {
                     this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : XORMask.XOR(this.DisplayCode, value);
