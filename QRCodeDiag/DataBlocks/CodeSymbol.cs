@@ -75,19 +75,19 @@ namespace QRCodeDiag.DataBlocks
         public virtual void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices)
         {
             // Draw symbol edges
-            var pixelWidth = (float)size.Width / QRCode.VERSION3SIZE;
-            var pixelHeight = (float)size.Height / QRCode.VERSION3SIZE;
+            var codeElWidth = (float)size.Width / QRCode.VERSION3SIZE;
+            var codeElHeight = (float)size.Height / QRCode.VERSION3SIZE;
             float penWidth = 2;
             var p = new Pen(color, penWidth);
             var fontFamily = new FontFamily("Lucida Console");
-            var smallFont = new Font(fontFamily, 0.5F * pixelHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+            var smallFont = new Font(fontFamily, 0.5F * codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var solidrush = new SolidBrush(color);
             foreach (var edge in this.GetContour())
             {
-                var edgeStartX = edge.Start.X * pixelWidth;
-                var edgeStartY = edge.Start.Y * pixelHeight;
-                var edgeEndX = edge.End.X * pixelWidth;
-                var edgeEndY = edge.End.Y * pixelHeight;
+                var edgeStartX = edge.Start.X * codeElWidth;
+                var edgeStartY = edge.Start.Y * codeElHeight;
+                var edgeEndX = edge.End.X * codeElWidth;
+                var edgeEndY = edge.End.Y * codeElHeight;
                 switch (edge.GetDirection()) // Inside is on the right looking in edge direction.
                 {
                     case PolygonEdge.Direction.Down:
@@ -125,7 +125,7 @@ namespace QRCodeDiag.DataBlocks
                 for (int i = 0; i < this.CurrentSymbolLength; i++)
                 {
                     var pixCoord = this.GetBitCoordinate(i);
-                    g.DrawString(i.ToString(), smallFont, solidrush, new Point((int)((pixCoord.X + 0.4F) * pixelWidth), (int)((pixCoord.Y + 0.4F) * pixelHeight)));
+                    g.DrawString(i.ToString(), smallFont, solidrush, new Point((int)((pixCoord.X + 0.4F) * codeElWidth), (int)((pixCoord.Y + 0.4F) * codeElHeight)));
                 }
             }
         }

@@ -100,12 +100,12 @@ namespace QRCodeDiag
         public QRCode(string path) : this(GenerateBitsFromFile(path))
         { }
 
-        public static int GetVersionFromSize(int pixelCount)
+        public static int GetVersionFromSize(int codeElCount)
         {
-            int v = pixelCount - QRCode.BASESIZE;
+            int v = codeElCount - QRCode.BASESIZE;
             if(v % 4 != 0)
             {
-                throw new ArgumentException("Not a valid pixel count", "pixelCount");
+                throw new ArgumentException("Not a valid codeEl count", "codeElCount");
             }
             return 1 + (v / 4);
         }
@@ -196,7 +196,7 @@ namespace QRCodeDiag
             {
                 coordValues[0] = 6; // first coordinate is always 6
 
-                coordValues[num_total - 1] = 4 * this.Version + 10; // last coordinate is always 7 pixels from the right/bottom border of the code
+                coordValues[num_total - 1] = 4 * this.Version + 10; // last coordinate is always 7 codeEls from the right/bottom border of the code
 
                 if (num_total > 2)
                 {
@@ -518,8 +518,8 @@ namespace QRCodeDiag
             byte alpha = transparent ? (byte)128 : (byte)255;
             var edgeLength = this.bits.GetLength(0);
 
-            float pixelWidth = (float)size.Width / edgeLength;
-            float pixelHeight = (float)size.Height / edgeLength;
+            float codeElWidth = (float)size.Width / edgeLength;
+            float codeElHeight = (float)size.Height / edgeLength;
 
             var blackBrush = new SolidBrush(Color.FromArgb(alpha, Color.Black.R, Color.Black.G, Color.Black.B));
             var whiteBrush = new SolidBrush(Color.FromArgb(alpha, Color.White.R, Color.White.G, Color.White.B));
@@ -544,9 +544,9 @@ namespace QRCodeDiag
                         default:
                             b = grayBrush;
                             break;
-                            //throw new QRCodeFormatException("Invalid pixel value: " + this.bits[x, y]);
+                            //throw new QRCodeFormatException("Invalid codeEl value: " + this.bits[x, y]);
                     }
-                    g.FillRectangle(b, x * pixelWidth, y * pixelHeight, pixelWidth, pixelHeight);
+                    g.FillRectangle(b, x * codeElWidth, y * codeElHeight, codeElWidth, codeElHeight);
                 }
             }
         }
