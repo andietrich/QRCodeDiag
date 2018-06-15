@@ -132,12 +132,12 @@ namespace QRCodeDiag.DataBlocks
             return encoding.GetString(this.ToByteArray());
         }
 
-        public void DrawCode(Graphics g, Size size, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices)
+        public void DrawCode(Graphics g, Size size, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices, int codeVersion)
         {
             var preferredSymbolDrawLocation = 2;
 
-            var codeElWidth = (float)size.Width / QRCode.VERSION3SIZE;
-            var codeElHeight = (float)size.Height / QRCode.VERSION3SIZE;
+            var codeElWidth = (float)size.Width / QRCode.GetEdgeSizeFromVersion(codeVersion);
+            var codeElHeight = (float)size.Height / QRCode.GetEdgeSizeFromVersion(codeVersion);
 
             var fontFamily = new FontFamily("Lucida Console");
             var largeFont = new Font(fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -147,7 +147,7 @@ namespace QRCodeDiag.DataBlocks
             for (int j = 0; j < this.rawCodeByteList.Count; j++)
             {
                 var wd = this.rawCodeByteList[j];
-                wd.DrawSymbol(g, size, bitColor, drawBitIndices);
+                wd.DrawSymbol(g, size, bitColor, drawBitIndices, codeVersion);
                 if (drawSymbolIndices && wd.CurrentSymbolLength > 0)
                 {
                     var drawIndexCoord = wd.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, wd.CurrentSymbolLength));

@@ -35,7 +35,6 @@ namespace QRCodeDiag
         }
 
         public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
-        public const int VERSION3SIZE = BASESIZE + 8; //ToDo adjust for other versions
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
@@ -499,19 +498,19 @@ namespace QRCodeDiag
 
         public void DrawRawByteLocations(Graphics g, Size size, bool drawBitIndices, bool drawByteIndices)
         {
-            this.rawCode?.DrawCode(g, size, Color.Orange, Color.Cyan, drawBitIndices, drawByteIndices);
+            this.rawCode?.DrawCode(g, size, Color.Orange, Color.Cyan, drawBitIndices, drawByteIndices, this.Version);
         }
         public void DrawEncodedData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
-            this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices);
+            this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices, this.Version);
         }
         public void DrawPadding(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {   
-            this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices);
+            this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices, this.Version);
         }
         public void DrawTerminator(Graphics g, Size size, bool drawBitIndices)
         {
-            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices);
+            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices, this.Version);
         }
         public void DrawCode(Graphics g, Size size, bool transparent = false)
         {
