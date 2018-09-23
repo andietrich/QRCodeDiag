@@ -203,7 +203,11 @@ namespace QRCodeDiag
 
         private void newCodeToolStripButton_Click(object sender, EventArgs e)
         {
-            this.DisplayCode = new QRCode(3);//ToDo ask to save modified codes and select version
+            var createForm = new CreateNewCode();
+            if (createForm.ShowDialog(this) == DialogResult.OK)
+            {
+                this.DisplayCode = new QRCode(createForm.Version); //ToDo ask to save modified codes
+            }
         }
 
         private void mask000ToolStripMenuItem_Click(object sender, EventArgs e)

@@ -51,6 +51,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateNewCode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateNewCode.Designer.cs">
+      <DependentUpon>CreateNewCode.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataBlocks\AlphaNumericEncodingSymbol.cs" />
     <Compile Include="DataBlocks\QRCodeBitIterator.cs" />
     <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
@@ -75,6 +81,9 @@
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
+    <EmbeddedResource Include="CreateNewCode.resx">
+      <DependentUpon>CreateNewCode.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

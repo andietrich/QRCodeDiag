@@ -170,6 +170,7 @@ namespace QRCodeDiag
             }
             // Place dark module
             this.bits[8, (4 * this.Version) + 9] = 'b';
+            // ToDo: Place format information, alternatively allow user to set it manually
             // ToDo: Place version information where needed
         }
 
