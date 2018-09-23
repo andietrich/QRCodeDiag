@@ -13,7 +13,7 @@ namespace QRCodeDiag
 {
     internal class QRCode
     {
-        internal enum MessageMode
+        public enum MessageMode
         {
             Numeric = 1,
             Alphanumeric = 2,
@@ -21,7 +21,7 @@ namespace QRCodeDiag
             Kanji = 8,
             ECI = 7
         }
-        internal enum MaskType
+        public enum MaskType
         {
             Mask000 = 0,
             Mask001 = 1,
@@ -34,11 +34,17 @@ namespace QRCodeDiag
             None
         }
 
+        private enum FormatInfoLocation
+        {
+            TopLeft,
+            SplitBottomLeftTopRight
+        }
+
         public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
         public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
-        private char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
+        private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
         private string message;
         private bool messageChanged;
         private FullCode<RawCodeByte> rawCode;
@@ -97,7 +103,9 @@ namespace QRCodeDiag
         }
 
         public QRCode(string path) : this(GenerateBitsFromFile(path))
-        { }
+        {
+            this.PlaceStaticElements(); // make sure static elements have correct value
+        }
 
         public static int GetVersionFromSize(int codeElCount)
         {
@@ -120,13 +128,13 @@ namespace QRCodeDiag
 
             char[,] finderPattern = new char[,] 
             {
-                { '1', '1', '1', '1', '1', '1', '1'},
-                { '1', '0', '0', '0', '0', '0', '1'},
-                { '1', '0', '1', '1', '1', '0', '1'},
-                { '1', '0', '1', '1', '1', '0', '1'},
-                { '1', '0', '1', '1', '1', '0', '1'},
-                { '1', '0', '0', '0', '0', '0', '1'},
-                { '1', '1', '1', '1', '1', '1', '1'}
+                { 'b', 'b', 'b', 'b', 'b', 'b', 'b'},
+                { 'b', 'w', 'w', 'w', 'w', 'w', 'b'},
+                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
+                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
+                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
+                { 'b', 'w', 'w', 'w', 'w', 'w', 'b'},
+                { 'b', 'b', 'b', 'b', 'b', 'b', 'b'}
             };
             // Place Finder Patterns
             for(int x = 0; x < 7; x++)
@@ -142,14 +150,14 @@ namespace QRCodeDiag
             for(int i = 0; i < 8; i++)
             {
                 // Top Left
-                this.bits[7, i] = '0';
-                this.bits[i, 7] = '0';
+                this.bits[7, i] = 'w';
+                this.bits[i, 7] = 'w';
                 // Top Right
-                this.bits[edgeLength - 1 - i, 7] = '0';
-                this.bits[edgeLength - 8, i] = '0';
+                this.bits[edgeLength - 1 - i, 7] = 'w';
+                this.bits[edgeLength - 8, i] = 'w';
                 // Bottom Left
-                this.bits[7, edgeLength - 1 - i] = '0';
-                this.bits[i, edgeLength - 8] = '0';
+                this.bits[7, edgeLength - 1 - i] = 'w';
+                this.bits[i, edgeLength - 8] = 'w';
             }
             // Place Alignment Patterns
             this.PlaceAlignmentPatterns();
@@ -157,11 +165,11 @@ namespace QRCodeDiag
             // Place timing
             for(int i = 6; i < edgeLength - 7; i++)
             {
-                this.bits[6, i] = i % 2 == 0 ? '1' : '0';
-                this.bits[i, 6] = i % 2 == 0 ? '1' : '0';
+                this.bits[6, i] = i % 2 == 0 ? 'b' : 'w';
+                this.bits[i, 6] = i % 2 == 0 ? 'b' : 'w';
             }
             // Place dark module
-            this.bits[8, (4 * this.Version) + 9] = '1';
+            this.bits[8, (4 * this.Version) + 9] = 'b';
             // ToDo: Place version information where needed
         }
 
@@ -169,11 +177,11 @@ namespace QRCodeDiag
         {
             char[,] alignmentPattern = new char[,]
             {
-                { '1', '1', '1', '1', '1', },
-                { '1', '0', '0', '0', '1', },
-                { '1', '0', '1', '0', '1', },
-                { '1', '0', '0', '0', '1', },
-                { '1', '1', '1', '1', '1', }
+                { 'b', 'b', 'b', 'b', 'b', },
+                { 'b', 'w', 'w', 'w', 'b', },
+                { 'b', 'w', 'b', 'w', 'b', },
+                { 'b', 'w', 'w', 'w', 'b', },
+                { 'b', 'b', 'b', 'b', 'b', }
             };
 
             for (int x = 0; x < alignmentPattern.GetLength(0); x++)
@@ -187,7 +195,7 @@ namespace QRCodeDiag
 
         private void PlaceAlignmentPatterns()
         {
-            int num_total = this.Version == 1 ? 0 : (this.Version / 7) + 2; // number of coordinates
+            int num_total = this.Version == 1 ? 0 : (this.Version / 7) + 2; // number of coordinates (coordinates in x- and y-direction are identical)
 
             int[] coordValues = new int[num_total];
             
@@ -287,9 +295,86 @@ namespace QRCodeDiag
             }
         }
 
+        public char GetBit(int x, int y)
+        {
+            return this.bits[x, y];
+        }
+
         public char[,] GetBits()
         {
             return (char[,])this.bits.Clone();
+        }
+
+        private void SetFormatInfo(char[] fInfo)
+        {
+            if (fInfo.Length != 15)
+                throw new ArgumentException("Wrong length", "fInfo");
+
+            var edgeLen = this.GetEdgeLength();
+            var index = 0;
+
+            for (int x = 0; x < 8; x++) // left to right
+            {
+                if (x != 6)
+                {
+                    this.bits[x, 8] = fInfo[index++];
+                }
+            }
+            for (int y = 7; y >= 0; y--) // towards top
+            {
+                if (y != 6)
+                {
+                    this.bits[8, y] = fInfo[index++];
+                }
+            }
+            index = 0;
+            for (int y = edgeLen - 1; y >= edgeLen - 7; y--) // from bottom up
+            {
+                this.bits[8, y] = fInfo[index++];
+            }
+            for (int x = edgeLen - 9; x < edgeLen; x++) // towards right edge
+            {
+                this.bits[x, 8] = fInfo[index++];
+            }
+        }
+
+        private char[] GetFormatInfo(FormatInfoLocation loc)
+        {
+            var fInfo = new List<char>();
+            var edgeLen = this.GetEdgeLength();
+            switch (loc)
+            {
+                case FormatInfoLocation.TopLeft:
+                    for (int x = 0; x < 8; x++) // left to right
+                    {
+                        if (x != 6)
+                        {
+                            fInfo.Add(this.bits[x, 8]);
+                        }
+                    }
+                    for (int y = 7; y >= 0; y--) // towards top
+                    {
+                        if (y != 6)
+                        {
+                            fInfo.Add(this.bits[8, y]);
+                        }
+                    }
+                    return fInfo.ToArray();
+
+                case FormatInfoLocation.SplitBottomLeftTopRight:
+                    for (int y = edgeLen-1; y >= edgeLen-7; y--) // from bottom up
+                    {
+                        fInfo.Add(this.bits[8, y]);
+                    }
+                    for (int x = edgeLen - 9; x < edgeLen; x++) // towards right edge
+                    {
+                        fInfo.Add(this.bits[x, 8]);
+                    }
+                    return fInfo.ToArray();
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         public string GetTerminator()
@@ -317,58 +402,76 @@ namespace QRCodeDiag
 
         public void ToggleDataCell(int x, int y)
         {
-            if (IsDataCell(x, y, this.Version))
+            switch (bits[x, y])
             {
-                switch (bits[x, y])
-                {
-                    case '0':
-                        bits[x, y] = '1';
-                        break;
-                    case '1':
-                        bits[x, y] = 'u';
-                        break;
-                    case 'u':
-                        bits[x, y] = '0';
-                        break;
-                    default:
-                        break;
-                }
-                this.messageChanged = true;
+                case '0':
+                    bits[x, y] = '1';
+                    this.messageChanged = true;
+                    break;
+                case '1':
+                    bits[x, y] = 'u';
+                    this.messageChanged = true;
+                    break;
+                case 'u':
+                    bits[x, y] = '0';
+                    this.messageChanged = true;
+                    break;
+                default:
+                    break;
             }
         }
 
         private QRCodeBitIterator GetBitIterator()
         {
-            return new QRCodeBitIterator(this.bits);
+            return new QRCodeBitIterator(this);
         }
 
-        public static bool IsDataCell(int x, int y, int version)
+        public bool IsDataCell(int x, int y)
         {
-            var versionSize = QRCode.GetEdgeSizeFromVersion(version);
-            bool ret = true;
-            if (x > versionSize || y > versionSize || x < 0 || y < 0)
+            if ((y == 8 && (x < 9 || x > this.GetEdgeLength() - 9)) || (x == 8 && (y < 9 || y > this.GetEdgeLength() - 8))) // Format Information
+            {
                 return false;
-
-            if (x < 9)
-            {
-                if (y < 9 || y > 20) // Left side fidner patterns
-                    ret = false;
             }
-            else if (x > 20 && y < 9) // Right side finder pattern
+            else
             {
-                ret = false;
+                return (this.bits[x, y] == '1') || (this.bits[x, y] == '0') || (this.bits[x, y] == 'u');
             }
-            if (x > 19 && x < 25 && y > 19 && y < 25) // Alignment TODO for all versions
-            {
-                ret = false;
-            }
-            if (y == 6 || x == 6) // Timing
-            {
-                ret = false;
-            }
-
-            return ret;
         }
+
+        //public static bool IsDataCell(int x, int y, int version) //ToDo extend for other versions
+        //{
+        //    var versionSize = QRCode.GetEdgeSizeFromVersion(version);
+        //    const int finderPatternWidth = 7;
+        //    const int formatInfoWidth = 1; // width of the version information area
+        //    const int separatorWidth = 1; // width of the separator
+
+        //    bool ret = true;
+        //    if (x > versionSize || y > versionSize || x < 0 || y < 0)
+        //        return false;
+
+        //    if (x < 9) // left side
+        //    {
+        //        if (y < finderPatternWidth + separatorWidth + formatInfoWidth) // top left finder pattern
+        //            ret = false;
+        //        else if (y >= versionSize - finderPatternWidth - separatorWidth) // bottom left finder pattern
+        //            ret = false;
+        //    }
+        //    else if ((x >= versionSize - finderPatternWidth - separatorWidth) && (y < finderPatternWidth + separatorWidth + formatInfoWidth)) // Top right finder pattern
+        //    {
+        //        ret = false;
+        //    }
+        //    if (x > 19 && x < 25 && y > 19 && y < 25) // Alignment TODO for all versions
+        //    {
+        //        ret = false;
+        //    }
+        //    if (x == 6 || y == 6) // Timing
+        //    {
+        //        ret = false;
+        //    }
+
+        //    return ret;
+        //}
+
         private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
         {
             switch (mode)
@@ -540,10 +643,13 @@ namespace QRCodeDiag
                         case 'b':
                             b = blackBrush;
                             break;
-                        default:
+                        case 'u':
                             b = grayBrush;
                             break;
-                            //throw new QRCodeFormatException("Invalid codeEl value: " + this.bits[x, y]);
+                        default:
+                            //b = grayBrush;
+                            //break;
+                            throw new QRCodeFormatException("Invalid codeEl value: " + this.bits[x, y]);
                     }
                     g.FillRectangle(b, x * codeElWidth, y * codeElHeight, codeElWidth, codeElHeight);
                 }

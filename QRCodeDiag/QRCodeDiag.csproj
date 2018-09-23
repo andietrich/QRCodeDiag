@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlocks\AlphaNumericEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\BitIterator.cs" />
+    <Compile Include="DataBlocks\QRCodeBitIterator.cs" />
     <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
     <Compile Include="DataBlocks\CodeSymbol.cs" />
     <Compile Include="DataBlocks\FullCodeBitIterator.cs" />
