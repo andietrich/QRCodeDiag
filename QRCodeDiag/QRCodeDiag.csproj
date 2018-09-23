@@ -77,6 +77,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QRCode.cs" />
+    <Compile Include="QRCodeCapacities.cs" />
     <Compile Include="QRCodeFormatException.cs" />
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\RawCodeByte.cs" />

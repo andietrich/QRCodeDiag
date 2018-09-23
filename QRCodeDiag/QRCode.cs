@@ -33,7 +33,13 @@ namespace QRCodeDiag
             Mask111 = 7,
             None
         }
-
+        public enum ECCLevel
+        {
+            Low = 0,
+            Medium = 1,
+            Quartile = 2,
+            High = 3
+        }
         private enum FormatInfoLocation
         {
             TopLeft,
@@ -45,6 +51,8 @@ namespace QRCodeDiag
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
+        private ECCLevel eccLevel = ECCLevel.Low; //ToDo parse correct value before reading the code
+        private MessageMode messageMode; // ToDo: set initial value: byte? MessageMode.Unknown?
         private string message;
         private bool messageChanged;
         private FullCode<RawCodeByte> rawCode;
@@ -561,7 +569,7 @@ namespace QRCodeDiag
             }
             if (Enum.IsDefined(typeof(MessageMode), modeNibble))
             {
-                var messageMode = (MessageMode)modeNibble;
+                this.messageMode = (MessageMode)modeNibble;
                 var charIndicatorLength = GetCharacterCountIndicatorLength(this.Version, messageMode);
                 int characterCount;
                 try
@@ -572,6 +580,13 @@ namespace QRCodeDiag
                 {
                     throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count
                 }
+
+                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.eccLevel, this.messageMode);
+                if (characterCount > max_capacity)
+                {
+                    throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);
+                }
+
                 if (messageMode == MessageMode.Byte)
                 {
                     var encodedCharacterLength = GetCharacterLength(messageMode);
