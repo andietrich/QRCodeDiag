@@ -31,19 +31,41 @@ namespace QRCodeDiag
 
         public static int GetCapacity(int version, ECCLevel eccLevel, MessageMode mode)
         {
+            if(version < 1 || version > 40)
+            {
+                throw new ArgumentOutOfRangeException("version");
+            }
             switch (mode)
             {
                 case MessageMode.Numeric:
-                    return numeric_capacity[(int)eccLevel, version];
+                    return numeric_capacity[(int)eccLevel, version-1];
                 case MessageMode.Alphanumeric:
-                    return alphanumeric_capacity[(int)eccLevel, version];
+                    return alphanumeric_capacity[(int)eccLevel, version-1];
                 case MessageMode.Byte:
-                    return bytemode_capacity[(int)eccLevel, version];
+                    return bytemode_capacity[(int)eccLevel, version-1];
                 case MessageMode.Kanji:
-                    return kanji_capacity[(int)eccLevel, version];
+                    return kanji_capacity[(int)eccLevel, version-1];
                 default:
                     throw new ArgumentException("Invalid MessageMode", "mode");
             }
         }
-    }
+
+        public static int GetDataBytes(int version, ECCLevel eccLevel)
+        {
+            if (version < 0 || version > 40)
+            {
+                throw new ArgumentOutOfRangeException("version");
+            }
+
+            var cap = GetCapacity(version, eccLevel, MessageMode.Byte);
+            if(version < 10)
+            {
+                return cap + 2; // indicator nibble (+ terminator) + 8 bit length
+            }
+            else
+            {
+                return cap + 3; // indicator nibble (+ terminator) + 16 bit length
+            }
+        }
+}
 }

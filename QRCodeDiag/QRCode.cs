@@ -47,7 +47,6 @@ namespace QRCodeDiag
         }
 
         public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
-        public const int DATAWORDS = 55;//ToDo adjust for other versions
         public const int ECCWORDS = 15;//ToDo adjust for other versions
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
@@ -59,6 +58,7 @@ namespace QRCodeDiag
         private FullCode<RawCodeByte> paddingBits;
         private FullCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
         private TerminatorSymbol terminator;
+        //ToDo Use/Set/Check Remainder Bits
 
         public int Version { get { return QRCode.GetVersionFromSize(this.bits.GetLength(0)); } }
         public string Message
@@ -601,7 +601,7 @@ namespace QRCodeDiag
                     }
                     this.encodedSymbols = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
                     this.terminator = new TerminatorSymbol(this.rawCode.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
-                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset + terminatorLength, DATAWORDS * 8 - (messageEndOffset + terminatorLength));
+                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel) * 8 - (messageEndOffset + terminatorLength));
                     return encodedSymbols.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else
