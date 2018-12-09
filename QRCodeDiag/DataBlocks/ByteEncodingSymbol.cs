@@ -8,15 +8,15 @@ using static QRCodeDiag.QRCode;
 
 namespace QRCodeDiag.DataBlocks
 {
-    class ByteEncodingSymbol : RawCodeByte, IEncodingSymbol
+    class ByteEncodingSymbol : ByteSymbol, IEncodingSymbol
     {
         public MessageMode EncodingType { get { return MessageMode.Byte; } }
         public override object Clone()
         {
             var ret = new ByteEncodingSymbol();
-            for (int i = 0; i < this.bitCoordinates.Count; i++)
+            for (int i = 0; i < base.bitCoordinates.Count; i++)
             {
-                ret.AddBit(this.bitArray[i], this.bitCoordinates[i]);
+                ret.AddBit(base.bitArray[i], base.bitCoordinates[i]);
             }
             return ret;
         }

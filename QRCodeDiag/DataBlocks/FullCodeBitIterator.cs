@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
-    class FullCodeBitIterator<T> : IBitIterator where T : RawCodeByte, new() //ToDo adapt for CodeSymbol instead of RawCodeByte
+    class FullCodeBitIterator<T> : IBitIterator where T : ByteSymbol, new() //ToDo adapt for CodeSymbol instead of RawCodeByte
     {
         private FullCode<T> fullCode;
         private string bitString;

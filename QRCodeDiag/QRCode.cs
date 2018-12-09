@@ -18,8 +18,8 @@ namespace QRCodeDiag
             Numeric = 1,
             Alphanumeric = 2,
             Byte = 4,
-            Kanji = 8,
-            ECI = 7
+            ECI = 7,    // extended channel interpretation
+            Kanji = 8
         }
         public enum MaskType
         {
@@ -48,6 +48,7 @@ namespace QRCodeDiag
 
         public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
         public const int ECCWORDS = 15;//ToDo adjust for other versions
+        private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
         private ECCLevel eccLevel = ECCLevel.Low; //ToDo parse correct value before reading the code
@@ -430,6 +431,21 @@ namespace QRCodeDiag
             }
         }
 
+        public void SetDataCell(int x, int y, char cellValue)
+        {
+            switch(cellValue)
+            {
+                case '0':
+                case '1':
+                case 'u':
+                    bits[x, y] = cellValue;
+                    this.messageChanged = true;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid cellValue: " + cellValue);
+            }
+        }
+
         private QRCodeBitIterator GetBitIterator()
         {
             return new QRCodeBitIterator(this);
@@ -561,11 +577,11 @@ namespace QRCodeDiag
             int modeNibble;
             try
             {
-                modeNibble = Convert.ToInt32(this.rawCode.GetBitString(0, 4), 2);
+                modeNibble = Convert.ToInt32(this.rawCode.GetBitString(0, MODEINFOLENGTH), 2);
             }
             catch (FormatException fe)
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawCode.GetBitString(0, 4), fe);
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawCode.GetBitString(0, MODEINFOLENGTH), fe);
             }
             if (Enum.IsDefined(typeof(MessageMode), modeNibble))
             {
@@ -574,11 +590,11 @@ namespace QRCodeDiag
                 int characterCount;
                 try
                 {
-                    characterCount = Convert.ToInt32(this.rawCode.GetBitString(4, charIndicatorLength), 2); //ToDo check if characterCount is in range
+                    characterCount = Convert.ToInt32(this.rawCode.GetBitString(MODEINFOLENGTH, charIndicatorLength), 2);
                 }
                 catch (FormatException fe)
                 {
-                    throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count
+                    throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count, but inform the user
                 }
 
                 var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.eccLevel, this.messageMode);
@@ -590,10 +606,10 @@ namespace QRCodeDiag
                 if (messageMode == MessageMode.Byte)
                 {
                     var encodedCharacterLength = GetCharacterLength(messageMode);
-                    var firstSymbolOffset = 4 + charIndicatorLength;
+                    var firstSymbolOffset = MODEINFOLENGTH + charIndicatorLength;
                     var messageLenghtInBits = characterCount * encodedCharacterLength;
                     var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
-                    var terminatorLength = 4; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode
+                    var terminatorLength = 4; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode. // TODO generalize as terminatorLength = RAWBYTELENGTH - (messageEndOffset % RAWBYTELENGTH) to fill up the remaining bits in the last used raw code byte?
                     var terminatorLocation = new Vector2D[terminatorLength];
                     for (int i = 0, bitNumber = messageEndOffset; i < terminatorLength; i++, bitNumber++)
                     {

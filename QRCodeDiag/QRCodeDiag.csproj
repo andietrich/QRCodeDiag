@@ -58,6 +58,7 @@
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </Compile>
     <Compile Include="DataBlocks\AlphaNumericEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\ByteSymbol.cs" />
     <Compile Include="DataBlocks\QRCodeBitIterator.cs" />
     <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
     <Compile Include="DataBlocks\CodeSymbol.cs" />

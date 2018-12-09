@@ -11,7 +11,7 @@ namespace QRCodeDiag.DataBlocks
     /// Contains all code bytes consisting of data and ecc in correct order and the coordinates of each bit.
     /// Set by GenerateRawByteList()
     /// </summary>
-    internal class FullCode<T> where T : RawCodeByte, new() //ToDo implement for CodeSymbol instead of RawCodeByte
+    internal class FullCode<T> where T : ByteSymbol, new() //ToDo implement for CodeSymbol instead of RawCodeByte
     {
         /// <summary>
         /// All code bytes consisting of data and ecc in correct order together with the coordinates of each bit.
@@ -118,7 +118,7 @@ namespace QRCodeDiag.DataBlocks
             }
             return symbolsAsBytes;
         }
-        public FullCode<T2> ToFullCode<T2>(int startIndex, int length) where T2 : RawCodeByte, new()
+        public FullCode<T2> ToFullCode<T2>(int startIndex, int length) where T2 : ByteSymbol, new()
         {
             return new FullCode<T2>(this.GetBitIterator(startIndex, length));
         }

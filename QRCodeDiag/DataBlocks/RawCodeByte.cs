@@ -6,45 +6,23 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
-    class RawCodeByte : CodeSymbol
+    internal class RawCodeByte : ByteSymbol
     {
-        public const uint RAWBYTELENGTH = 8;
-        public RawCodeByte() : base(RAWBYTELENGTH)
-        { }
-        public virtual object Clone()
+        public override object Clone()
         {
             var ret = new RawCodeByte();
-            for(int i = 0; i < this.bitCoordinates.Count; i++)
+            for (int i = 0; i < base.bitCoordinates.Count; i++)
             {
-                ret.AddBit(this.bitArray[i], this.bitCoordinates[i].X, this.bitCoordinates[i].Y);
+                ret.AddBit(base.bitArray[i], base.bitCoordinates[i]);
             }
             return ret;
         }
-        /// <summary>
-        /// Gets the byte representation of the RawCodeByte.
-        /// If there are unknown bits they will be replaced by 0 and the function will return false.
-        /// If not all bits have been set, the missing bits will be treated as unknown.
-        /// </summary>
-        /// <param name="value">The byte representation will be written to this parameter.</param>
-        /// <returns>True if all bits are known, otherwise false.</returns>
-        public bool GetAsByte(out byte value)
+
+        public override string ToString()
         {
-            int bits = 0;
-            value = 0;
-            for (int i = 0; i < this.bitCoordinates.Count; i++)
-            {
-                if (this.bitArray[i] == '0')
-                {
-                    bits++;
-                }
-                else if (this.bitArray[i] == '1')
-                {
-                    bits++;
-                    value += (byte)(0x80 >> i);
-                }
-            }
-            System.Diagnostics.Debug.Assert(bits != this.SymbolLength || (Convert.ToByte(this.BitString, 2) == value));
-            return bits == this.SymbolLength;
+            byte numericValue;
+            base.GetAsByte(out numericValue);
+            return "0x" + BitConverter.ToString(new byte[] { numericValue });
         }
     }
 }

@@ -12,13 +12,28 @@ namespace QRCodeDiag
 {
     public partial class Form1 : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
+        //[Flags] //ToDo: hold button to draw lines
+        //private enum ButtonDown
+        //{
+        //    None = 0x00,
+        //    MouseLeft = 0x01,
+        //    MouseRight = 0x02,
+        //    MouseMiddle = 0x04,
+        //    MouseOther = 0x08,
+        //    ControlButton = 0x10,
+        //    ShiftButton = 0x20,
+        //    AltButton = 0x40
+        //}
+
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
         private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
         private MaskType maskUsed; // ToDo use better solution when mask application gets automated
+        //private ButtonDown buttonDown; //ToDo: hold button to draw lines
         private bool showRawOverlay;
         private bool showEncodingOverlay;
         private bool showPaddingOverlay;
         private bool showXORed;
+        
         private MaskType CurrentMaskUsed
         {
             get { return this.maskUsed; }
@@ -108,7 +123,25 @@ namespace QRCodeDiag
             if (this.DisplayCode != null)
             {
                 var edgeLength = this.DisplayCode.GetEdgeLength();
-                this.DisplayCode.ToggleDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height);
+                switch(e.Button)
+                {
+                    case MouseButtons.Left:
+                        //this.buttonDown |= ButtonDown.MouseLeft; //ToDo: hold button to draw lines
+                        this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, '1');
+                        break;
+                    case MouseButtons.Right:
+                        //this.buttonDown |= ButtonDown.MouseRight; //ToDo: hold button to draw lines
+                        this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, '0');
+                        break;
+                    case MouseButtons.Middle:
+                        //this.buttonDown |= ButtonDown.MouseMiddle; //ToDo: hold button to draw lines
+                        this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, 'u');
+                        break;
+                    default:
+                        //this.buttonDown |= ButtonDown.MouseOther; //ToDo: hold button to draw lines
+                        this.DisplayCode.ToggleDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height);
+                        break;
+                }
                 this.UpdateBackgroundCode();
                 this.pictureBox1.Invalidate();
                 this.UpdateTextBox();
@@ -263,6 +296,25 @@ namespace QRCodeDiag
                     MessageBox.Show("Could not open background image: " + ex.Message);
                 }
             }
+        }
+
+        private void pictureBox1_Resize(object sender, EventArgs e)
+        {
+            if (sender is Control)
+            {
+                Control control = (Control)sender;
+                if (control.Size.Height != control.Size.Width)
+                {
+                    control.Size = new System.Drawing.Size(control.Size.Height, control.Size.Height);
+                    
+                }
+            }
+        }
+
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            var newMinFormWidth = this.pictureBox1.Size.Width + 3 * this.pictureBox1.Location.X;
+            this.Size = new System.Drawing.Size(newMinFormWidth, this.Size.Height);
         }
     }
 }

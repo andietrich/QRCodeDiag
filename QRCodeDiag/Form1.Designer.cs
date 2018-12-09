@@ -30,10 +30,6 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -51,6 +47,10 @@
             this.mask110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mask111ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bgImgToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.bgImgOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -73,37 +73,6 @@
             this.toolStrip1.Size = new System.Drawing.Size(574, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.Filter = "Text Files|*.txt";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(12, 584);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(550, 116);
-            this.textBox1.TabIndex = 2;
-            // 
-            // saveFileDialog1
-            // 
-            this.saveFileDialog1.Filter = "Text Files|*.txt";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
-            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             // 
             // newCodeToolStripButton
             // 
@@ -197,7 +166,7 @@
             // 
             this.mask000ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask000;
             this.mask000ToolStripMenuItem.Name = "mask000ToolStripMenuItem";
-            this.mask000ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask000ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask000ToolStripMenuItem.Text = "Mask 000";
             this.mask000ToolStripMenuItem.Click += new System.EventHandler(this.mask000ToolStripMenuItem_Click);
             // 
@@ -205,7 +174,7 @@
             // 
             this.mask001ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask001;
             this.mask001ToolStripMenuItem.Name = "mask001ToolStripMenuItem";
-            this.mask001ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask001ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask001ToolStripMenuItem.Text = "Mask 001";
             this.mask001ToolStripMenuItem.Click += new System.EventHandler(this.mask001ToolStripMenuItem_Click);
             // 
@@ -213,7 +182,7 @@
             // 
             this.mask010ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask010;
             this.mask010ToolStripMenuItem.Name = "mask010ToolStripMenuItem";
-            this.mask010ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask010ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask010ToolStripMenuItem.Text = "Mask 010";
             this.mask010ToolStripMenuItem.Click += new System.EventHandler(this.mask010ToolStripMenuItem_Click);
             // 
@@ -221,7 +190,7 @@
             // 
             this.mask011ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask011;
             this.mask011ToolStripMenuItem.Name = "mask011ToolStripMenuItem";
-            this.mask011ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask011ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask011ToolStripMenuItem.Text = "Mask 011";
             this.mask011ToolStripMenuItem.Click += new System.EventHandler(this.mask011ToolStripMenuItem_Click);
             // 
@@ -229,7 +198,7 @@
             // 
             this.mask100ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask100;
             this.mask100ToolStripMenuItem.Name = "mask100ToolStripMenuItem";
-            this.mask100ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask100ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask100ToolStripMenuItem.Text = "Mask 100";
             this.mask100ToolStripMenuItem.Click += new System.EventHandler(this.mask100ToolStripMenuItem_Click);
             // 
@@ -237,7 +206,7 @@
             // 
             this.mask101ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask101;
             this.mask101ToolStripMenuItem.Name = "mask101ToolStripMenuItem";
-            this.mask101ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask101ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask101ToolStripMenuItem.Text = "Mask 101";
             this.mask101ToolStripMenuItem.Click += new System.EventHandler(this.mask101ToolStripMenuItem_Click);
             // 
@@ -245,7 +214,7 @@
             // 
             this.mask110ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask110;
             this.mask110ToolStripMenuItem.Name = "mask110ToolStripMenuItem";
-            this.mask110ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask110ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask110ToolStripMenuItem.Text = "Mask 110";
             this.mask110ToolStripMenuItem.Click += new System.EventHandler(this.mask110ToolStripMenuItem_Click);
             // 
@@ -253,7 +222,7 @@
             // 
             this.mask111ToolStripMenuItem.Image = global::QRCodeDiag.Properties.Resources.mask111;
             this.mask111ToolStripMenuItem.Name = "mask111ToolStripMenuItem";
-            this.mask111ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mask111ToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.mask111ToolStripMenuItem.Text = "Mask 111";
             this.mask111ToolStripMenuItem.Click += new System.EventHandler(this.mask111ToolStripMenuItem_Click);
             // 
@@ -267,6 +236,40 @@
             this.bgImgToolStripButton.Text = "Set background image";
             this.bgImgToolStripButton.Click += new System.EventHandler(this.bgImgToolStripButton_Click);
             // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(12, 584);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(550, 116);
+            this.textBox1.TabIndex = 2;
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.Filter = "Text Files|*.txt";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox1.Location = new System.Drawing.Point(12, 28);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(550, 550);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
+            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
+            this.pictureBox1.Resize += new System.EventHandler(this.pictureBox1_Resize);
+            // 
             // bgImgOpenFileDialog
             // 
             this.bgImgOpenFileDialog.Filter = "Portable Network Graphics (.png)|*.png|Bitmap (.bmp)|*.bmp";
@@ -279,9 +282,10 @@
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.toolStrip1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MinimumSize = new System.Drawing.Size(590, 750);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
