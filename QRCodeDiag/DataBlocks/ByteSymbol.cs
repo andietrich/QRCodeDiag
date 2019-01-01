@@ -13,7 +13,7 @@ namespace QRCodeDiag.DataBlocks
         { }
         public abstract object Clone();
         /// <summary>
-        /// Gets the byte representation of the RawCodeByte.
+        /// Gets the byte representation of the ByteSymbol.
         /// If there are unknown bits they will be replaced by 0 and the function will return false.
         /// If not all bits have been set, the missing bits will be treated as unknown.
         /// </summary>

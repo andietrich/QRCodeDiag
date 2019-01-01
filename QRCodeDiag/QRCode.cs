@@ -55,9 +55,9 @@ namespace QRCodeDiag
         private MessageMode messageMode; // ToDo: set initial value: byte? MessageMode.Unknown?
         private string message;
         private bool messageChanged;
-        private FullCode<RawCodeByte> rawCode;
-        private FullCode<RawCodeByte> paddingBits;
-        private FullCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
+        private ByteSymbolCode<RawCodeByte> rawCode;
+        private ByteSymbolCode<RawCodeByte> paddingBits;
+        private ByteSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
         private TerminatorSymbol terminator;
         //ToDo Use/Set/Check Remainder Bits
 
@@ -431,7 +431,7 @@ namespace QRCodeDiag
             }
         }
 
-        public void SetDataCell(int x, int y, char cellValue)
+        public void SetDataCell(int x, int y, char cellValue)   //ToDo set as expected in un-masked view
         {
             switch(cellValue)
             {
@@ -547,7 +547,7 @@ namespace QRCodeDiag
         }
         public string RepairMessage() //ToDo move to FullCode
         {
-            var fullCode = new FullCode<RawCodeByte>(this.GetBitIterator());
+            var fullCode = new ByteSymbolCode<RawCodeByte>(this.GetBitIterator());
             var codeBytes = fullCode.ToByteArray();
             var codeAsInts = new int[codeBytes.Length];
             for (int i = 0; i < codeBytes.Length; i++)
@@ -572,7 +572,8 @@ namespace QRCodeDiag
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
             //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS); // transform RawByteList to byte[] using RawCodeByte.GetAsByte() ?
-            this.rawCode = new FullCode<RawCodeByte>(this.GetBitIterator());
+            this.rawCode = new ByteSymbolCode<RawCodeByte>(this.GetBitIterator());
+            //ToDo: replace with this.rawCode = new InterleavedRawByteCode(this.GetBitIterator());
 
             int modeNibble;
             try
@@ -615,9 +616,9 @@ namespace QRCodeDiag
                     {
                         terminatorLocation[i] = this.rawCode.GetBitPosition(bitNumber);
                     }
-                    this.encodedSymbols = this.rawCode.ToFullCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
+                    this.encodedSymbols = this.rawCode.ToByteSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
                     this.terminator = new TerminatorSymbol(this.rawCode.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
-                    this.paddingBits = this.rawCode.ToFullCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel) * 8 - (messageEndOffset + terminatorLength));
+                    this.paddingBits = this.rawCode.ToByteSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel) * 8 - (messageEndOffset + terminatorLength));
                     return encodedSymbols.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else

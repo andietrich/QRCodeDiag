@@ -8,7 +8,7 @@ namespace QRCodeDiag.DataBlocks
 {
     class QRCodeBitIterator : IBitIterator
     {
-        private QRCode qrCode;
+        private readonly QRCode qrCode;
         private int xPos, yPos;
         private bool directionUp;
         private bool rightCell;
