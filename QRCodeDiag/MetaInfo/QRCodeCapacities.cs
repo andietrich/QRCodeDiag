@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static QRCodeDiag.MetaInfo.ErrorCorrectionLevel;
 using static QRCodeDiag.QRCode;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.MetaInfo
 {
     class QRCodeCapacities
     {

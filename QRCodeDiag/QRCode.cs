@@ -1,4 +1,5 @@
-﻿using QRCodeDiag.DataBlocks;
+﻿using QRCodeDiag.MetaInfo;
+using QRCodeDiag.DataBlocks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,13 +34,7 @@ namespace QRCodeDiag
             Mask111 = 7,
             None
         }
-        public enum ECCLevel
-        {
-            Low = 0,
-            Medium = 1,
-            Quartile = 2,
-            High = 3
-        }
+        
         private enum FormatInfoLocation
         {
             TopLeft,
@@ -51,7 +46,7 @@ namespace QRCodeDiag
         private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
-        private ECCLevel eccLevel = ECCLevel.Low; //ToDo parse correct value before reading the code
+        private readonly ErrorCorrectionLevel.ECCLevel eccLevel = ErrorCorrectionLevel.ECCLevel.Low; //ToDo parse correct value before reading the code
         private MessageMode messageMode; // ToDo: set initial value: byte? MessageMode.Unknown?
         private string message;
         private bool messageChanged;

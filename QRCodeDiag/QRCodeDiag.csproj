@@ -77,12 +77,15 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="MetaInfo\ECCGroup.cs" />
+    <Compile Include="MetaInfo\ErrorCorrectionLevel.cs" />
     <Compile Include="PolygonEdge.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QRCode.cs" />
-    <Compile Include="QRCodeCapacities.cs" />
+    <Compile Include="MetaInfo\QRCodeCapacities.cs" />
     <Compile Include="QRCodeFormatException.cs" />
+    <Compile Include="MetaInfo\QRCodeVersion.cs" />
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
