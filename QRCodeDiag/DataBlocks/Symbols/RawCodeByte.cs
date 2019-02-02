@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
+    /// <summary>
+    /// Represents a byte of the interleaved block code (data or ecc)
+    /// </summary>
     internal class RawCodeByte : ByteSymbol
     {
         public override object Clone()
@@ -20,8 +23,7 @@ namespace QRCodeDiag.DataBlocks
 
         public override string ToString()
         {
-            byte numericValue;
-            base.GetAsByte(out numericValue);
+            base.GetAsByte(out byte numericValue);
             return "0x" + BitConverter.ToString(new byte[] { numericValue });
         }
     }

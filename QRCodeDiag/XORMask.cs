@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeDiag.MetaInfo;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,7 +76,7 @@ namespace QRCodeDiag
             if (version < 1 || version > 40)
                 throw new ArgumentOutOfRangeException("version");
 
-            var versionSize = QRCode.GetEdgeSizeFromVersion(version);
+            var versionSize = QRCodeVersion.GetEdgeSizeFromVersion(version);
             switch (mtype)
             {
                 case MaskType.Mask000:

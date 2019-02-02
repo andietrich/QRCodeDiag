@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeDiag.MetaInfo;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
+    /// <summary>
+    /// Abstract super class for all other symbol classes.
+    /// Provides functions accumulatively store bit values with coordinates, checking completeness
+    /// and drawing a contour of all bits in the code including each bit with a bit number indicator.
+    /// </summary>
     internal abstract class CodeSymbol
     {
         protected List<Vector2D> bitCoordinates;
@@ -75,8 +81,8 @@ namespace QRCodeDiag.DataBlocks
         public virtual void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices, int codeVersion)
         {
             // Draw symbol edges
-            var codeElWidth = (float)size.Width / QRCode.GetEdgeSizeFromVersion(codeVersion);
-            var codeElHeight = (float)size.Height / QRCode.GetEdgeSizeFromVersion(codeVersion);
+            var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
+            var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
             float penWidth = 2;
             var p = new Pen(color, penWidth);
             var fontFamily = new FontFamily("Lucida Console");

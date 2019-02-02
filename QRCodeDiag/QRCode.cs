@@ -41,7 +41,7 @@ namespace QRCodeDiag
             SplitBottomLeftTopRight
         }
 
-        public const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
+        
         public const int ECCWORDS = 15;//ToDo adjust for other versions
         private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
 
@@ -56,7 +56,7 @@ namespace QRCodeDiag
         private TerminatorSymbol terminator;
         //ToDo Use/Set/Check Remainder Bits
 
-        public int Version { get { return QRCode.GetVersionFromSize(this.bits.GetLength(0)); } }
+        public int Version { get { return QRCodeVersion.GetVersionFromSize(this.bits.GetLength(0)); } }
         public string Message
         {
             get
@@ -70,9 +70,13 @@ namespace QRCodeDiag
         }
         public QRCode(char[,] setBits)
         {
-            if ((setBits.GetLength(0) - QRCode.BASESIZE) % 4 != 0)
+            try
             {
-                throw new ArgumentException("Bad QR Code size: Not a valid version number", "setBits");
+                QRCodeVersion.GetVersionFromSize(setBits.GetLength(0));
+            }
+            catch(ArgumentException ae)
+            {
+                throw new ArgumentException("Bad QR Code size: Not a valid version number", "setBits", ae);
             }
             if (setBits.GetLength(0) != setBits.GetLength(1))
             {
@@ -93,7 +97,7 @@ namespace QRCodeDiag
                 throw new ArgumentOutOfRangeException("version");
             }
 
-            var size = QRCode.GetEdgeSizeFromVersion(version);
+            var size = QRCodeVersion.GetEdgeSizeFromVersion(version);
             this.bits = new char[size, size];
             for (int x = 0; x < size; x++)
             {
@@ -109,21 +113,6 @@ namespace QRCodeDiag
         public QRCode(string path) : this(GenerateBitsFromFile(path))
         {
             this.PlaceStaticElements(); // make sure static elements have correct value
-        }
-
-        public static int GetVersionFromSize(int codeElCount)
-        {
-            int v = codeElCount - QRCode.BASESIZE;
-            if(v % 4 != 0)
-            {
-                throw new ArgumentException("Not a valid codeEl count", "codeElCount");
-            }
-            return 1 + (v / 4);
-        }
-
-        public static int GetEdgeSizeFromVersion(int version)
-        {
-            return QRCode.BASESIZE + 4 * (version - 1);
         }
 
         private void PlaceStaticElements()
@@ -272,7 +261,7 @@ namespace QRCodeDiag
             }
             try
             {
-                var version = QRCode.GetVersionFromSize(cells.Count); // check column length
+                var version = QRCodeVersion.GetVersionFromSize(cells.Count); // check column length
                 var bitMask = new char[cells.Count, cells.Count];
                 for (int y = 0; y < cells.Count; y++)
                 {
@@ -540,7 +529,7 @@ namespace QRCodeDiag
                     throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
-        public string RepairMessage() //ToDo move to FullCode
+        public string RepairMessage()
         {
             var fullCode = new ByteSymbolCode<RawCodeByte>(this.GetBitIterator());
             var codeBytes = fullCode.ToByteArray();

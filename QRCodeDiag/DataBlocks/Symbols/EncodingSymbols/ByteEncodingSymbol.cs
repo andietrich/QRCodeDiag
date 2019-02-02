@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeDiag.MetaInfo;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -8,6 +9,9 @@ using static QRCodeDiag.QRCode;
 
 namespace QRCodeDiag.DataBlocks
 {
+    /// <summary>
+    /// Symbol for the encoding type "Byte"
+    /// </summary>
     class ByteEncodingSymbol : ByteSymbol, IEncodingSymbol
     {
         public MessageMode EncodingType { get { return MessageMode.Byte; } }
@@ -25,8 +29,8 @@ namespace QRCodeDiag.DataBlocks
             base.DrawSymbol(g, size, color, drawBitIndices, codeVersion);
             if (this.CurrentSymbolLength > 0)
             {
-                var codeElWidth = (float)size.Width / QRCode.GetEdgeSizeFromVersion(codeVersion);
-                var codeElHeight = (float)size.Height / QRCode.GetEdgeSizeFromVersion(codeVersion);
+                var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
+                var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
                 var drawLocation = this.GetBitCoordinate(Math.Min(4, this.CurrentSymbolLength - 1));
                 var fontFamily = new FontFamily("Lucida Console");
                 var largeFont = new Font(fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);

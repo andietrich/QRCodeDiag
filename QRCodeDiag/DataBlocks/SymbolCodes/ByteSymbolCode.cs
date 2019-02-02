@@ -59,6 +59,12 @@ namespace QRCodeDiag.DataBlocks
             this.InitializeBitString();
         }
 
+        public ByteSymbolCode(List<ByteSymbol> byteSymbols)
+        {
+            this.byteSymbolList = byteSymbols;
+            this.InitializeBitString();
+        }
+
         private IBitIterator GetBitIterator()
         {
             return new ByteSymbolCodeBitIterator(this);
@@ -67,13 +73,7 @@ namespace QRCodeDiag.DataBlocks
         {
             return new ByteSymbolCodeBitIterator(this, startIndex, length);
         }
-
-        protected override List<ByteSymbol> GetByteSymbols()
-        {
-            return this.byteSymbolList;
-        }
-
-        public void InitializeBitString()
+        private void InitializeBitString()
         {
             var sb = new StringBuilder();
             for (int i = 0; i < this.byteSymbolList.Count; i++)
@@ -81,6 +81,17 @@ namespace QRCodeDiag.DataBlocks
                 sb.Append(this.byteSymbolList[i].BitString);
             }
             this.bitString = sb.ToString();
+        }
+        protected override List<ByteSymbol> GetByteSymbols()
+        {
+            return this.byteSymbolList;
+        }
+        public T GetSymbolAt(int index)
+        {
+            if (index < 0 || index > this.byteSymbolList.Count)
+                throw new ArgumentOutOfRangeException("index");
+            else
+                return (T)this.byteSymbolList[index];
         }
         public string GetBitString()
         {

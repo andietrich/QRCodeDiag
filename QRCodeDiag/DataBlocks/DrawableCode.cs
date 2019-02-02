@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeDiag.MetaInfo;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -14,8 +15,8 @@ namespace QRCodeDiag.DataBlocks
         {
             var preferredSymbolDrawLocation = 2;
 
-            var codeElWidth = (float)size.Width / QRCode.GetEdgeSizeFromVersion(codeVersion);
-            var codeElHeight = (float)size.Height / QRCode.GetEdgeSizeFromVersion(codeVersion);
+            var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
+            var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
 
             var fontFamily = new FontFamily("Lucida Console");
             var largeFont = new Font(fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);

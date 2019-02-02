@@ -57,20 +57,20 @@
     <Compile Include="CreateNewCode.Designer.cs">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataBlocks\AlphaNumericEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\ByteSymbol.cs" />
+    <Compile Include="DataBlocks\Symbols\EncodingSymbols\AlphaNumericEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\Symbols\ByteSymbol.cs" />
     <Compile Include="DataBlocks\DrawableCode.cs" />
-    <Compile Include="DataBlocks\IByteSymbolCode.cs" />
-    <Compile Include="DataBlocks\InterleavedRawByteCode.cs" />
+    <Compile Include="DataBlocks\SymbolCodes\IByteSymbolCode.cs" />
     <Compile Include="DataBlocks\QRCodeBitIterator.cs" />
-    <Compile Include="DataBlocks\ByteEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\CodeSymbol.cs" />
-    <Compile Include="DataBlocks\ByteSymbolCodeBitIterator.cs" />
+    <Compile Include="DataBlocks\Symbols\EncodingSymbols\ByteEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\Symbols\CodeSymbol.cs" />
+    <Compile Include="DataBlocks\SymbolCodes\ByteSymbolCodeBitIterator.cs" />
     <Compile Include="DataBlocks\IBitIterator.cs" />
-    <Compile Include="DataBlocks\IEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\ByteSymbolCode.cs" />
-    <Compile Include="DataBlocks\NumericEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\TerminatorSymbol.cs" />
+    <Compile Include="DataBlocks\Symbols\EncodingSymbols\IEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\SymbolCodes\ByteSymbolCode.cs" />
+    <Compile Include="DataBlocks\Symbols\EncodingSymbols\NumericEncodingSymbol.cs" />
+    <Compile Include="DataBlocks\Symbols\TerminatorSymbol.cs" />
+    <Compile Include="DeInterleaver.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,7 +87,7 @@
     <Compile Include="QRCodeFormatException.cs" />
     <Compile Include="MetaInfo\QRCodeVersion.cs" />
     <Compile Include="Vector2D.cs" />
-    <Compile Include="DataBlocks\RawCodeByte.cs" />
+    <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
     <EmbeddedResource Include="CreateNewCode.resx">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
@@ -142,6 +142,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\mask111.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DeInterleaving\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

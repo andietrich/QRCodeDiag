@@ -19,11 +19,17 @@ namespace QRCodeDiag.MetaInfo
         private readonly ECCGroup[] eccGroups;
 
         public uint ECCBytesPerBlock { get; private set; }
+        public ECCLevel Level { get; private set; }
 
         private ErrorCorrectionLevel(uint eccBytesPerBlock, ECCGroup[] _eccGroups)
         {
             this.ECCBytesPerBlock = eccBytesPerBlock;
             this.eccGroups = _eccGroups;
+        }
+
+        public ECCGroup[] GetECCGroups()
+        {
+            return this.eccGroups;
         }
 
         public static ErrorCorrectionLevel GetECCLevel(ECCLevel level, uint version)

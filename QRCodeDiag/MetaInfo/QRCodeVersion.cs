@@ -10,28 +10,29 @@ namespace QRCodeDiag.MetaInfo
 {
     internal class QRCodeVersion
     {
-        private readonly ErrorCorrectionLevel ecLevel;
+        private const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
         public uint VersionNumber { get; private set; }
 
         public QRCodeVersion(uint versionNumber, ErrorCorrectionLevel.ECCLevel eccLevel)
         {
+            //ToDo finish
             if (versionNumber < 1 || versionNumber > 40)
                 throw new ArgumentOutOfRangeException("versionNumber", "Version number must be in range 1 to 40");
             this.VersionNumber = versionNumber;
-
-            ErrorCorrectionLevel.GetECCLevel(eccLevel, versionNumber)
-
-            //switch(eccLevel)
-            //{
-            //    case ECCLevel.
-            //}
-
-
+        }
+        public static int GetVersionFromSize(int codeElCount)
+        {
+            int v = codeElCount - BASESIZE;
+            if (v % 4 != 0)
+            {
+                throw new ArgumentException("Not a valid codeEl count", "codeElCount");
+            }
+            return 1 + (v / 4);
         }
 
-        public static QRCodeVersion GetVersionAndECCFromBitString()
+        public static int GetEdgeSizeFromVersion(int version)
         {
-            throw new NotImplementedException();    //ToDo implement
+            return BASESIZE + 4 * (version - 1);
         }
     }
 }

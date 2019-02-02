@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
+    /// <summary>
+    /// Abstract super class for any type of symbol that has byte length (8 bits)
+    /// </summary>
     abstract class ByteSymbol : CodeSymbol
     {
         public const uint RAWBYTELENGTH = 8;
