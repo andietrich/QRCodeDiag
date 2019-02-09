@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.ECCDecoding
 {
     class DeInterleaver
     {
@@ -25,7 +25,7 @@ namespace QRCodeDiag
             uint numberOfBlocks = 0;
             uint numberOfRawCodeBytes = 0;
 
-            foreach(ECCGroup g in eccGroups)
+            foreach(ECCGroupInfo g in eccGroups)
             {
                 numberOfBlocks += g.NumberOfBlocks;
                 numberOfRawCodeBytes += g.NumberOfBlocks * (g.DataBytesPerBlock + eccLevel.ECCBytesPerBlock);
@@ -35,7 +35,7 @@ namespace QRCodeDiag
                 throw new ArgumentException("Invalid number of symbols in interleaved code.");
 
             uint largestBlockLength = 0;
-            foreach(ECCGroup g in eccGroups)
+            foreach(ECCGroupInfo g in eccGroups)
             {
                 largestBlockLength = Math.Max(largestBlockLength, g.DataBytesPerBlock);
             }
@@ -84,7 +84,7 @@ namespace QRCodeDiag
             this.eccByteCode  = new ByteSymbolCode<RawCodeByte>(eccBytesInOrder);
         }
 
-        private static uint GetBlockLength(int absoluteBlockNumber, ECCGroup[] eccGroups)
+        private static uint GetBlockLength(int absoluteBlockNumber, ECCGroupInfo[] eccGroups)
         {
             for(int i = 0; i < eccGroups.Length; i++)
             {

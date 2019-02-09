@@ -20,7 +20,7 @@ namespace QRCodeDiag.DataBlocks
             this.bitString = bsc.GetBitString();
             this.startPosition = 0;
             this.endPosition = this.bitString.Length;
-            this.CurrentPosition = this.startPosition-1;
+            this.currentPosition = this.startPosition-1;
         }
         public ByteSymbolCodeBitIterator(IByteSymbolCode fc, int startIndex, int length)
         {
@@ -28,21 +28,21 @@ namespace QRCodeDiag.DataBlocks
             this.bitString = fc.GetBitString();
             this.startPosition = startIndex;
             this.endPosition = startIndex + length;
-            this.CurrentPosition = this.startPosition-1;
+            this.currentPosition = this.startPosition-1;
         }
-        public bool EndReached { get { return this.CurrentPosition == this.bitString.Length; } }
+        public bool EndReached { get { return this.currentPosition == this.endPosition; } }
 
         public char CurrentChar
         {
             get
             {
-                if (this.CurrentPosition < this.startPosition)
+                if (this.currentPosition < this.startPosition)
                 {
-                    return '\0';
+                    return this.bitString[this.startPosition];
                 }
-                else if (this.CurrentPosition < this.endPosition)
+                else if (this.currentPosition < this.endPosition)
                 {
-                    return this.bitString[this.CurrentPosition];
+                    return this.bitString[this.currentPosition];
                 }
                 else
                 {
@@ -55,22 +55,21 @@ namespace QRCodeDiag.DataBlocks
         {
             get
             {
-                if (this.CurrentPosition < 0 || this.CurrentPosition >= this.bitString.Length)
+                if (this.currentPosition < 0 || this.currentPosition >= this.endPosition)
                 {
                     throw new InvalidOperationException("The iterator is not on a valid position.");
                 }
                 else
                 {
-                    return this.byteSymbolCode.GetBitPosition(this.CurrentPosition);
+                    return this.byteSymbolCode.GetBitPosition(this.currentPosition);
                 }
             }
         }
 
-        public int CurrentPosition { get => currentPosition; set => currentPosition = value; }
-
         public char NextBit()
         {
-            this.CurrentPosition++;
+            if(!this.EndReached)
+                this.currentPosition++;
             return this.CurrentChar;
         }
     }

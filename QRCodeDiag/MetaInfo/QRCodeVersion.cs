@@ -13,9 +13,8 @@ namespace QRCodeDiag.MetaInfo
         private const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
         public uint VersionNumber { get; private set; }
 
-        public QRCodeVersion(uint versionNumber, ErrorCorrectionLevel.ECCLevel eccLevel)
+        public QRCodeVersion(uint versionNumber)
         {
-            //ToDo finish
             if (versionNumber < 1 || versionNumber > 40)
                 throw new ArgumentOutOfRangeException("versionNumber", "Version number must be in range 1 to 40");
             this.VersionNumber = versionNumber;

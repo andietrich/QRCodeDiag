@@ -11,8 +11,8 @@ namespace QRCodeDiag.DataBlocks
     /// </summary>
     abstract class ByteSymbol : CodeSymbol
     {
-        public const uint RAWBYTELENGTH = 8;
-        public ByteSymbol() : base(RAWBYTELENGTH)
+        public const uint BYTESYMBOLLENGTH = 8;
+        public ByteSymbol() : base(BYTESYMBOLLENGTH)
         { }
         public abstract object Clone();
         /// <summary>

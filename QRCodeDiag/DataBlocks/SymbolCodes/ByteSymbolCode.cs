@@ -113,20 +113,18 @@ namespace QRCodeDiag.DataBlocks
                 throw new InvalidOperationException("The code is empty.");
             }
         }
-        
-        public byte[] ToByteArray() //ToDo: adapt for CodeSymbol
+        public byte[] ToByteArray(byte unknownSymbolByte = 0) //ToDo: adapt for CodeSymbol
         {
             var symbolsAsBytes = new byte[this.byteSymbolList.Count];
             for (int i = 0; i < this.byteSymbolList.Count; i++)
             {
-                this.byteSymbolList[i].GetAsByte(out var value);
-                symbolsAsBytes[i] = value;
+                symbolsAsBytes[i] = this.byteSymbolList[i].GetAsByte(out var value) ? value : unknownSymbolByte;
             }
             return symbolsAsBytes;
         }
-        public byte[] ToByteArray(byte unknownSymbolByte) //ToDo: adapt for CodeSymbol
+        public int[] ToIntArray(byte unknownSymbolByte = 0)
         {
-            var symbolsAsBytes = new byte[this.byteSymbolList.Count];
+            var symbolsAsBytes = new int[this.byteSymbolList.Count];
             for (int i = 0; i < this.byteSymbolList.Count; i++)
             {
                 symbolsAsBytes[i] = this.byteSymbolList[i].GetAsByte(out var value) ? value : unknownSymbolByte;
