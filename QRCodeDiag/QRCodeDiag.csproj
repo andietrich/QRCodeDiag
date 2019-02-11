@@ -88,7 +88,6 @@
     <Compile Include="MetaInfo\QRCodeCapacities.cs" />
     <Compile Include="QRCodeFormatException.cs" />
     <Compile Include="MetaInfo\QRCodeVersion.cs" />
-    <Compile Include="ECCDecoding\RSDecoderWrapper.cs" />
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />

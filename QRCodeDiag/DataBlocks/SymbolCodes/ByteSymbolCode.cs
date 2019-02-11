@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
-    internal class ByteSymbolCode<T> : DrawableCode, IByteSymbolCode where T : ByteSymbol, new() //ToDo implement for CodeSymbol instead of ByteSymbol
+    internal class ByteSymbolCode<T> : DrawableCode<T>, IByteSymbolCode where T : ByteSymbol, new() //ToDo implement for CodeSymbol instead of ByteSymbol
     {
-        private List<ByteSymbol> byteSymbolList;
+        private List<T> byteSymbolList;
         private string bitString;
         public int SymbolCount { get { return this.byteSymbolList.Count; } }
         public int BitCount
@@ -37,7 +37,7 @@ namespace QRCodeDiag.DataBlocks
         /// <param name="it"><see cref="IBitIterator"/> to iterate through all bits the <see cref="ByteSymbolCode{T}"/> will be composed of.</param>
         public ByteSymbolCode(IBitIterator it)
         {
-            this.byteSymbolList = new List<ByteSymbol>();
+            this.byteSymbolList = new List<T>();
 
             var wd = new T();
             char c = it.NextBit();
@@ -59,7 +59,7 @@ namespace QRCodeDiag.DataBlocks
             this.InitializeBitString();
         }
 
-        public ByteSymbolCode(List<ByteSymbol> byteSymbols)
+        public ByteSymbolCode(List<T> byteSymbols)
         {
             this.byteSymbolList = byteSymbols;
             this.InitializeBitString();
@@ -82,7 +82,7 @@ namespace QRCodeDiag.DataBlocks
             }
             this.bitString = sb.ToString();
         }
-        protected override List<ByteSymbol> GetByteSymbols()
+        protected override List<T> GetByteSymbols()
         {
             return this.byteSymbolList;
         }
@@ -91,7 +91,7 @@ namespace QRCodeDiag.DataBlocks
             if (index < 0 || index > this.byteSymbolList.Count)
                 throw new ArgumentOutOfRangeException("index");
             else
-                return (T)this.byteSymbolList[index];
+                return this.byteSymbolList[index];
         }
         public string GetBitString()
         {

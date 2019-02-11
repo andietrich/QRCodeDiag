@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
+    /// <summary>
+    /// Used to create a new ByteSymbolCode with new bit values from an array
+    /// using the bit positions of a source ByteSymbolCode
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     class OverrideByteSymbolCodeValuesBitIterator<T> : IBitIterator where T: ByteSymbol, new()
     {
         private int bitPosition;
@@ -36,7 +41,6 @@ namespace QRCodeDiag.DataBlocks
             }
         }
 
-
         public Vector2D Position
         {
             get
@@ -48,6 +52,13 @@ namespace QRCodeDiag.DataBlocks
         private readonly ByteSymbolCode<T> originalCode;
         private readonly int[] newValues;
 
+        public OverrideByteSymbolCodeValuesBitIterator(ByteSymbolCode<T> _originalCode, int[] _newValues)
+        {
+            this.bitPosition = -1;
+            this.originalCode = _originalCode;
+            this.newValues = _newValues;
+        }
+
         private char GetBitCharAt(int index)
         {
             var bitValue = (((byte)newValues[index / ByteSymbol.BYTESYMBOLLENGTH]) >> (int)(index % ByteSymbol.BYTESYMBOLLENGTH)) & 1;
@@ -55,13 +66,6 @@ namespace QRCodeDiag.DataBlocks
                 return '1';
             else
                 return '0';
-        }
-
-        public OverrideByteSymbolCodeValuesBitIterator(ByteSymbolCode<T> _originalCode, int[] _newValues)
-        {
-            this.bitPosition = -1;
-            this.originalCode = _originalCode;
-            this.newValues = _newValues;
         }
 
         public char NextBit()

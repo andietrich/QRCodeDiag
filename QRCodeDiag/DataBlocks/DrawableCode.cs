@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.DataBlocks
 {
-    internal abstract class DrawableCode
+    internal abstract class DrawableCode<T> where T : CodeSymbol
     {
-        protected abstract List<ByteSymbol> GetByteSymbols();
+        protected abstract List<T> GetByteSymbols();
         public void DrawCode(Graphics g, Size size, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices, int codeVersion)
         {
             var preferredSymbolDrawLocation = 2;

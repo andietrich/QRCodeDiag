@@ -10,10 +10,9 @@ namespace QRCodeDiag.ECCDecoding
 {
     class DeInterleaver
     {
-        private readonly ByteSymbolCode<RawCodeByte> dataByteCode;
-        private readonly ByteSymbolCode<RawCodeByte> eccByteCode;
+        private readonly List<ByteSymbolCode<RawCodeByte>> dataBlocksInOrder;
+        private readonly List<ByteSymbolCode<RawCodeByte>> eccBlocksInOrder;
         public DeInterleaver(ByteSymbolCode<RawCodeByte>    interleavedCode,
-                             QRCodeVersion                  version,
                              ErrorCorrectionLevel           eccLevel)
         {
             // a block consists of data and ecc codewords for that block
@@ -63,25 +62,26 @@ namespace QRCodeDiag.ECCDecoding
                 }
             }
 
-            var dataBytesInOrder = new List<ByteSymbol>();
-            var eccBytesInOrder  = new List<ByteSymbol>();
-            for(int g = 0; g < eccGroups.Length; g++)                       // group
+            dataBlocksInOrder = new List<ByteSymbolCode<RawCodeByte>>();
+            eccBlocksInOrder = new List<ByteSymbolCode<RawCodeByte>>();
+            for (int g = 0; g < eccGroups.Length; g++)                       // group
             {
-                for(int b = 0; b < eccGroups[g].NumberOfBlocks; b++)        // block
+                for (int b = 0; b < eccGroups[g].NumberOfBlocks; b++)        // block
                 {
-                    for(int s = 0; s < eccGroups[g].DataBytesPerBlock; s++) // data symbol
+                    var blockData = new List<RawCodeByte>();
+                    var blockECC = new List<RawCodeByte>();
+                    for (int s = 0; s < eccGroups[g].DataBytesPerBlock; s++) // data symbol
                     {
-                        dataBytesInOrder.Add(dataCodewords[b, s]);
+                        blockData.Add(dataCodewords[b, s]);
                     }
-                    for(int e = 0; e < eccLevel.ECCBytesPerBlock; e++)      // ecc symbol
+                    for (int e = 0; e < eccLevel.ECCBytesPerBlock; e++)      // ecc symbol
                     {
-                        dataBytesInOrder.Add(eccCodewords[b, e]);
+                        blockECC.Add(eccCodewords[b, e]);
                     }
+                    dataBlocksInOrder.Add(new ByteSymbolCode<RawCodeByte>(blockData);
+                    eccBlocksInOrder.Add(new ByteSymbolCode<RawCodeByte>(blockECC));
                 }
             }
-
-            this.dataByteCode = new ByteSymbolCode<RawCodeByte>(dataBytesInOrder);
-            this.eccByteCode  = new ByteSymbolCode<RawCodeByte>(eccBytesInOrder);
         }
 
         private static uint GetBlockLength(int absoluteBlockNumber, ECCGroupInfo[] eccGroups)
@@ -96,13 +96,13 @@ namespace QRCodeDiag.ECCDecoding
             throw new ArgumentException("absoluteBlockNumber is larger than the total number of blocks in eccGroups.");
         }
 
-        public ByteSymbolCode<RawCodeByte> GetDataByteCode()
+        public List<ByteSymbolCode<RawCodeByte>> GetDataByteCode()
         {
-            return this.dataByteCode;
+            return this.dataBlocksInOrder;
         }
-        public ByteSymbolCode<RawCodeByte> GetECCByteCode()
+        public List<ByteSymbolCode<RawCodeByte>> GetECCByteCode()
         {
-            return this.eccByteCode;
+            return this.eccBlocksInOrder;
         }
     }
 }
