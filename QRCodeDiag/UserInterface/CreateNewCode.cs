@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.UserInterface
 {
     public partial class CreateNewCode : Form
     {

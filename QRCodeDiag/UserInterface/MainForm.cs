@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static QRCodeDiag.QRCode;
 
-namespace QRCodeDiag
+namespace QRCodeDiag.UserInterface
 {
-    public partial class Form1 : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
+    public partial class MainForm : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
         //[Flags] //ToDo: hold button to draw lines
         //private enum ButtonDown
@@ -75,7 +75,7 @@ namespace QRCodeDiag
                 this.pictureBox1.Invalidate();
             }
         }
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             this.showRawOverlay = false;

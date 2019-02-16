@@ -1,4 +1,4 @@
-﻿namespace QRCodeDiag
+﻿namespace QRCodeDiag.UserInterface
 {
     partial class CreateNewCode
     {

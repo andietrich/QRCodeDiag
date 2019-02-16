@@ -51,10 +51,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateNewCode.cs">
+    <Compile Include="UserInterface\CreateNewCode.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CreateNewCode.Designer.cs">
+    <Compile Include="UserInterface\CreateNewCode.Designer.cs">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </Compile>
     <Compile Include="DataBlocks\Symbols\EncodingSymbols\AlphaNumericEncodingSymbol.cs" />
@@ -73,11 +73,11 @@
     <Compile Include="DataBlocks\OverrideByteSymbolCodeValuesBitIterator.cs" />
     <Compile Include="ECCDecoding\DeInterleaver.cs" />
     <Compile Include="ECCDecoding\ECCBlock.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="UserInterface\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="UserInterface\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MetaInfo\ECCGroupInfo.cs" />
     <Compile Include="MetaInfo\ErrorCorrectionLevel.cs" />
@@ -91,11 +91,11 @@
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
-    <EmbeddedResource Include="CreateNewCode.resx">
+    <EmbeddedResource Include="UserInterface\CreateNewCode.resx">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="UserInterface\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
