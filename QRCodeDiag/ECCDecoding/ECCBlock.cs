@@ -8,7 +8,7 @@ using ZXing.Common.ReedSolomon;
 
 namespace QRCodeDiag.ECCDecoding
 {
-    class ECCBlock
+    internal class ECCBlock
     {
         private readonly ByteSymbolCode<RawCodeByte> preRepairData;
         private readonly ByteSymbolCode<RawCodeByte> preRepairECC;
@@ -51,19 +51,19 @@ namespace QRCodeDiag.ECCDecoding
             }
         }
 
-        private ByteSymbolCode<RawCodeByte> GetPreRepairData()
+        public ByteSymbolCode<RawCodeByte> GetPreRepairData()
         {
             return this.preRepairData;
         }
-        private ByteSymbolCode<RawCodeByte> GetPreRepairECC()
+        public ByteSymbolCode<RawCodeByte> GetPreRepairECC()
         {
             return this.preRepairECC;
         }
-        private ByteSymbolCode<RawCodeByte> GetPostRepairData()
+        public ByteSymbolCode<RawCodeByte> GetPostRepairData()
         {
             return this.postRepairData;
         }
-        private ByteSymbolCode<RawCodeByte> GetPostRepairECC()
+        public ByteSymbolCode<RawCodeByte> GetPostRepairECC()
         {
             return this.postRepairECC;
         }

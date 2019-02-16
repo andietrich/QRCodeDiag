@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag.ECCDecoding
 {
-    class DeInterleaver
+    internal class DeInterleaver
     {
-        private readonly List<ByteSymbolCode<RawCodeByte>> dataBlocksInOrder;
-        private readonly List<ByteSymbolCode<RawCodeByte>> eccBlocksInOrder;
+        private readonly List<ECCBlock> eccBlockList;
         public DeInterleaver(ByteSymbolCode<RawCodeByte>    interleavedCode,
                              ErrorCorrectionLevel           eccLevel)
         {
@@ -62,8 +61,7 @@ namespace QRCodeDiag.ECCDecoding
                 }
             }
 
-            dataBlocksInOrder = new List<ByteSymbolCode<RawCodeByte>>();
-            eccBlocksInOrder = new List<ByteSymbolCode<RawCodeByte>>();
+            eccBlockList = new List<ECCBlock>();
             for (int g = 0; g < eccGroups.Length; g++)                       // group
             {
                 for (int b = 0; b < eccGroups[g].NumberOfBlocks; b++)        // block
@@ -78,8 +76,8 @@ namespace QRCodeDiag.ECCDecoding
                     {
                         blockECC.Add(eccCodewords[b, e]);
                     }
-                    dataBlocksInOrder.Add(new ByteSymbolCode<RawCodeByte>(blockData);
-                    eccBlocksInOrder.Add(new ByteSymbolCode<RawCodeByte>(blockECC));
+                    eccBlockList.Add(new ECCBlock(new ByteSymbolCode<RawCodeByte>(blockData),
+                                                  new ByteSymbolCode<RawCodeByte>(blockECC)));
                 }
             }
         }
@@ -96,13 +94,9 @@ namespace QRCodeDiag.ECCDecoding
             throw new ArgumentException("absoluteBlockNumber is larger than the total number of blocks in eccGroups.");
         }
 
-        public List<ByteSymbolCode<RawCodeByte>> GetDataByteCode()
+        public List<ECCBlock> GetECCBlocks()
         {
-            return this.dataBlocksInOrder;
-        }
-        public List<ByteSymbolCode<RawCodeByte>> GetECCByteCode()
-        {
-            return this.eccBlocksInOrder;
+            return this.eccBlockList;
         }
     }
 }
