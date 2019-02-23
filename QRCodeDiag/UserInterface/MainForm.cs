@@ -239,7 +239,7 @@ namespace QRCodeDiag.UserInterface
             var createForm = new CreateNewCode();
             if (createForm.ShowDialog(this) == DialogResult.OK)
             {
-                this.DisplayCode = new QRCode(createForm.Version); //ToDo ask to save modified codes
+                this.DisplayCode = new QRCode((uint) createForm.Version); //ToDo ask to save modified codes
             }
         }
 

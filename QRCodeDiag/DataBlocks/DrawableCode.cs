@@ -11,12 +11,9 @@ namespace QRCodeDiag.DataBlocks
     internal abstract class DrawableCode<T> where T : CodeSymbol
     {
         protected abstract List<T> GetByteSymbols();
-        public void DrawCode(Graphics g, Size size, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices, int codeVersion)
+        public void DrawCode(Graphics g, float codeElWidth, float codeElHeight, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices)
         {
             var preferredSymbolDrawLocation = 2;
-
-            var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
-            var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
 
             var fontFamily = new FontFamily("Lucida Console");
             var largeFont = new Font(fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -27,7 +24,7 @@ namespace QRCodeDiag.DataBlocks
             for (int j = 0; j < byteSymbolList.Count; j++)
             {
                 var wd = byteSymbolList[j];
-                wd.DrawSymbol(g, size, bitColor, drawBitIndices, codeVersion);
+                wd.DrawSymbol(g, codeElWidth, codeElHeight, bitColor, drawBitIndices);
                 if (drawSymbolIndices && wd.CurrentSymbolLength > 0)
                 {
                     var drawIndexCoord = wd.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, wd.CurrentSymbolLength));

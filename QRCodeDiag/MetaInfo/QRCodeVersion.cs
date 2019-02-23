@@ -10,7 +10,7 @@ namespace QRCodeDiag.MetaInfo
 {
     internal class QRCodeVersion
     {
-        private const int BASESIZE = 21; // size for version 1 code. +4 for each higher version
+        private const uint BASESIZE = 21; // size for version 1 code. +4 for each higher version
         public uint VersionNumber { get; private set; }
 
         public QRCodeVersion(uint versionNumber)
@@ -19,19 +19,20 @@ namespace QRCodeDiag.MetaInfo
                 throw new ArgumentOutOfRangeException("versionNumber", "Version number must be in range 1 to 40");
             this.VersionNumber = versionNumber;
         }
-        public static int GetVersionFromSize(int codeElCount)
+
+        public uint GetEdgeSizeFromVersion()
         {
-            int v = codeElCount - BASESIZE;
-            if (v % 4 != 0)
+            return BASESIZE + 4u * (this.VersionNumber - 1u);
+        }
+
+        public static QRCodeVersion GetVersionFromSize(uint codeElCount)
+        {
+            uint v = codeElCount - BASESIZE;
+            if ((v % 4 != 0) || (codeElCount < BASESIZE))
             {
                 throw new ArgumentException("Not a valid codeEl count", "codeElCount");
             }
-            return 1 + (v / 4);
-        }
-
-        public static int GetEdgeSizeFromVersion(int version)
-        {
-            return BASESIZE + 4 * (version - 1);
+            return new QRCodeVersion(1u + (v / 4u));
         }
     }
 }

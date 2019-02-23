@@ -78,11 +78,9 @@ namespace QRCodeDiag.DataBlocks
             return edges.ToList();
         }
 
-        public virtual void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices, int codeVersion)
+        public virtual void DrawSymbol(Graphics g, float codeElWidth, float codeElHeight, Color color, bool drawBitIndices)
         {
             // Draw symbol edges
-            var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
-            var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
             float penWidth = 2;
             var p = new Pen(color, penWidth);
             var fontFamily = new FontFamily("Lucida Console");

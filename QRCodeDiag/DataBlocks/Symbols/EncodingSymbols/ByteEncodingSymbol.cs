@@ -24,13 +24,11 @@ namespace QRCodeDiag.DataBlocks
             }
             return ret;
         }
-        public override void DrawSymbol(Graphics g, Size size, Color color, bool drawBitIndices, int codeVersion)
+        public override void DrawSymbol(Graphics g, float codeElWidth, float codeElHeight, Color color, bool drawBitIndices)
         {
-            base.DrawSymbol(g, size, color, drawBitIndices, codeVersion);
+            base.DrawSymbol(g, codeElWidth, codeElHeight, color, drawBitIndices);
             if (this.CurrentSymbolLength > 0)
             {
-                var codeElWidth = (float)size.Width / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
-                var codeElHeight = (float)size.Height / QRCodeVersion.GetEdgeSizeFromVersion(codeVersion);
                 var drawLocation = this.GetBitCoordinate(Math.Min(4, this.CurrentSymbolLength - 1));
                 var fontFamily = new FontFamily("Lucida Console");
                 var largeFont = new Font(fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);

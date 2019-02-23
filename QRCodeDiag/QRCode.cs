@@ -14,6 +14,7 @@ namespace QRCodeDiag
 {
     internal class QRCode
     {
+        public delegate void VersionChangedHandler(QRCodeVersion newVersion);
         public enum MessageMode
         {
             Numeric = 1,
@@ -54,9 +55,10 @@ namespace QRCodeDiag
         private ByteSymbolCode<RawCodeByte> paddingBits;
         private ByteSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
         private TerminatorSymbol terminator;
+        private QRCodeVersion version;
         //ToDo Use/Set/Check Remainder Bits
 
-        public int Version { get { return QRCodeVersion.GetVersionFromSize(this.bits.GetLength(0)); } }
+        public QRCodeVersion Version { get { return this.version; } }
         public string Message
         {
             get
@@ -72,7 +74,7 @@ namespace QRCodeDiag
         {
             try
             {
-                QRCodeVersion.GetVersionFromSize(setBits.GetLength(0));
+                this.version = QRCodeVersion.GetVersionFromSize((uint) setBits.GetLength(0));
             }
             catch(ArgumentException ae)
             {
@@ -90,14 +92,11 @@ namespace QRCodeDiag
         /// Generates an empty QRCode of the specified <paramref name="version"/>
         /// </summary>
         /// <param name="version">The version defines the size of the QR Code. Valid versions are 1-40</param>
-        public QRCode(int version)
+        public QRCode(uint _version)
         {
-            if(version > 40 ||version < 1)
-            {
-                throw new ArgumentOutOfRangeException("version");
-            }
+            this.version = new QRCodeVersion(_version);
 
-            var size = QRCodeVersion.GetEdgeSizeFromVersion(version);
+            var size = version.GetEdgeSizeFromVersion();
             this.bits = new char[size, size];
             for (int x = 0; x < size; x++)
             {
@@ -110,8 +109,50 @@ namespace QRCodeDiag
             this.PlaceStaticElements();
         }
 
-        public QRCode(string path) : this(GenerateBitsFromFile(path))
+        public QRCode(string path)
         {
+            List<string[]> cells = new List<string[]>();
+            try
+            {
+                using (var f = File.OpenText(path))
+                {
+                    while (!f.EndOfStream)
+                    {
+                        cells.Add(f.ReadLine().Trim().Split(null));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new QRCodeFormatException("Can't read file.", ex);
+            }
+            try
+            {
+                this.version = new QRCodeVersion((uint)cells.Count);
+                this.bits = new char[cells.Count, cells.Count];
+                for (int y = 0; y < cells.Count; y++)
+                {
+                    if (cells[y].Length != cells.Count) // compare row length to column length
+                    {
+                        throw new QRCodeFormatException("QR Code row length is wrong in row " + y);
+                    }
+                    for (int x = 0; x < cells.Count; x++)
+                    {
+                        if (cells[y][x].Length != 1)  // more than one "bit" char in cell?
+                        {
+                            throw new QRCodeFormatException("Invalid QR Code data");
+                        }
+                        else
+                        {
+                            this.bits[x, y] = cells[y][x][0];
+                        }
+                    }
+                }
+            }
+            catch (ArgumentOutOfRangeException ae)
+            {
+                throw new QRCodeFormatException("QR Code column count is wrong.", ae);
+            }
             this.PlaceStaticElements(); // make sure static elements have correct value
         }
 
@@ -162,7 +203,7 @@ namespace QRCodeDiag
                 this.bits[i, 6] = i % 2 == 0 ? 'b' : 'w';
             }
             // Place dark module
-            this.bits[8, (4 * this.Version) + 9] = 'b';
+            this.bits[8, (4 * this.Version.VersionNumber) + 9] = 'b';
             // ToDo: Place format information, alternatively allow user to set it manually
             // ToDo: Place version information where needed
         }
@@ -189,7 +230,7 @@ namespace QRCodeDiag
 
         private void PlaceAlignmentPatterns()
         {
-            int num_total = this.Version == 1 ? 0 : (this.Version / 7) + 2; // number of coordinates (coordinates in x- and y-direction are identical)
+            int num_total = this.Version.VersionNumber == 1 ? 0 : (int)((this.Version.VersionNumber / 7) + 2); // number of coordinates (coordinates in x- and y-direction are identical)
 
             int[] coordValues = new int[num_total];
             
@@ -197,7 +238,7 @@ namespace QRCodeDiag
             {
                 coordValues[0] = 6; // first coordinate is always 6
 
-                coordValues[num_total - 1] = 4 * this.Version + 10; // last coordinate is always 7 codeEls from the right/bottom border of the code
+                coordValues[num_total - 1] = 4 * (int)this.Version.VersionNumber + 10; // last coordinate is always 7 codeEls from the right/bottom border of the code
 
                 if (num_total > 2)
                 {
@@ -219,7 +260,7 @@ namespace QRCodeDiag
             {
                 foreach(var y in coordValues)
                 {
-                    if(!(x <= 10 && (y <= 10 || y >= this.Version - 10)) && !(y <= 10 && (x <= 10 || x >= this.Version - 10))) // no collision with finder pattern
+                    if(!(x <= 10 && (y <= 10 || y >= this.Version.VersionNumber - 10)) && !(y <= 10 && (x <= 10 || x >= this.Version.VersionNumber - 10))) // no collision with finder pattern
                     {
                         this.InsertAlignmentPattern(x, y);
                     }
@@ -241,52 +282,6 @@ namespace QRCodeDiag
                 sb.Append(Environment.NewLine);
             }
             File.WriteAllText(path, sb.ToString());
-        }
-        private static char[,] GenerateBitsFromFile(string path)
-        {
-            List<string[]> cells = new List<string[]>();
-            try
-            {
-                using (var f = File.OpenText(path))
-                {
-                    while (!f.EndOfStream)
-                    {
-                        cells.Add(f.ReadLine().Trim().Split(null));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new QRCodeFormatException("Can't read file.", ex);
-            }
-            try
-            {
-                var version = QRCodeVersion.GetVersionFromSize(cells.Count); // check column length
-                var bitMask = new char[cells.Count, cells.Count];
-                for (int y = 0; y < cells.Count; y++)
-                {
-                    if (cells[y].Length != cells.Count) // compare row length to column length
-                    {
-                        throw new QRCodeFormatException("QR Code row length is wrong in row " + y);
-                    }
-                    for (int x = 0; x < cells.Count; x++)
-                    {
-                        if (cells[y][x].Length != 1)  // string in cell = 1 char length?
-                        {
-                            throw new QRCodeFormatException("Invalid QR Code data");
-                        }
-                        else
-                        {
-                            bitMask[x, y] = cells[y][x][0];
-                        }
-                    }
-                }
-                return bitMask;
-            }
-            catch(ArgumentException ae)
-            {
-                throw new QRCodeFormatException("QR Code column count is wrong.", ae);
-            }
         }
 
         public char GetBit(int x, int y)
@@ -481,35 +476,35 @@ namespace QRCodeDiag
         //    return ret;
         //}
 
-        private static int GetCharacterCountIndicatorLength(int version, MessageMode mode)
+        private static int GetCharacterCountIndicatorLength(QRCodeVersion version, MessageMode mode)
         {
             switch (mode)
             {
                 case MessageMode.Byte:
-                    return version < 10 ? 8 : 16;
+                    return version.VersionNumber < 10 ? 8 : 16;
                 case MessageMode.Alphanumeric:
                     {
-                        if (version < 10)
+                        if (version.VersionNumber < 10)
                             return 9;
-                        else if (version < 27)
+                        else if (version.VersionNumber < 27)
                             return 11;
                         else
                             return 13;
                     }
                 case MessageMode.Kanji:
                     {
-                        if (version < 10)
+                        if (version.VersionNumber < 10)
                             return 8;
-                        else if (version < 27)
+                        else if (version.VersionNumber < 27)
                             return 10;
                         else
                             return 12;
                     }
                 case MessageMode.Numeric:
                     {
-                        if (version < 10)
+                        if (version.VersionNumber < 10)
                             return 10;
-                        else if (version < 27)
+                        else if (version.VersionNumber < 27)
                             return 12;
                         else
                         return 14;
@@ -618,19 +613,41 @@ namespace QRCodeDiag
 
         public void DrawRawByteLocations(Graphics g, Size size, bool drawBitIndices, bool drawByteIndices)
         {
-            this.rawCode?.DrawCode(g, size, Color.Orange, Color.Cyan, drawBitIndices, drawByteIndices, this.Version);
+            this.rawCode?.DrawCode(g,
+                                   (float)size.Width / this.version.GetEdgeSizeFromVersion(),
+                                   (float)size.Height / this.version.GetEdgeSizeFromVersion(),
+                                   Color.Orange,
+                                   Color.Cyan,
+                                   drawBitIndices,
+                                   drawByteIndices);
         }
         public void DrawEncodedData(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {
-            this.encodedSymbols?.DrawCode(g, size, Color.Red, Color.LightBlue, drawBitIndices, drawSymbolIndices, this.Version);
+            this.encodedSymbols?.DrawCode(g,
+                                          (float)size.Width / this.version.GetEdgeSizeFromVersion(),
+                                          (float)size.Height / this.version.GetEdgeSizeFromVersion(),
+                                          Color.Red,
+                                          Color.LightBlue,
+                                          drawBitIndices,
+                                          drawSymbolIndices);
         }
         public void DrawPadding(Graphics g, Size size, bool drawBitIndices, bool drawSymbolIndices)
         {   
-            this.paddingBits?.DrawCode(g, size, Color.Blue, Color.LightBlue, drawBitIndices, drawSymbolIndices, this.Version);
+            this.paddingBits?.DrawCode(g,
+                                       (float)size.Width / this.version.GetEdgeSizeFromVersion(),
+                                       (float)size.Height / this.version.GetEdgeSizeFromVersion(),
+                                       Color.Blue,
+                                       Color.LightBlue,
+                                       drawBitIndices,
+                                       drawSymbolIndices);
         }
         public void DrawTerminator(Graphics g, Size size, bool drawBitIndices)
         {
-            this.terminator?.DrawSymbol(g, size, Color.Purple, drawBitIndices, this.Version);
+            this.terminator?.DrawSymbol(g,
+                                       (float)size.Width / this.version.GetEdgeSizeFromVersion(),
+                                       (float)size.Height / this.version.GetEdgeSizeFromVersion(),
+                                       Color.Purple,
+                                       drawBitIndices);
         }
         public void DrawCode(Graphics g, Size size, bool transparent = false)
         {

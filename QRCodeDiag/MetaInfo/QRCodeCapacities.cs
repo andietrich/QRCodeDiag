@@ -30,36 +30,27 @@ namespace QRCodeDiag.MetaInfo
                                                             {7, 12, 20, 28, 37, 45, 53, 66, 80, 93, 109, 125, 149, 159, 180, 198, 224, 243, 272, 297, 314, 348, 376, 407, 440, 462, 496, 534, 559, 604, 634, 684, 719, 756, 790, 832, 876, 923, 972, 1024},
                                                             {4, 8, 15, 21, 27, 36, 39, 52, 60, 74, 85, 96, 109, 120, 136, 154, 173, 191, 208, 235, 248, 270, 284, 315, 330, 365, 385, 405, 430, 457, 486, 518, 553, 590, 605, 647, 673, 701, 750, 784} };
 
-        public static int GetCapacity(int version, ECCLevel eccLevel, MessageMode mode)
+        public static int GetCapacity(QRCodeVersion version, ECCLevel eccLevel, MessageMode mode)
         {
-            if(version < 1 || version > 40)
-            {
-                throw new ArgumentOutOfRangeException("version");
-            }
             switch (mode)
             {
                 case MessageMode.Numeric:
-                    return numeric_capacity[(int)eccLevel, version-1];
+                    return numeric_capacity[(int)eccLevel, version.VersionNumber-1];
                 case MessageMode.Alphanumeric:
-                    return alphanumeric_capacity[(int)eccLevel, version-1];
+                    return alphanumeric_capacity[(int)eccLevel, version.VersionNumber - 1];
                 case MessageMode.Byte:
-                    return bytemode_capacity[(int)eccLevel, version-1];
+                    return bytemode_capacity[(int)eccLevel, version.VersionNumber - 1];
                 case MessageMode.Kanji:
-                    return kanji_capacity[(int)eccLevel, version-1];
+                    return kanji_capacity[(int)eccLevel, version.VersionNumber - 1];
                 default:
                     throw new ArgumentException("Invalid MessageMode", "mode");
             }
         }
 
-        public static int GetDataBytes(int version, ECCLevel eccLevel)
+        public static int GetDataBytes(QRCodeVersion version, ECCLevel eccLevel)
         {
-            if (version < 0 || version > 40)
-            {
-                throw new ArgumentOutOfRangeException("version");
-            }
-
             var cap = GetCapacity(version, eccLevel, MessageMode.Byte);
-            if(version < 10)
+            if(version.VersionNumber < 10)
             {
                 return cap + 2; // indicator nibble (+ terminator) + 8 bit length
             }
