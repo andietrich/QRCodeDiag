@@ -15,6 +15,9 @@ namespace QRCodeDiag
     internal class QRCode
     {
         public delegate void VersionChangedHandler(QRCodeVersion newVersion);
+        public delegate void MessageChangedHandler(string newMessage, bool messageIsValid);
+        public event VersionChangedHandler VersionChangedEvent;
+        public event MessageChangedHandler MessageChangedEvent;
         public enum MessageMode
         {
             Numeric = 1,
@@ -50,7 +53,6 @@ namespace QRCodeDiag
         private readonly ErrorCorrectionLevel.ECCLevel eccLevel = ErrorCorrectionLevel.ECCLevel.Low; //ToDo parse correct value before reading the code
         private MessageMode messageMode; // ToDo: set initial value: byte? MessageMode.Unknown?
         private string message;
-        private bool messageChanged;
         private ByteSymbolCode<RawCodeByte> rawCode;
         private ByteSymbolCode<RawCodeByte> paddingBits;
         private ByteSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
@@ -58,18 +60,31 @@ namespace QRCodeDiag
         private QRCodeVersion version;
         //ToDo Use/Set/Check Remainder Bits
 
-        public QRCodeVersion Version { get { return this.version; } }
+        public QRCodeVersion Version
+        {
+            get
+            {
+                return this.version;
+            }
+            private set
+            {
+                this.version = value;
+                this.VersionChangedEvent?.Invoke(this.version);
+            }
+        }
         public string Message
         {
             get
             {
-                if (this.messageChanged)
-                {
-                    this.message = this.ReadMessage();
-                }
                 return this.message;
             }
+            set
+            {
+                this.message = value;
+                this.MessageChangedEvent?.Invoke(this.message, this.ReadMessageSuccess);
+            }
         }
+        public bool ReadMessageSuccess { get; private set; }
         public QRCode(char[,] setBits)
         {
             try
@@ -85,7 +100,7 @@ namespace QRCodeDiag
                 throw new ArgumentException("Bad QR Code size: Not a square", "setBits");
             }
             this.bits = setBits;
-            this.messageChanged = true;
+            this.UpdateMessage();
         }
 
         /// <summary>
@@ -128,7 +143,7 @@ namespace QRCodeDiag
             }
             try
             {
-                this.version = new QRCodeVersion((uint)cells.Count);
+                this.version = QRCodeVersion.GetVersionFromSize((uint)cells.Count);
                 this.bits = new char[cells.Count, cells.Count];
                 for (int y = 0; y < cells.Count; y++)
                 {
@@ -260,11 +275,26 @@ namespace QRCodeDiag
             {
                 foreach(var y in coordValues)
                 {
-                    if(!(x <= 10 && (y <= 10 || y >= this.Version.VersionNumber - 10)) && !(y <= 10 && (x <= 10 || x >= this.Version.VersionNumber - 10))) // no collision with finder pattern
+                    if(!(x <= 10 && (y <= 10 || y >= (int)this.Version.VersionNumber - 10)) && !(y <= 10 && (x <= 10 || x >= (int)this.Version.VersionNumber - 10))) // no collision with finder pattern
                     {
                         this.InsertAlignmentPattern(x, y);
                     }
                 }
+            }
+        }
+
+        private void UpdateMessage()
+        {
+            try
+            {
+                var msg = this.ReadMessage();
+                this.ReadMessageSuccess = true; // only set if ReadMessage threw no exception, but before setting the property (invokes event)
+                this.Message = msg;
+            }
+            catch(QRCodeFormatException qfe)
+            {
+                this.ReadMessageSuccess = false;
+                this.Message = qfe.Message;
             }
         }
 
@@ -294,7 +324,7 @@ namespace QRCodeDiag
             return (char[,])this.bits.Clone();
         }
 
-        private void SetFormatInfo(char[] fInfo)
+        private void SetFormatInfo(char[] fInfo)    //ToDo create DataBlock/Symbol for Format Info 1 and 2
         {
             if (fInfo.Length != 15)
                 throw new ArgumentException("Wrong length", "fInfo");
@@ -395,19 +425,17 @@ namespace QRCodeDiag
             {
                 case '0':
                     bits[x, y] = '1';
-                    this.messageChanged = true;
                     break;
                 case '1':
                     bits[x, y] = 'u';
-                    this.messageChanged = true;
                     break;
                 case 'u':
                     bits[x, y] = '0';
-                    this.messageChanged = true;
                     break;
                 default:
                     break;
             }
+            this.UpdateMessage();
         }
 
         public void SetDataCell(int x, int y, char cellValue)   //ToDo set as expected in un-masked view
@@ -418,11 +446,11 @@ namespace QRCodeDiag
                 case '1':
                 case 'u':
                     bits[x, y] = cellValue;
-                    this.messageChanged = true;
                     break;
                 default:
                     throw new ArgumentException("Invalid cellValue: " + cellValue);
             }
+            this.UpdateMessage();
         }
 
         private QRCodeBitIterator GetBitIterator()

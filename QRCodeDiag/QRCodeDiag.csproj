@@ -51,6 +51,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SettingsPropertyManager.cs" />
     <Compile Include="UserInterface\CreateNewCode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +89,12 @@
     <Compile Include="MetaInfo\QRCodeCapacities.cs" />
     <Compile Include="QRCodeFormatException.cs" />
     <Compile Include="MetaInfo\QRCodeVersion.cs" />
+    <Compile Include="UserInterface\StringValueOptionsItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserInterface\StringValueOptionsItem.Designer.cs">
+      <DependentUpon>StringValueOptionsItem.cs</DependentUpon>
+    </Compile>
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
@@ -107,6 +114,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UserInterface\StringValueOptionsItem.resx">
+      <DependentUpon>StringValueOptionsItem.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
