@@ -52,6 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SettingsPropertyManager.cs" />
+    <Compile Include="UserInterface\BooleanValueOptionsItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserInterface\BooleanValueOptionsItem.Designer.cs">
+      <DependentUpon>BooleanValueOptionsItem.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserInterface\CreateNewCode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,6 +104,9 @@
     <Compile Include="Vector2D.cs" />
     <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
     <Compile Include="XORMask.cs" />
+    <EmbeddedResource Include="UserInterface\BooleanValueOptionsItem.resx">
+      <DependentUpon>BooleanValueOptionsItem.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserInterface\CreateNewCode.resx">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </EmbeddedResource>

@@ -12,28 +12,22 @@ namespace QRCodeDiag
     {
         public static QRCode XOR(QRCode code, MaskType maskType)
         {
+            if (code == null)
+                throw new ArgumentNullException("code");
             return XORMask.XOR(code, XORMask.GetMask(maskType, code.Version));
         }
 
-        public static QRCode XOR(QRCode lhs, QRCode rhs)
+        private static QRCode XOR(QRCode code, char[,] mask)
         {
-            if (lhs == null)
-                throw new ArgumentNullException("lhs");
-            if (rhs == null)
-                throw new ArgumentNullException("rhs");
-            if (lhs.Version != rhs.Version)
-                throw new ArgumentException("Argument version mismatch");
-
-            var lhsBits = lhs.GetBits();
-            var rhsBits = rhs.GetBits();
-            var edgeLength = lhsBits.GetLength(0);
+            var codeBits = code.GetBits();
+            var edgeLength = codeBits.GetLength(0);
             var xored = new char[edgeLength, edgeLength];
             for (int y = 0; y < edgeLength; y++)
             {
                 for (int x = 0; x < edgeLength; x++)
                 {
-                    var lhsbit = lhsBits[x, y];
-                    var rhsbit = rhsBits[x, y];
+                    var lhsbit = codeBits[x, y];
+                    var rhsbit = mask[x, y];
 
                     if (lhsbit != '0' && lhsbit != '1')
                     {
@@ -46,15 +40,15 @@ namespace QRCodeDiag
                     else
                     {
                         int ones = 0;
-                        if (lhsBits[x, y] == '1')
+                        if (codeBits[x, y] == '1')
                             ones++;
-                        if (rhsBits[x, y] == '1')
+                        if (mask[x, y] == '1')
                             ones++;
                         xored[x, y] = (ones == 1) ? '1' : '0';
                     }
                 }
             }
-            return new QRCode(xored);
+            return new QRCode(xored, code.ECCLevel);
         }
 
         /*
@@ -71,7 +65,7 @@ namespace QRCodeDiag
          *  row = y, column = x
          * */
 
-        private static QRCode GetMask(MaskType mtype, QRCodeVersion version)
+        private static char[,] GetMask(MaskType mtype, QRCodeVersion version)
         {
             switch (mtype)
             {
@@ -95,7 +89,7 @@ namespace QRCodeDiag
                     return GetEmptyMask(version);
             }
         }
-        private static QRCode GetEmptyMask(QRCodeVersion version)
+        private static char[,] GetEmptyMask(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
@@ -103,79 +97,79 @@ namespace QRCodeDiag
             {
                 mask.SetValue('0', i);
             }
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask000(QRCodeVersion version)
+        private static char[,] GetMask000(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((x + y) % 2 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask001(QRCodeVersion version) // (row) mod 2 == 0
+        private static char[,] GetMask001(QRCodeVersion version) // (row) mod 2 == 0
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (y % 2 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask010(QRCodeVersion version)
+        private static char[,] GetMask010(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (x % 3 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask011(QRCodeVersion version)
+        private static char[,] GetMask011(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((x + y) % 3 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask100(QRCodeVersion version) // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
+        private static char[,] GetMask100(QRCodeVersion version) // ( floor(row / 2) + floor(column / 3) ) mod 2 == 0
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = (((y / 2 + x / 3) % 2) == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask101(QRCodeVersion version)
+        private static char[,] GetMask101(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask110(QRCodeVersion version)
+        private static char[,] GetMask110(QRCodeVersion version)
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y * x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
-        private static QRCode GetMask111(QRCodeVersion version) //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
+        private static char[,] GetMask111(QRCodeVersion version) //( ((row + column) mod 2) + ((row * column) mod 3) ) mod 2 == 0
         {
             var versionSize = version.GetEdgeSizeFromVersion();
             var mask = new char[versionSize, versionSize];
             for (int y = 0; y < versionSize; y++)
                 for (int x = 0; x < versionSize; x++)
                     mask[x, y] = ((((y + x) % 2) + ((y * x) % 3)) % 2 == 0) ? '1' : '0';
-            return new QRCode(mask);
+            return mask;
         }
     }
 }

@@ -9,14 +9,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZXing.Common.ReedSolomon;
+using QRCodeDiag.ECCDecoding;
 
 namespace QRCodeDiag
 {
     internal class QRCode
     {
         public delegate void VersionChangedHandler(QRCodeVersion newVersion);
+        public delegate void ECCLevelChangedHandler(ErrorCorrectionLevel.ECCLevel newECCLevel);
         public delegate void MessageChangedHandler(string newMessage, bool messageIsValid);
         public event VersionChangedHandler VersionChangedEvent;
+        public event ECCLevelChangedHandler ECCLevelChangedEvent;
         public event MessageChangedHandler MessageChangedEvent;
         public enum MessageMode
         {
@@ -38,27 +41,31 @@ namespace QRCodeDiag
             Mask111 = 7,
             None
         }
-        
         private enum FormatInfoLocation
         {
             TopLeft,
             SplitBottomLeftTopRight
         }
 
-        
         public const int ECCWORDS = 15;//ToDo adjust for other versions
         private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
-        private readonly ErrorCorrectionLevel.ECCLevel eccLevel = ErrorCorrectionLevel.ECCLevel.Low; //ToDo parse correct value before reading the code
+
         private MessageMode messageMode; // ToDo: set initial value: byte? MessageMode.Unknown?
         private string message;
+
+        // parsed/drawable code elements
         private ByteSymbolCode<RawCodeByte> rawCode;
         private ByteSymbolCode<RawCodeByte> paddingBits;
         private ByteSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
+        private List<ECCBlock> interleavingBlocks;
         private TerminatorSymbol terminator;
         private QRCodeVersion version;
+        private ErrorCorrectionLevel eccLevel; //ToDo parse correct value or use user-provided/default
         //ToDo Use/Set/Check Remainder Bits
+        //ToDo highlight message mode
+        //ToDo highlight version/ecc info 1 + 2
 
         public QRCodeVersion Version
         {
@@ -66,10 +73,23 @@ namespace QRCodeDiag
             {
                 return this.version;
             }
-            private set
+            private set //ToDo should be settable from outside
             {
                 this.version = value;
+                this.eccLevel = ErrorCorrectionLevel.GetECCLevel(ErrorCorrectionLevel.ECCLevel.Low, this.version); //ToDo parse correct value before reading the code
                 this.VersionChangedEvent?.Invoke(this.version);
+            }
+        }
+        public ErrorCorrectionLevel.ECCLevel ECCLevel
+        {
+            get
+            {
+                return this.eccLevel.Level;
+            }
+            private set //ToDo should be settable from outside
+            {
+                this.eccLevel = ErrorCorrectionLevel.GetECCLevel(ErrorCorrectionLevel.ECCLevel.Low, this.version); //ToDo write the correct bits into the info locations
+                this.ECCLevelChangedEvent?.Invoke(value);
             }
         }
         public string Message
@@ -78,18 +98,19 @@ namespace QRCodeDiag
             {
                 return this.message;
             }
-            set
+            private set     //ToDo message should be settable from outside and then written into the correct location
             {
                 this.message = value;
                 this.MessageChangedEvent?.Invoke(this.message, this.ReadMessageSuccess);
             }
         }
         public bool ReadMessageSuccess { get; private set; }
-        public QRCode(char[,] setBits)
+        public QRCode(char[,] setBits, ErrorCorrectionLevel.ECCLevel eccLevel)
         {
             try
             {
                 this.version = QRCodeVersion.GetVersionFromSize((uint) setBits.GetLength(0));
+                this.ECCLevel = eccLevel;
             }
             catch(ArgumentException ae)
             {
@@ -107,9 +128,10 @@ namespace QRCodeDiag
         /// Generates an empty QRCode of the specified <paramref name="version"/>
         /// </summary>
         /// <param name="version">The version defines the size of the QR Code. Valid versions are 1-40</param>
-        public QRCode(uint _version)
+        public QRCode(uint _version, ErrorCorrectionLevel.ECCLevel eccLevel)
         {
             this.version = new QRCodeVersion(_version);
+            this.ECCLevel = eccLevel;
 
             var size = version.GetEdgeSizeFromVersion();
             this.bits = new char[size, size];
@@ -122,6 +144,7 @@ namespace QRCodeDiag
             }
 
             this.PlaceStaticElements();
+            this.UpdateMessage();
         }
 
         public QRCode(string path)
@@ -144,6 +167,9 @@ namespace QRCodeDiag
             try
             {
                 this.version = QRCodeVersion.GetVersionFromSize((uint)cells.Count);
+
+                this.ECCLevel = ErrorCorrectionLevel.ECCLevel.Low; //ToDo read from data or default
+
                 this.bits = new char[cells.Count, cells.Count];
                 for (int y = 0; y < cells.Count; y++)
                 {
@@ -169,6 +195,7 @@ namespace QRCodeDiag
                 throw new QRCodeFormatException("QR Code column count is wrong.", ae);
             }
             this.PlaceStaticElements(); // make sure static elements have correct value
+            this.UpdateMessage();
         }
 
         private void PlaceStaticElements()
@@ -275,7 +302,8 @@ namespace QRCodeDiag
             {
                 foreach(var y in coordValues)
                 {
-                    if(!(x <= 10 && (y <= 10 || y >= (int)this.Version.VersionNumber - 10)) && !(y <= 10 && (x <= 10 || x >= (int)this.Version.VersionNumber - 10))) // no collision with finder pattern
+                    if(!(x <= 10 && (y <= 10 || y >= (int)this.Version.GetEdgeSizeFromVersion() - 10))
+                    && !(y <= 10 && (x <= 10 || x >= (int)this.Version.GetEdgeSizeFromVersion() - 10))) // no collision with finder pattern
                     {
                         this.InsertAlignmentPattern(x, y);
                     }
@@ -440,17 +468,25 @@ namespace QRCodeDiag
 
         public void SetDataCell(int x, int y, char cellValue)   //ToDo set as expected in un-masked view
         {
-            switch(cellValue)
+            if (x < 0 || x >= this.Version.GetEdgeSizeFromVersion())
+                throw new ArgumentOutOfRangeException("x");
+            if (y < 0 || y >= this.Version.GetEdgeSizeFromVersion())
+                throw new ArgumentOutOfRangeException("y");
+
+            if (this.IsDataCell(x, y))
             {
-                case '0':
-                case '1':
-                case 'u':
-                    bits[x, y] = cellValue;
-                    break;
-                default:
-                    throw new ArgumentException("Invalid cellValue: " + cellValue);
+                switch (cellValue)
+                {
+                    case '0':
+                    case '1':
+                    case 'u':
+                        bits[x, y] = cellValue;
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid cellValue: " + cellValue);
+                }
+                this.UpdateMessage();
             }
-            this.UpdateMessage();
         }
 
         private QRCodeBitIterator GetBitIterator()
@@ -460,7 +496,14 @@ namespace QRCodeDiag
 
         public bool IsDataCell(int x, int y)
         {
-            if ((y == 8 && (x < 9 || x > this.GetEdgeLength() - 9)) || (x == 8 && (y < 9 || y > this.GetEdgeLength() - 8))) // Format Information
+            if ((y == 8 && (x < 9 || x > this.GetEdgeLength() - 9))
+            ||  (x == 8 && (y < 9 || y > this.GetEdgeLength() - 8))) // Format Information //ToDo make editable
+            {
+                return false;
+            }
+            else if(this.Version.GetEdgeSizeFromVersion() > 6
+            && (    x < 6 && y < (this.GetEdgeLength() - 8) && y > (this.GetEdgeLength() - 12))
+                || (y < 6 && x < (this.GetEdgeLength() - 8) && x > (this.GetEdgeLength() - 12)))
             {
                 return false;
             }
@@ -554,33 +597,17 @@ namespace QRCodeDiag
         }
         public string RepairMessage()
         {
-            var fullCode = new ByteSymbolCode<RawCodeByte>(this.GetBitIterator());
-            var codeBytes = fullCode.ToByteArray();
-            var codeAsInts = new int[codeBytes.Length];
-            for (int i = 0; i < codeBytes.Length; i++)
-            {
-                codeAsInts[i] = codeBytes[i] & 0xFF; //ToDo remaining zeros in int ignored by decoder? - using as in zxing example app
-            }
-            var rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
-            if (rsDecoder.decode(codeAsInts, ECCWORDS))
-            {
-                var binarySB = new StringBuilder();
-                for (int i = 0; i < codeAsInts.Length; i++) // also repair the ecc bytes, the goal is to completely restore the broken qr code
-                {
-                    binarySB.Append(Convert.ToString((byte)codeAsInts[i], 2).PadLeft(8, '0'));
-                }
-                return fullCode.GetBitString() + Environment.NewLine + binarySB.ToString();
-            }
-            else
-            {
-                return "Could not repair";
-            }
+            var sb = new StringBuilder();
+            //for (int i = 0; i < this.interleavingBlocks.Count; i++)
+            //{
+            //    sb.AppendLine(String.Format("Block {0} {1} repaired", i, this.interleavingBlocks[i].RepairSuccess ? "successfully" : "not"));
+            //}
+            return sb.ToString();
         }
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
-            //TODO: Fix this.RepairMessage(binaryBlocks) ?? string.Join("", binaryBlocks, 0, DATAWORDS); // transform RawByteList to byte[] using RawCodeByte.GetAsByte() ?
             this.rawCode = new ByteSymbolCode<RawCodeByte>(this.GetBitIterator());
-            //ToDo: replace with this.rawCode = new InterleavedRawByteCode(this.GetBitIterator());
+            //this.interleavingBlocks = DeInterleaver.DeInterleave(this.rawCode, this.eccLevel);
 
             int modeNibble;
             try
@@ -605,7 +632,7 @@ namespace QRCodeDiag
                     throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count, but inform the user
                 }
 
-                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.eccLevel, this.messageMode);
+                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.eccLevel.Level, this.messageMode);
                 if (characterCount > max_capacity)
                 {
                     throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);
@@ -625,7 +652,7 @@ namespace QRCodeDiag
                     }
                     this.encodedSymbols = this.rawCode.ToByteSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
                     this.terminator = new TerminatorSymbol(this.rawCode.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
-                    this.paddingBits = this.rawCode.ToByteSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel) * 8 - (messageEndOffset + terminatorLength));
+                    this.paddingBits = this.rawCode.ToByteSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
                     return encodedSymbols.DecodeSymbols('_', Encoding.GetEncoding("iso-8859-1"));
                 }
                 else

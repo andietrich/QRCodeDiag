@@ -8,6 +8,7 @@ namespace QRCodeDiag.DataBlocks
 {
     class QRCodeBitIterator : IBitIterator
     {
+        private const int TIMINGPATTERNCOLUMN = 6;      // number of the column in which the vertical timing pattern is located
         private readonly QRCode qrCode;
         private int xPos, yPos;
         private bool directionUp;
@@ -73,7 +74,7 @@ namespace QRCodeDiag.DataBlocks
                     this.directionUp = false;
                     this.rightCell = true;
                     this.XPos--;
-                    if (this.XPos == 6)
+                    if (this.XPos == QRCodeBitIterator.TIMINGPATTERNCOLUMN)
                         this.XPos--;
                 }
                 else if (this.YPos == this.qrCode.GetEdgeLength() - 1 && !this.directionUp && !this.rightCell) // Bottom end of a line reached
@@ -82,7 +83,7 @@ namespace QRCodeDiag.DataBlocks
                     this.directionUp = true;
                     this.rightCell = true;
                     this.XPos--;
-                    if (this.XPos == 6)
+                    if (this.XPos == QRCodeBitIterator.TIMINGPATTERNCOLUMN)
                         this.XPos--;
                 }
                 else // Somewhere in the line

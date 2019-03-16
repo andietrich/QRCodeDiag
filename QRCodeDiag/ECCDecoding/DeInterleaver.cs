@@ -10,9 +10,8 @@ namespace QRCodeDiag.ECCDecoding
 {
     internal class DeInterleaver
     {
-        private readonly List<ECCBlock> eccBlockList;
-        public DeInterleaver(ByteSymbolCode<RawCodeByte>    interleavedCode,
-                             ErrorCorrectionLevel           eccLevel)
+        public static List<ECCBlock> DeInterleave(ByteSymbolCode<RawCodeByte> interleavedCode,
+                                                  ErrorCorrectionLevel        eccLevel)
         {
             // a block consists of data and ecc codewords for that block
             // blocks are in groups of blocks with the same amount of data codewords (max 2 groups)
@@ -61,7 +60,7 @@ namespace QRCodeDiag.ECCDecoding
                 }
             }
 
-            eccBlockList = new List<ECCBlock>();
+            var eccBlockList = new List<ECCBlock>();
             for (int g = 0; g < eccGroups.Length; g++)                       // group
             {
                 for (int b = 0; b < eccGroups[g].NumberOfBlocks; b++)        // block
@@ -80,6 +79,7 @@ namespace QRCodeDiag.ECCDecoding
                                                   new ByteSymbolCode<RawCodeByte>(blockECC)));
                 }
             }
+            return eccBlockList;
         }
 
         private static uint GetBlockLength(int absoluteBlockNumber, ECCGroupInfo[] eccGroups)
@@ -92,11 +92,6 @@ namespace QRCodeDiag.ECCDecoding
                     absoluteBlockNumber -= (int) eccGroups[i].NumberOfBlocks;
             }
             throw new ArgumentException("absoluteBlockNumber is larger than the total number of blocks in eccGroups.");
-        }
-
-        public List<ECCBlock> GetECCBlocks()
-        {
-            return this.eccBlockList;
         }
     }
 }

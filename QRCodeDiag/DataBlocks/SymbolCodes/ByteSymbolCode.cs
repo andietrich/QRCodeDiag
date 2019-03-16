@@ -18,7 +18,7 @@ namespace QRCodeDiag.DataBlocks
             {
                 if(this.byteSymbolList.Count > 1)
                 {
-                    return this.byteSymbolList.Count * (int)this.byteSymbolList[0].SymbolLength + this.byteSymbolList[this.byteSymbolList.Count - 1].CurrentSymbolLength;
+                    return this.byteSymbolList.Count * ((int)this.byteSymbolList[0].SymbolLength - 1) + this.byteSymbolList[this.byteSymbolList.Count - 1].CurrentSymbolLength;
                 }
                 else if (this.byteSymbolList.Count == 1)
                 {

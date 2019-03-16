@@ -32,12 +32,12 @@ namespace QRCodeDiag.MetaInfo
             return this.eccGroups;
         }
 
-        public static ErrorCorrectionLevel GetECCLevel(ECCLevel level, uint version)
+        public static ErrorCorrectionLevel GetECCLevel(ECCLevel level, QRCodeVersion version)
         {
             switch(level)
             {
                 case ECCLevel.Low:
-                    switch(version)
+                    switch(version.VersionNumber)
                     {
                         case  1: return new ErrorCorrectionLevel( 7, new ECCGroupInfo[] { new ECCGroupInfo( 19,  1) });
                         case  2: return new ErrorCorrectionLevel(10, new ECCGroupInfo[] { new ECCGroupInfo( 34,  1) });
@@ -84,7 +84,7 @@ namespace QRCodeDiag.MetaInfo
                     break;
 
                 case ECCLevel.Medium:
-                    switch (version)
+                    switch (version.VersionNumber)
                     {
                         case  1: return new ErrorCorrectionLevel(10, new ECCGroupInfo[] { new ECCGroupInfo(16,  1) });
                         case  2: return new ErrorCorrectionLevel(16, new ECCGroupInfo[] { new ECCGroupInfo(28,  1) });
@@ -131,7 +131,7 @@ namespace QRCodeDiag.MetaInfo
                     break;
 
                 case ECCLevel.Quartile:
-                    switch (version)
+                    switch (version.VersionNumber)
                     {
                         case  1: return new ErrorCorrectionLevel(13, new ECCGroupInfo[] { new ECCGroupInfo(13,  1) });
                         case  2: return new ErrorCorrectionLevel(22, new ECCGroupInfo[] { new ECCGroupInfo(22,  1) });
@@ -177,7 +177,7 @@ namespace QRCodeDiag.MetaInfo
                     }
                     break;
                 case ECCLevel.High:
-                    switch (version)
+                    switch (version.VersionNumber)
                     {
                         case  1: return new ErrorCorrectionLevel(17, new ECCGroupInfo[] { new ECCGroupInfo( 9,  1) });
                         case  2: return new ErrorCorrectionLevel(28, new ECCGroupInfo[] { new ECCGroupInfo(16,  1) });

@@ -27,32 +27,10 @@ namespace QRCodeDiag.DataBlocks
             this.bitArray = new char[symbolLength];
             this.bitCoordinates = new List<Vector2D>((int)symbolLength);
         }
-        public void AddBit(char bit, int x, int y)
-        {
-            this.AddBit(bit, new Vector2D(x, y));
-        }
-        public void AddBit(char bit, Vector2D bitPosition)
-        {
-            if (this.bitCoordinates.Count == this.SymbolLength)
-                throw new InvalidOperationException("The maximum symbol length " + this.SymbolLength + " has already been reached.");
-            this.bitArray[bitCoordinates.Count] = bit;
-            this.bitCoordinates.Add(bitPosition);
-        }
-        public Vector2D GetBitCoordinate(int bitNumber)
-        {
-            if (bitNumber < 0 || bitNumber >= this.bitCoordinates.Count)
-            {
-                throw new ArgumentOutOfRangeException(
-                    "bitNumber",
-                    String.Format("Bit number {0} does not exist. Current symbol length is {1}.",
-                    bitNumber,
-                    this.bitCoordinates.Count));
-            }
-            return this.bitCoordinates[bitNumber];
-        }
+
         //ToDo generate point array and use drawPolygon method
         //Define: Square at x, y has corner points at x, y, x+1, y+1
-        public List<PolygonEdge> GetContour()
+        private List<PolygonEdge> GetContour()
         {
             var edges = new HashSet<PolygonEdge>();
             foreach (var cell in bitCoordinates)
@@ -76,6 +54,30 @@ namespace QRCodeDiag.DataBlocks
                     edges.Add(left);
             }
             return edges.ToList();
+        }
+
+        public void AddBit(char bit, int x, int y)
+        {
+            this.AddBit(bit, new Vector2D(x, y));
+        }
+        public void AddBit(char bit, Vector2D bitPosition)
+        {
+            if (this.bitCoordinates.Count == this.SymbolLength)
+                throw new InvalidOperationException("The maximum symbol length " + this.SymbolLength + " has already been reached.");
+            this.bitArray[bitCoordinates.Count] = bit;
+            this.bitCoordinates.Add(bitPosition);
+        }
+        public Vector2D GetBitCoordinate(int bitNumber)
+        {
+            if (bitNumber < 0 || bitNumber >= this.bitCoordinates.Count)
+            {
+                throw new ArgumentOutOfRangeException(
+                    "bitNumber",
+                    String.Format("Bit number {0} does not exist. Current symbol length is {1}.",
+                    bitNumber,
+                    this.bitCoordinates.Count));
+            }
+            return this.bitCoordinates[bitNumber];
         }
 
         public virtual void DrawSymbol(Graphics g, float codeElWidth, float codeElHeight, Color color, bool drawBitIndices)

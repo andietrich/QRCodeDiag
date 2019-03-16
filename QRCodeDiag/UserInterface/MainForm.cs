@@ -29,11 +29,11 @@ namespace QRCodeDiag.UserInterface
         private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
         private MaskType maskUsed; // ToDo use better solution when mask application gets automated
         //private ButtonDown buttonDown; //ToDo: hold button to draw lines
-        private bool showRawOverlay;
-        private bool showEncodingOverlay;
-        private bool showPaddingOverlay;
-        private bool showXORed;
-        
+        public bool ShowRawOverlay { get; set; }
+        public bool ShowEncodingOverlay { get; set; }
+        public bool ShowPaddingOverlay { get; set; }
+        public bool ShowXORed { get; set; }
+
         private MaskType CurrentMaskUsed
         {
             get { return this.maskUsed; }
@@ -78,10 +78,10 @@ namespace QRCodeDiag.UserInterface
         public MainForm()
         {
             InitializeComponent();
-            this.showRawOverlay = false;
-            this.showEncodingOverlay = true;
-            this.showPaddingOverlay = true;
-            this.showXORed = false;
+            this.ShowRawOverlay = false;
+            this.ShowEncodingOverlay = true;
+            this.ShowPaddingOverlay = true;
+            this.ShowXORed = false;
             this.CurrentMaskUsed = MaskType.None;
         }
 
@@ -103,15 +103,15 @@ namespace QRCodeDiag.UserInterface
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             bool drawTransparent = this.pictureBox1.BackgroundImage != null;
-            if(this.showXORed)
+            if(this.ShowXORed)
                 this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
             else
                 this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
-            if (this.showRawOverlay)
+            if (this.ShowRawOverlay)
                 this.BackgroundCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
-            if (this.showEncodingOverlay)
+            if (this.ShowEncodingOverlay)
                 this.BackgroundCode?.DrawEncodedData(e.Graphics, this.pictureBox1.Size, true, false);
-            if (this.showPaddingOverlay)
+            if (this.ShowPaddingOverlay)
             {
                 this.BackgroundCode?.DrawPadding(e.Graphics, this.pictureBox1.Size, true, false);
                 this.BackgroundCode?.DrawTerminator(e.Graphics, this.pictureBox1.Size, true);
@@ -212,25 +212,25 @@ namespace QRCodeDiag.UserInterface
 
         private void rawOverlayToolStripButton_Click(object sender, EventArgs e)
         {
-            this.showRawOverlay = !this.showRawOverlay;
+            this.ShowRawOverlay = !this.ShowRawOverlay;
             this.pictureBox1.Invalidate();
         }
 
         private void encodingToolStripButton_Click(object sender, EventArgs e)
         {
-            this.showEncodingOverlay = !this.showEncodingOverlay;
+            this.ShowEncodingOverlay = !this.ShowEncodingOverlay;
             this.pictureBox1.Invalidate();
         }
 
         private void paddingToolStripButton_Click(object sender, EventArgs e)
         {
-            this.showPaddingOverlay = !this.showPaddingOverlay;
+            this.ShowPaddingOverlay = !this.ShowPaddingOverlay;
             this.pictureBox1.Invalidate();
         }
 
         private void showXORedToolStripButton_Click(object sender, EventArgs e)
         {
-            this.showXORed = !this.showXORed;
+            this.ShowXORed = !this.ShowXORed;
             this.pictureBox1.Invalidate();
         }
 
@@ -239,7 +239,7 @@ namespace QRCodeDiag.UserInterface
             var createForm = new CreateNewCode();
             if (createForm.ShowDialog(this) == DialogResult.OK)
             {
-                this.DisplayCode = new QRCode((uint) createForm.Version); //ToDo ask to save modified codes
+                this.DisplayCode = new QRCode((uint) createForm.Version, createForm.ECCLevel); //ToDo ask to save modified codes
             }
         }
 

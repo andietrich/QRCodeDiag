@@ -18,7 +18,7 @@ namespace QRCodeDiag.DataBlocks
         {
             get
             {
-                return this.bitPosition == this.newValues.Length - 1;
+                return this.bitPosition >= this.newValues.Length;
             }
         }
 
