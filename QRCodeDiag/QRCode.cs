@@ -47,7 +47,6 @@ namespace QRCodeDiag
             SplitBottomLeftTopRight
         }
 
-        public const int ECCWORDS = 15;//ToDo adjust for other versions
         private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
 
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear

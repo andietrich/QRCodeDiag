@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Class Name="QRCodeDiag.QRCode">
+    <Position X="15" Y="5.25" Width="6" />
+    <Compartments>
+      <Compartment Name="Private" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Delegate Name="QRCodeDiag.QRCode.VersionChangedHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="QRCodeDiag.QRCode.ECCLevelChangedHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Delegate Name="QRCodeDiag.QRCode.MessageChangedHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Enum Name="QRCodeDiag.QRCode.MessageMode" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="QRCodeDiag.QRCode.MaskType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="QRCodeDiag.QRCode.FormatInfoLocation" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>QRCode.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>oZEEACBiAA4BAAEACVAAwKBQIQIoACIAAMIAIAAASCY=</HashCode>
+      <FileName>QRCode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="QRCodeDiag.DataBlocks.DrawableCode&lt;T&gt;">
+    <Position X="4.25" Y="11" Width="9" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>DataBlocks\DrawableCode.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="QRCodeDiag.IOptionsHandler">
+    <Position X="2" Y="5.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IOptionsHandler.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="QRCodeDiag.IOptionsItem">
+    <Position X="2" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IOptionsItem.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="QRCodeDiag.IDrawingManager">
+    <Position X="8" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IDrawingManager.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="QRCodeDiag.IColoringSchema">
+    <Position X="8.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>IColoringSchema.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

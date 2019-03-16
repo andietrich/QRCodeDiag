@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace QRCodeDiag
+{
+    public interface IColoringSchema
+    {
+        void RegisterColoredObject();
+        void GetColorSet();
+    }
+}

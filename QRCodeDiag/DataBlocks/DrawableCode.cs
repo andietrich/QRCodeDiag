@@ -11,6 +11,7 @@ namespace QRCodeDiag.DataBlocks
     internal abstract class DrawableCode<T> where T : CodeSymbol
     {
         protected abstract List<T> GetByteSymbols();
+        public bool Show { get; set; }
         public void DrawCode(Graphics g, float codeElWidth, float codeElHeight, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices)
         {
             var preferredSymbolDrawLocation = 2;

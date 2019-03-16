@@ -51,6 +51,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColoringSchema.cs" />
+    <Compile Include="IColoringSchema.cs" />
+    <Compile Include="IDrawingManager.cs" />
+    <Compile Include="IOptionsHandler.cs" />
+    <Compile Include="IOptionsItem.cs" />
     <Compile Include="SettingsPropertyManager.cs" />
     <Compile Include="UserInterface\BooleanValueOptionsItem.cs">
       <SubType>UserControl</SubType>
@@ -126,6 +131,7 @@
     <EmbeddedResource Include="UserInterface\StringValueOptionsItem.resx">
       <DependentUpon>StringValueOptionsItem.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="GUIConcept.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
