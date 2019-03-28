@@ -1,4 +1,5 @@
-﻿using QRCodeDiag.UserInterface;
+﻿using QRCodeBaseLib;
+using QRCodeDiag.UserInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;

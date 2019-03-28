@@ -1,12 +1,15 @@
-﻿using System;
+﻿using QRCodeBaseLib;
+using QRCodeBaseLib.DataBlocks.SymbolCodes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static QRCodeDiag.QRCode;
+using static QRCodeBaseLib.QRCode;
 
 namespace QRCodeDiag.UserInterface
 {
@@ -102,19 +105,34 @@ namespace QRCodeDiag.UserInterface
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            bool drawTransparent = this.pictureBox1.BackgroundImage != null;
-            if(this.ShowXORed)
-                this.BackgroundCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
-            else
-                this.DisplayCode?.DrawCode(e.Graphics, this.pictureBox1.Size, drawTransparent);
-            if (this.ShowRawOverlay)
-                this.BackgroundCode?.DrawRawByteLocations(e.Graphics, this.pictureBox1.Size, true, true);
-            if (this.ShowEncodingOverlay)
-                this.BackgroundCode?.DrawEncodedData(e.Graphics, this.pictureBox1.Size, true, false);
-            if (this.ShowPaddingOverlay)
+            if (this.BackgroundCode != null)
             {
-                this.BackgroundCode?.DrawPadding(e.Graphics, this.pictureBox1.Size, true, false);
-                this.BackgroundCode?.DrawTerminator(e.Graphics, this.pictureBox1.Size, true);
+                int     edgeLength      = this.BackgroundCode.GetEdgeLength();
+                float   codeElWidth     = (float)this.pictureBox1.Size.Width / edgeLength;
+                float   codeElHeight    = (float)this.pictureBox1.Size.Height / edgeLength;
+                bool    drawTransparent = this.pictureBox1.BackgroundImage != null;
+                var     codeDrawer      = new CodeElementDrawer(codeElWidth, codeElHeight);
+                var     rawCode         = this.BackgroundCode.GetRawCode();
+                var     encodedData     = this.BackgroundCode.GetEncodedSymbols();
+                var     padding         = this.BackgroundCode.GetPaddingBits();
+                var     terminator      = this.BackgroundCode.GetTerminator();
+
+                if (this.ShowXORed)
+                    codeDrawer.DrawQRCode(this.BackgroundCode, e.Graphics, drawTransparent);
+                else
+                    codeDrawer.DrawQRCode(this.DisplayCode, e.Graphics, drawTransparent);
+
+                if (this.ShowRawOverlay && rawCode != null)
+                    codeDrawer.DrawCodeSymbolCode(rawCode, e.Graphics, Color.Orange, Color.Cyan, true, true);
+
+                if (this.ShowEncodingOverlay && encodedData != null)
+                    codeDrawer.DrawCodeSymbolCode(encodedData, e.Graphics, Color.Red, Color.LightBlue, true, true);
+
+                if (this.ShowPaddingOverlay && padding != null)
+                    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
+
+                if (this.ShowPaddingOverlay && terminator != null)  // ToDo separate condition this.ShowPaddingOverlay for terminator
+                    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
             }
         }
 
@@ -143,8 +161,6 @@ namespace QRCodeDiag.UserInterface
                         break;
                 }
                 this.UpdateBackgroundCode();
-                this.pictureBox1.Invalidate();
-                this.UpdateTextBox();
             }
         }
 
@@ -155,15 +171,17 @@ namespace QRCodeDiag.UserInterface
                 var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
                 {
+                    var paddingBits = this.BackgroundCode.GetPaddingBits();
+                    var terminator = this.BackgroundCode.GetTerminator();
                     sb.AppendLine("Message: " + this.BackgroundCode.Message);
-                    sb.AppendLine("Terminator: " + this.BackgroundCode.GetTerminator());
+                    sb.AppendLine("Terminator: " + this.BackgroundCode.GetTerminator()?.BitString ?? "No terminator found");
                     sb.AppendLine("Padding bits: ");
-                    foreach (var s in this.BackgroundCode.GetPaddingBits())
-                    {
-                        sb.AppendLine(s);
-                    }
-                    sb.AppendLine("RepairMessage():");
-                    sb.AppendLine(this.backgroundCode.RepairMessage());
+                    if (this.BackgroundCode.GetPaddingBits() == null)
+                        sb.AppendLine("Padding bits have not been initialized yet.");
+                    else
+                        sb.AppendLine(string.Join(Environment.NewLine, this.BackgroundCode.GetPaddingBits().GetSymbolBitStrings()));
+                    
+                    sb.AppendLine("RepairMessage():" + this.BackgroundCode.RepairMessage());
                 }
                 catch (QRCodeFormatException qfe)
                 {
@@ -182,15 +200,15 @@ namespace QRCodeDiag.UserInterface
 
         private void UpdateBackgroundCode()
         {
-            if(this.displayCode != null)
+            if(this.DisplayCode != null)
             {
                 if (this.CurrentMaskUsed == MaskType.None)
                 {
-                    this.backgroundCode = this.displayCode;
+                    this.BackgroundCode = this.DisplayCode;
                 }
                 else
                 {
-                    this.backgroundCode = XORMask.XOR(this.DisplayCode, this.CurrentMaskUsed);
+                    this.BackgroundCode = XORMask.XOR(this.DisplayCode, this.CurrentMaskUsed);
                 }
             }
         }

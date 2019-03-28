@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeDiag", "QRCodeDiag\QR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidUI", "AndroidUI\AndroidUI.csproj", "{5AA881E5-5A1F-4EEA-82E4-1F217014B6F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeBaseLib", "QRCodeBaseLib\QRCodeBaseLib.csproj", "{3357734A-FAD0-4895-BE65-B3FF8F37113B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,8 +25,15 @@ Global
 		{5AA881E5-5A1F-4EEA-82E4-1F217014B6F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AA881E5-5A1F-4EEA-82E4-1F217014B6F9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AA881E5-5A1F-4EEA-82E4-1F217014B6F9}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DD228D83-B507-4A59-A669-2FEA9C0EFE73}
 	EndGlobalSection
 EndGlobal
