@@ -22,6 +22,7 @@ namespace QRCodeDiag.UserInterface
         public StringValueOptionsItem(string label = "Name of the Value")
         {
             InitializeComponent();
+            this.valueNameLabel.Text = label;
             this.writeButton.Click += (s, e) => NewValueEnteredEvent?.Invoke(this.valueTextBox.Text);
         }
     }

@@ -8,9 +8,10 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>QRCodeDiag</RootNamespace>
     <AssemblyName>QRCodeDiag</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -43,15 +44,11 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="zxing, Version=0.15.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
-      <HintPath>..\packages\ZXing.Net.0.15.0\lib\net45\zxing.dll</HintPath>
-    </Reference>
-    <Reference Include="zxing.presentation, Version=0.15.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
-      <HintPath>..\packages\ZXing.Net.0.15.0\lib\net45\zxing.presentation.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColoringSchema.cs" />
     <Compile Include="SettingsPropertyManager.cs" />
+    <Compile Include="CodeElementDrawer.cs" />
     <Compile Include="UserInterface\BooleanValueOptionsItem.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -64,46 +61,20 @@
     <Compile Include="UserInterface\CreateNewCode.Designer.cs">
       <DependentUpon>CreateNewCode.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataBlocks\Symbols\EncodingSymbols\AlphaNumericEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\Symbols\ByteSymbol.cs" />
-    <Compile Include="DataBlocks\DrawableCode.cs" />
-    <Compile Include="DataBlocks\SymbolCodes\IByteSymbolCode.cs" />
-    <Compile Include="DataBlocks\QRCodeBitIterator.cs" />
-    <Compile Include="DataBlocks\Symbols\EncodingSymbols\ByteEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\Symbols\CodeSymbol.cs" />
-    <Compile Include="DataBlocks\SymbolCodes\ByteSymbolCodeBitIterator.cs" />
-    <Compile Include="DataBlocks\IBitIterator.cs" />
-    <Compile Include="DataBlocks\Symbols\EncodingSymbols\IEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\SymbolCodes\ByteSymbolCode.cs" />
-    <Compile Include="DataBlocks\Symbols\EncodingSymbols\NumericEncodingSymbol.cs" />
-    <Compile Include="DataBlocks\Symbols\TerminatorSymbol.cs" />
-    <Compile Include="DataBlocks\OverrideByteSymbolCodeValuesBitIterator.cs" />
-    <Compile Include="ECCDecoding\DeInterleaver.cs" />
-    <Compile Include="ECCDecoding\ECCBlock.cs" />
     <Compile Include="UserInterface\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UserInterface\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MetaInfo\ECCGroupInfo.cs" />
-    <Compile Include="MetaInfo\ErrorCorrectionLevel.cs" />
-    <Compile Include="PolygonEdge.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QRCode.cs" />
-    <Compile Include="MetaInfo\QRCodeCapacities.cs" />
-    <Compile Include="QRCodeFormatException.cs" />
-    <Compile Include="MetaInfo\QRCodeVersion.cs" />
     <Compile Include="UserInterface\StringValueOptionsItem.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="UserInterface\StringValueOptionsItem.Designer.cs">
       <DependentUpon>StringValueOptionsItem.cs</DependentUpon>
     </Compile>
-    <Compile Include="Vector2D.cs" />
-    <Compile Include="DataBlocks\Symbols\RawCodeByte.cs" />
-    <Compile Include="XORMask.cs" />
     <EmbeddedResource Include="UserInterface\BooleanValueOptionsItem.resx">
       <DependentUpon>BooleanValueOptionsItem.cs</DependentUpon>
     </EmbeddedResource>
@@ -126,7 +97,6 @@
     <EmbeddedResource Include="UserInterface\StringValueOptionsItem.resx">
       <DependentUpon>StringValueOptionsItem.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -164,6 +134,11 @@
   <ItemGroup>
     <None Include="Resources\mask111.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\QRCodeBaseLib\QRCodeBaseLib.csproj">
+      <Project>{3357734a-fad0-4895-be65-b3ff8f37113b}</Project>
+      <Name>QRCodeBaseLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

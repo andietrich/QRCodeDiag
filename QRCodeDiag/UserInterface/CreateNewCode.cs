@@ -1,4 +1,4 @@
-﻿using QRCodeDiag.MetaInfo;
+﻿using QRCodeBaseLib.MetaInfo;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
