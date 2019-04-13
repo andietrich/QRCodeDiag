@@ -24,7 +24,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         public override string ToString()
         {
             base.TryGetAsByte(out byte numericValue);
-            return "0x" + BitConverter.ToString(new byte[] { numericValue });
+            return BitConverter.ToString(new byte[] { numericValue }) + "h";
         }
     }
 }

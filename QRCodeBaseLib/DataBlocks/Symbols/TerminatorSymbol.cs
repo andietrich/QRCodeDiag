@@ -23,7 +23,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
 
         public override string ToString()
         {
-            return this.terminatorBitString;
+            return this.terminatorBitString + "b";
         }
     }
 }
