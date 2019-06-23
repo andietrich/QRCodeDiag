@@ -19,7 +19,15 @@ namespace QRCodeDiag.UserInterface
             get { return this.valueTextBox.Text; }
             set { this.valueTextBox.Text = value; }
         }
-        public StringValueOptionsItem(string label = "Name of the Value")
+        public string ValueName
+        {
+            get { return this.valueNameLabel.Text; }
+            set { this.valueNameLabel.Text = value; }
+        }
+        public StringValueOptionsItem() : this("Name of the Value")
+        {
+        }
+        public StringValueOptionsItem(string label)
         {
             InitializeComponent();
             this.valueNameLabel.Text = label;

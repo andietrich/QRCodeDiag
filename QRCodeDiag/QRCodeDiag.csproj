@@ -55,6 +55,12 @@
     <Compile Include="UserInterface\BooleanValueOptionsItem.Designer.cs">
       <DependentUpon>BooleanValueOptionsItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserInterface\CodeSymbolCodeOptionsItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserInterface\CodeSymbolCodeOptionsItem.Designer.cs">
+      <DependentUpon>CodeSymbolCodeOptionsItem.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserInterface\CreateNewCode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +83,9 @@
     </Compile>
     <EmbeddedResource Include="UserInterface\BooleanValueOptionsItem.resx">
       <DependentUpon>BooleanValueOptionsItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserInterface\CodeSymbolCodeOptionsItem.resx">
+      <DependentUpon>CodeSymbolCodeOptionsItem.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserInterface\CreateNewCode.resx">
       <DependentUpon>CreateNewCode.cs</DependentUpon>

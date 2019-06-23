@@ -39,28 +39,28 @@ namespace QRCodeDiag
                 switch (edge.GetDirection()) // Inside is on the right looking in edge direction.
                 {
                     case PolygonEdge.Direction.Down:
-                        edgeStartX -= (penWidth / 2); // shift left
-                        edgeEndX -= (penWidth / 2);   // shift left
-                        edgeStartY += (penWidth / 2); // push down
-                        edgeEndY -= (penWidth / 2);  // pull up
+                        edgeStartX -= penWidth / 2; // shift left
+                        edgeEndX -= penWidth / 2;   // shift left
+                        edgeStartY += penWidth / 2; // push down
+                        edgeEndY -= penWidth / 2;  // pull up
                         break;
                     case PolygonEdge.Direction.Up:
-                        edgeStartX += (penWidth / 2); // shift right
-                        edgeEndX += (penWidth / 2);   // shift right
-                        edgeStartY -= (penWidth / 2); // push up
-                        edgeEndY += (penWidth / 2);   // pull down
+                        edgeStartX += penWidth / 2; // shift right
+                        edgeEndX += penWidth / 2;   // shift right
+                        edgeStartY -= penWidth / 2; // push up
+                        edgeEndY += penWidth / 2;   // pull down
                         break;
                     case PolygonEdge.Direction.Left:
-                        edgeStartX -= (penWidth / 2); // shift left
-                        edgeEndX += (penWidth / 2);   // shift right
-                        edgeStartY -= (penWidth / 2); // pull up
-                        edgeEndY -= (penWidth / 2);   // pull up
+                        edgeStartX -= penWidth / 2; // shift left
+                        edgeEndX += penWidth / 2;   // shift right
+                        edgeStartY -= penWidth / 2; // pull up
+                        edgeEndY -= penWidth / 2;   // pull up
                         break;
                     case PolygonEdge.Direction.Right:
-                        edgeStartX += (penWidth / 2); // shift right
-                        edgeEndX -= (penWidth / 2);   // shift left
-                        edgeStartY += (penWidth / 2); // push down
-                        edgeEndY += (penWidth / 2);   // push down
+                        edgeStartX += penWidth / 2; // shift right
+                        edgeEndX -= penWidth / 2;   // shift left
+                        edgeStartY += penWidth / 2; // push down
+                        edgeEndY += penWidth / 2;   // push down
                         break;
                     default:
                         throw new NotImplementedException("Drawing Direction type " + edge.GetDirection().ToString() + " is not implemented.");

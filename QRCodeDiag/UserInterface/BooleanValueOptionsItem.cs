@@ -25,7 +25,12 @@ namespace QRCodeDiag.UserInterface
                 this.enableCheckBox.Checked = value;
             }
         }
-        public BooleanValueOptionsItem(string label = "Name of the Value", string cbDescription = "checkbox description")
+
+        public BooleanValueOptionsItem() : this("Name of the Value", "checkbox description")
+        {
+
+        }
+        public BooleanValueOptionsItem(string label, string cbDescription)
         {
             InitializeComponent();
             this.valueNameLabel.Text = label;
