@@ -30,17 +30,17 @@ namespace QRCodeBaseLib.MetaInfo
                                                             {7, 12, 20, 28, 37, 45, 53, 66, 80, 93, 109, 125, 149, 159, 180, 198, 224, 243, 272, 297, 314, 348, 376, 407, 440, 462, 496, 534, 559, 604, 634, 684, 719, 756, 790, 832, 876, 923, 972, 1024},
                                                             {4, 8, 15, 21, 27, 36, 39, 52, 60, 74, 85, 96, 109, 120, 136, 154, 173, 191, 208, 235, 248, 270, 284, 315, 330, 365, 385, 405, 430, 457, 486, 518, 553, 590, 605, 647, 673, 701, 750, 784} };
 
-        public static int GetCapacity(QRCodeVersion version, ECCLevel eccLevel, MessageMode mode)
+        public static int GetCapacity(QRCodeVersion version, ECCLevel eccLevel, MessageMode.Mode mode)
         {
             switch (mode)
             {
-                case MessageMode.Numeric:
+                case MessageMode.Mode.Numeric:
                     return numeric_capacity[(int)eccLevel, version.VersionNumber-1];
-                case MessageMode.Alphanumeric:
+                case MessageMode.Mode.Alphanumeric:
                     return alphanumeric_capacity[(int)eccLevel, version.VersionNumber - 1];
-                case MessageMode.Byte:
+                case MessageMode.Mode.Byte:
                     return bytemode_capacity[(int)eccLevel, version.VersionNumber - 1];
-                case MessageMode.Kanji:
+                case MessageMode.Mode.Kanji:
                     return kanji_capacity[(int)eccLevel, version.VersionNumber - 1];
                 default:
                     throw new ArgumentException("Invalid MessageMode", "mode");
@@ -49,7 +49,7 @@ namespace QRCodeBaseLib.MetaInfo
 
         public static int GetDataBytes(QRCodeVersion version, ECCLevel eccLevel)
         {
-            var cap = GetCapacity(version, eccLevel, MessageMode.Byte);
+            var cap = GetCapacity(version, eccLevel, MessageMode.Mode.Byte);    // TODO other modes?
             if(version.VersionNumber < 10)
             {
                 return cap + 2; // indicator nibble (+ terminator) + 8 bit length

@@ -14,7 +14,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
     /// </summary>
     class ByteEncodingSymbol : ByteSymbol, IEncodingSymbol
     {
-        public MessageMode EncodingType { get { return MessageMode.Byte; } }
+        public MessageMode.Mode EncodingType { get { return MessageMode.Mode.Byte; } }
         public override object Clone()
         {
             var ret = new ByteEncodingSymbol();

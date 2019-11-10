@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeBaseLib.MetaInfo;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
 {
     class NumericEncodingSymbol : CodeSymbol, IEncodingSymbol
     {
-        public MessageMode EncodingType { get { return MessageMode.Numeric; } }
+        public MessageMode.Mode EncodingType { get { return MessageMode.Mode.Numeric; } }
         public NumericEncodingSymbol() : base(GetSymbolLength())
         { }
 
