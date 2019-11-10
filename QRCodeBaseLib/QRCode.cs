@@ -1,4 +1,4 @@
-﻿using QRCodeBaseLib.MetaInfo;
+using QRCodeBaseLib.MetaInfo;
 using QRCodeBaseLib.DataBlocks;
 using System;
 using System.Collections.Generic;
@@ -476,9 +476,9 @@ namespace QRCodeBaseLib
             {
                 return false;
             }
-            else if(this.Version.GetEdgeSizeFromVersion() > 6
-            && (    x < 6 && y < (this.GetEdgeLength() - 8) && y > (this.GetEdgeLength() - 12))
-                || (y < 6 && x < (this.GetEdgeLength() - 8) && x > (this.GetEdgeLength() - 12)))
+            else if(    this.Version.VersionNumber > 6  // version 7 or larger has additional version information
+                    && (    (x < 6 && y < (this.GetEdgeLength() - 8) && y > (this.GetEdgeLength() - 12))
+                         || (y < 6 && x < (this.GetEdgeLength() - 8) && x > (this.GetEdgeLength() - 12))))
             {
                 return false;
             }
