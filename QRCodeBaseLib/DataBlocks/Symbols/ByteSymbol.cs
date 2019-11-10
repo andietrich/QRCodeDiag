@@ -43,7 +43,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
                     unknownBits = true;
                 }
             }
-            System.Diagnostics.Debug.Assert(Convert.ToByte(this.BitString, 2) == value);
+            System.Diagnostics.Debug.Assert(Convert.ToByte(this.BitString.Replace("u", unknownBitValue.ToString()), 2) == value);
             return unknownBits;
         }
     }
