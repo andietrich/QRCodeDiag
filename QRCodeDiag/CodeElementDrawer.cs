@@ -92,9 +92,9 @@ namespace QRCodeDiag
             }
         }
 
-        public void DrawCodeSymbolCode(ICodeSymbolCode codeToDraw, Graphics g, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices)
+        public void DrawCodeSymbolCode<T>(CodeSymbolCode<T> codeToDraw, Graphics g, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices) where T : CodeSymbol, new()
         {
-            var preferredSymbolDrawLocation = 2;
+            const int preferredSymbolDrawLocation = 2;
             var largeFont = new Font(this.fontFamily, this.codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var symbolIndexBrush = new SolidBrush(symbolColor);
             var codeSymbolList = codeToDraw.GetCodeSymbols();

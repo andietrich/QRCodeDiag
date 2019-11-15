@@ -4,7 +4,7 @@ using System.Text;
 
 namespace QRCodeBaseLib.MetaInfo
 {
-    internal class MessageMode
+    public class MessageMode
     {
         public enum Mode
         {
@@ -15,7 +15,7 @@ namespace QRCodeBaseLib.MetaInfo
             Kanji = 8
         }
 
-        public static bool TryParse(int value, out Mode mode)
+        internal static bool TryParse(int value, out Mode mode)
         {
             if (Enum.IsDefined(typeof(MessageMode.Mode), value))
             {
@@ -29,7 +29,7 @@ namespace QRCodeBaseLib.MetaInfo
             }
         }
 
-        public static int GetCharacterCountIndicatorLength(QRCodeVersion version, Mode mode)
+        internal static int GetCharacterCountIndicatorLength(QRCodeVersion version, Mode mode)
         {
             switch (mode)
             {
@@ -69,7 +69,7 @@ namespace QRCodeBaseLib.MetaInfo
         }
 
 
-        public static int GetCharacterLength(Mode mode)
+        internal static int GetCharacterLength(Mode mode)
         {
             switch (mode)
             {

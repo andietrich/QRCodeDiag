@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 {
-    class CodeSymbolCodeBitIterator : IBitIterator
+    internal class CodeSymbolCodeBitIterator : IBitIterator
     {
         private readonly ICodeSymbolCode symbolCode;
         private readonly string bitString;

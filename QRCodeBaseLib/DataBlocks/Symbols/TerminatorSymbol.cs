@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols
 {
-    internal class TerminatorSymbol : CodeSymbol
+    public class TerminatorSymbol : CodeSymbol
     {
         private string terminatorBitString;
         public override string BitString { get { return this.terminatorBitString; } }

@@ -65,7 +65,7 @@ namespace QRCodeDiag.UserInterface
                 this.pictureBox1.Invalidate();
             }
         }
-        private QRCode BackgroundCode //ToDo better solution needed
+        private QRCode BackgroundCode
         {
             get
             {
@@ -86,6 +86,16 @@ namespace QRCodeDiag.UserInterface
             this.ShowPaddingOverlay = true;
             this.ShowXORed = false;
             this.CurrentMaskUsed = MaskType.None;
+            this.RecalculateFormMinimumSize();
+
+            var optitem = new CodeSymbolCodeOptionsItem();
+            optitem.CodeSymbolName = "Code symbol 1";
+            var optitem2 = new CodeSymbolCodeOptionsItem();
+            optitem2.CodeSymbolName = "Code symbol 2";
+            this.optionsTableLayoutPanel.Controls.Add(optitem, 0, 0);
+            //this.optionsTableLayoutPanel.Controls.Add(button_x, 0, 0);
+            //this.optionsTableLayoutPanel.Controls.Add(button_x2, 0, 1);
+            this.optionsTableLayoutPanel.Controls.Add(optitem2, 0, 1);
         }
 
         private void openToolStripButton_Click(object sender, EventArgs e)
@@ -113,6 +123,8 @@ namespace QRCodeDiag.UserInterface
                 bool    drawTransparent = this.pictureBox1.BackgroundImage != null;
                 var     codeDrawer      = new CodeElementDrawer(codeElWidth, codeElHeight);
                 var     rawCode         = this.BackgroundCode.GetRawCode();
+                var     rawDataBytes    = this.backgroundCode.GetRawDataBytes();
+                var     rawECCBytes     = this.backgroundCode.GetRawECCBytes();
                 var     encodedData     = this.BackgroundCode.GetEncodedSymbols();
                 var     padding         = this.BackgroundCode.GetPaddingBits();
                 var     terminator      = this.BackgroundCode.GetTerminator();
@@ -128,11 +140,20 @@ namespace QRCodeDiag.UserInterface
                 if (this.ShowEncodingOverlay && encodedData != null)
                     codeDrawer.DrawCodeSymbolCode(encodedData, e.Graphics, Color.Red, Color.LightBlue, true, true);
 
-                if (this.ShowPaddingOverlay && padding != null)
-                    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
 
-                if (this.ShowPaddingOverlay && terminator != null)  // ToDo separate condition this.ShowPaddingOverlay for terminator
-                    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
+                //////////////////////////////////////// testing only
+                if (this.ShowPaddingOverlay && rawDataBytes != null)
+                    codeDrawer.DrawCodeSymbolCode(rawDataBytes, e.Graphics, Color.Blue, Color.LightBlue, true, true);
+
+                if (this.ShowPaddingOverlay && rawDataBytes != null)
+                    codeDrawer.DrawCodeSymbolCode(rawECCBytes, e.Graphics, Color.Purple, Color.LightBlue, true, true);
+                //////////////////////////////////////// ^^^^^^^testing only
+
+                //if (this.ShowPaddingOverlay && padding != null)
+                //    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
+
+                //if (this.ShowPaddingOverlay && terminator != null)  // ToDo separate condition this.ShowPaddingOverlay for terminator
+                //    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
             }
         }
 
@@ -308,6 +329,7 @@ namespace QRCodeDiag.UserInterface
                 try
                 {
                     this.pictureBox1.BackgroundImage = System.Drawing.Image.FromFile(this.bgImgOpenFileDialog.FileName);
+                    this.pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
                 }
                 catch(OutOfMemoryException ex)
                 {
@@ -318,21 +340,63 @@ namespace QRCodeDiag.UserInterface
 
         private void pictureBox1_Resize(object sender, EventArgs e)
         {
-            if (sender is Control)
-            {
-                Control control = (Control)sender;
-                if (control.Size.Height != control.Size.Width)
-                {
-                    control.Size = new System.Drawing.Size(control.Size.Height, control.Size.Height);
-                    
-                }
-            }
+            //if (sender is Control)
+            //{
+            //    Control control = (Control)sender;
+            //    if (control.Size.Height != control.Size.Width)
+            //    {
+            //        control.Size = new System.Drawing.Size(control.Size.Height, control.Size.Height);
+            //    }
+            //}
         }
 
         private void Form1_ResizeEnd(object sender, EventArgs e)
         {
-            var newMinFormWidth = this.pictureBox1.Size.Width + 3 * this.pictureBox1.Location.X;
-            this.Size = new System.Drawing.Size(newMinFormWidth, this.Size.Height);
+            //var newMinFormWidth = this.pictureBox1.Size.Width + 3 * this.pictureBox1.Location.X;
+            //this.Size = new System.Drawing.Size(newMinFormWidth, this.Size.Height);
+        }
+
+        private void topTableLayoutPanel_Resize(object sender, EventArgs e)
+        {
+            var tlPanel = sender as TableLayoutPanel;
+
+            var width = tlPanel.GetColumnWidths()[0];
+            var height = tlPanel.GetRowHeights()[0];
+            var edgeLength = Math.Min(width-9, height-9);
+
+            this.pictureBox1.Size = new Size(edgeLength, edgeLength);
+        }
+
+        private void optionsTableLayoutPanel_ControlAdded(object sender, ControlEventArgs e)
+        {
+            var newMinSize = this.pictureBox1.MinimumSize;
+            var optionsWidth = 0;
+            var optionsHeight = 0;
+
+            foreach (var c in this.optionsTableLayoutPanel.Controls)
+            {
+                Control ctrl = c as Control;
+                optionsHeight += ctrl.MinimumSize.Height;
+                if (ctrl.MinimumSize.Width > optionsWidth)
+                    optionsWidth = ctrl.MinimumSize.Width;
+            }
+            newMinSize.Width += optionsWidth + 19; // 4x 4 pixels to border + 3 pixels border
+            newMinSize.Height = Math.Max(newMinSize.Height, optionsHeight) + 10; // 2x 4 pixels to border + 2 pixels border
+            this.topTableLayoutPanel.MinimumSize = newMinSize;
+
+            this.RecalculateFormMinimumSize();
+        }
+
+        private void RecalculateFormMinimumSize()
+        {
+            var newMinimumSize = new Size();
+            newMinimumSize.Height = this.textBox1.MinimumSize.Height
+                                  + this.topTableLayoutPanel.MinimumSize.Height
+                                  + this.toolStrip1.MinimumSize.Height
+                                  + 30 + 3 + 6 + 12;
+            newMinimumSize.Width = Math.Max(this.toolStrip1.MinimumSize.Width, this.topTableLayoutPanel.MinimumSize.Width + 40); // 2x 12 + 2x 8 form border
+
+            this.MinimumSize = newMinimumSize;
         }
     }
 }
