@@ -21,18 +21,6 @@ namespace QRCodeBaseLib
         public event ECCLevelChangedHandler ECCLevelChangedEvent;
         public event MessageChangedHandler MessageChangedEvent;
 
-        public enum MaskType
-        {
-            Mask000 = 0,
-            Mask001 = 1,
-            Mask010 = 2,
-            Mask011 = 3,
-            Mask100 = 4,
-            Mask101 = 5,
-            Mask110 = 6,
-            Mask111 = 7,
-            None
-        }
         private enum FormatInfoLocation
         {
             TopLeft,
@@ -371,14 +359,14 @@ namespace QRCodeBaseLib
             switch (loc)
             {
                 case FormatInfoLocation.TopLeft:
-                    for (int x = 0; x < 8; x++) // left to right
+                    for (int x = 0; x < 9; x++) // left to right (including corner 7th bit)
                     {
                         if (x != 6)
                         {
                             fInfo.Add(this.bits[x, 8]);
                         }
                     }
-                    for (int y = 7; y >= 0; y--) // towards top
+                    for (int y = 7; y >= 0; y--) // towards top (excluding corner, bits 8-14)
                     {
                         if (y != 6)
                         {
@@ -392,7 +380,7 @@ namespace QRCodeBaseLib
                     {
                         fInfo.Add(this.bits[8, y]);
                     }
-                    for (int x = edgeLen - 9; x < edgeLen; x++) // towards right edge
+                    for (int x = edgeLen - 8; x < edgeLen; x++) // towards right edge
                     {
                         fInfo.Add(this.bits[x, 8]);
                     }
@@ -403,8 +391,28 @@ namespace QRCodeBaseLib
             }
         }
 
+        private void ReadFormatInformation()
+        {
+            var splitInfo = new string(this.GetFormatInfo(FormatInfoLocation.SplitBottomLeftTopRight));
+            var topLeftInfo = new string(this.GetFormatInfo(FormatInfoLocation.TopLeft));
+            // TODO use correction mechanism of format info
+
+            if (splitInfo == topLeftInfo)
+            {
+                var fi = new FormatInformation(splitInfo);
+                this.ECCLevel = fi.ECCLevel;
+                // TODO do something with Mask information
+            }
+            else
+            {
+                //TODO display error message
+            }
+        }
+
         private string ReadMessage() //ToDo length check of messageBytes, 
         {
+            this.ReadFormatInformation(); // TODO check where the right place to call this is
+
             this.rawCode = new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
             this.interleavingBlocks = DeInterleaver.DeInterleave(this.rawCode, this.eccLevel);
 
@@ -608,7 +616,7 @@ namespace QRCodeBaseLib
         //    return ret;
         //}
 
-        public string RepairMessage()
+        public string GetRepairMessageStatusLine()
         {
             if (this.interleavingBlocks == null)
             {

@@ -10,6 +10,19 @@ namespace QRCodeBaseLib
 {
     public class XORMask
     {
+        public enum MaskType
+        {
+            Mask000 = 0,
+            Mask001 = 1,
+            Mask010 = 2,
+            Mask011 = 3,
+            Mask100 = 4,
+            Mask101 = 5,
+            Mask110 = 6,
+            Mask111 = 7,
+            None
+        }
+
         public static QRCode XOR(QRCode code, MaskType maskType)
         {
             if (code == null)

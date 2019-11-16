@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static QRCodeBaseLib.QRCode;
 
 namespace QRCodeDiag.UserInterface
 {
@@ -30,14 +29,14 @@ namespace QRCodeDiag.UserInterface
 
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
         private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
-        private MaskType maskUsed; // ToDo use better solution when mask application gets automated
+        private XORMask.MaskType maskUsed; // ToDo use better solution when mask application gets automated
         //private ButtonDown buttonDown; //ToDo: hold button to draw lines
         public bool ShowRawOverlay { get; set; }
         public bool ShowEncodingOverlay { get; set; }
         public bool ShowPaddingOverlay { get; set; }
         public bool ShowXORed { get; set; }
 
-        private MaskType CurrentMaskUsed
+        private XORMask.MaskType CurrentMaskUsed
         {
             get { return this.maskUsed; }
             set
@@ -45,7 +44,7 @@ namespace QRCodeDiag.UserInterface
                 this.maskUsed = value;
                 if (this.DisplayCode != null)
                 {
-                    this.BackgroundCode = (value == MaskType.None) ? this.DisplayCode : XORMask.XOR(this.DisplayCode, value);
+                    this.BackgroundCode = (value == XORMask.MaskType.None) ? this.DisplayCode : XORMask.XOR(this.DisplayCode, value);
                 }
             }
         }
@@ -58,7 +57,7 @@ namespace QRCodeDiag.UserInterface
             set
             {
                 this.backgroundCode = value;
-                this.CurrentMaskUsed = MaskType.None; // resetting the backgroundCode
+                this.CurrentMaskUsed = XORMask.MaskType.None; // resetting the backgroundCode
 
                 this.displayCode = value;
                 this.UpdateTextBox();
@@ -85,7 +84,7 @@ namespace QRCodeDiag.UserInterface
             this.ShowEncodingOverlay = true;
             this.ShowPaddingOverlay = true;
             this.ShowXORed = false;
-            this.CurrentMaskUsed = MaskType.None;
+            this.CurrentMaskUsed = XORMask.MaskType.None;
             this.RecalculateFormMinimumSize();
 
             var optitem = new CodeSymbolCodeOptionsItem();
@@ -202,7 +201,7 @@ namespace QRCodeDiag.UserInterface
                     else
                         sb.AppendLine(string.Join(Environment.NewLine, this.BackgroundCode.GetPaddingBits().GetSymbolBitStrings()));
                     
-                    sb.AppendLine("RepairMessage():" + this.BackgroundCode.RepairMessage());
+                    sb.AppendLine("RepairMessage():" + this.BackgroundCode.GetRepairMessageStatusLine());
                 }
                 catch (QRCodeFormatException qfe)
                 {
@@ -223,7 +222,7 @@ namespace QRCodeDiag.UserInterface
         {
             if(this.DisplayCode != null)
             {
-                if (this.CurrentMaskUsed == MaskType.None)
+                if (this.CurrentMaskUsed == XORMask.MaskType.None)
                 {
                     this.BackgroundCode = this.DisplayCode;
                 }
@@ -284,42 +283,42 @@ namespace QRCodeDiag.UserInterface
 
         private void mask000ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-             this.CurrentMaskUsed = MaskType.Mask000;
+             this.CurrentMaskUsed = XORMask.MaskType.Mask000;
         }
 
         private void mask001ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask001;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask001;
         }
 
         private void mask010ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask010;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask010;
         }
 
         private void mask011ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask011;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask011;
         }
 
         private void mask100ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask100;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask100;
         }
 
         private void mask101ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask101;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask101;
         }
 
         private void mask110ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask110;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask110;
         }
 
         private void mask111ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.CurrentMaskUsed = MaskType.Mask111;
+            this.CurrentMaskUsed = XORMask.MaskType.Mask111;
         }
 
         private void bgImgToolStripButton_Click(object sender, EventArgs e)
