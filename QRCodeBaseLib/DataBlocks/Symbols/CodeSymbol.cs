@@ -25,6 +25,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             this.bitCoordinates = new List<Vector2D>((int)symbolLength);
         }
 
+        /* Filling from most significant bit to least significant bit */
         internal void AddBit(char bit, Vector2D bitPosition)
         {
             if (this.bitCoordinates.Count == this.SymbolLength)

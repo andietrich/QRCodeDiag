@@ -65,7 +65,9 @@ namespace QRCodeBaseLib.DataBlocks
 
         private char GetBitCharAt(int index)
         {
-            var bitValue = (((byte)newValues[index / ByteSymbol.BYTESYMBOLLENGTH]) >> (int)(index % ByteSymbol.BYTESYMBOLLENGTH)) & 1;
+            var bytePos = index / ByteSymbol.BYTESYMBOLLENGTH;
+            var bitPos = (int)((ByteSymbol.BYTESYMBOLLENGTH - 1) - (index % ByteSymbol.BYTESYMBOLLENGTH));  // iterate from msbit to lsbit
+            var bitValue = (((byte)newValues[bytePos]) >> bitPos) & 1;
             if (bitValue == 1)
                 return '1';
             else
