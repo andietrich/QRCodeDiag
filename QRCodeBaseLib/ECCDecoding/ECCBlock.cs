@@ -40,7 +40,7 @@ namespace QRCodeBaseLib.ECCDecoding
                 var dataArr = new int[this.preRepairData.SymbolCount];
                 var eccArr = new int[this.preRepairECC.SymbolCount];
                 Array.Copy(dataWithECC, 0, dataArr, 0, dataArr.Length);
-                Array.Copy(dataWithECC, this.preRepairECC.SymbolCount, eccArr, 0, eccArr.Length);
+                Array.Copy(dataWithECC, dataArr.Length, eccArr, 0, eccArr.Length);
                 var dataIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairData, dataArr);
                 var eccIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairECC, eccArr);
                 this.postRepairData = new CodeSymbolCode<RawCodeByte>(dataIt);

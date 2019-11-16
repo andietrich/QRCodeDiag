@@ -16,11 +16,12 @@ namespace QRCodeBaseLib.DataBlocks
     class OverrideByteSymbolCodeValuesBitIterator<T> : IBitIterator where T: ByteSymbol, new()
     {
         private int bitPosition;
+        private int bitCount;
         public bool EndReached
         {
             get
             {
-                return this.bitPosition >= this.newValues.Length;
+                return this.bitPosition >= this.bitCount;
             }
         }
 
@@ -32,7 +33,7 @@ namespace QRCodeBaseLib.DataBlocks
                 {
                     return this.GetBitCharAt(0);
                 }
-                else if (this.bitPosition < this.newValues.Length)
+                else if (!this.EndReached)
                 {
                     return this.GetBitCharAt(this.bitPosition);
                 }
@@ -57,6 +58,7 @@ namespace QRCodeBaseLib.DataBlocks
         public OverrideByteSymbolCodeValuesBitIterator(CodeSymbolCode<T> _originalCode, int[] _newValues)
         {
             this.bitPosition = -1;
+            this.bitCount = _originalCode.BitCount;
             this.originalCode = _originalCode;
             this.newValues = _newValues;
         }

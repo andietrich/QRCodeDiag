@@ -19,7 +19,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             {
                 if(this.codeSymbolList.Count > 1)
                 {
-                    return this.codeSymbolList.Count * ((int)this.codeSymbolList[0].SymbolLength - 1) + this.codeSymbolList[this.codeSymbolList.Count - 1].CurrentSymbolLength;
+                    return (this.codeSymbolList.Count-1) * ((int)this.codeSymbolList[0].SymbolLength) + this.codeSymbolList[this.codeSymbolList.Count - 1].CurrentSymbolLength;
                 }
                 else if (this.codeSymbolList.Count == 1)
                 {

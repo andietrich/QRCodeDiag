@@ -44,9 +44,10 @@ namespace QRCodeBaseLib.ECCDecoding
             {
                 for (int i = 0; i < numberOfBlocks; i++)            // for each block
                 {
-                    if (i < DeInterleaver.GetBlockLength(i, eccGroups)) // skip block if it is already full
+                    if (j < DeInterleaver.GetBlockLength(i, eccGroups)) // skip block if it is already full
                     {
                         dataCodewords[i, j] = interleavedCode.GetSymbolAt(pos++);
+                        System.Diagnostics.Debug.Assert(dataCodewords[i, j] != null);
                     }
                 }
             }
@@ -60,6 +61,8 @@ namespace QRCodeBaseLib.ECCDecoding
             }
 
             var eccBlockList = new List<ECCBlock>();
+            int absBlockNo = 0;
+
             for (int g = 0; g < eccGroups.Length; g++)                       // group
             {
                 for (int b = 0; b < eccGroups[g].NumberOfBlocks; b++)        // block
@@ -68,14 +71,15 @@ namespace QRCodeBaseLib.ECCDecoding
                     var blockECC = new List<RawCodeByte>();
                     for (int s = 0; s < eccGroups[g].DataBytesPerBlock; s++) // data symbol
                     {
-                        blockData.Add(dataCodewords[b, s]);
+                        blockData.Add(dataCodewords[absBlockNo, s]);
                     }
                     for (int e = 0; e < eccLevel.ECCBytesPerBlock; e++)      // ecc symbol
                     {
-                        blockECC.Add(eccCodewords[b, e]);
+                        blockECC.Add(eccCodewords[absBlockNo, e]);
                     }
                     eccBlockList.Add(new ECCBlock(new CodeSymbolCode<RawCodeByte>(blockData),
                                                   new CodeSymbolCode<RawCodeByte>(blockECC)));
+                    absBlockNo++;
                 }
             }
             return eccBlockList;
