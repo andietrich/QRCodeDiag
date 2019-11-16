@@ -6,6 +6,12 @@ namespace QRCodeBaseLib.MetaInfo
 {
     internal class FormatInformation
     {
+        public enum FormatInfoLocation
+        {
+            TopLeft,
+            SplitBottomLeftTopRight
+        }
+
         public ErrorCorrectionLevel.ECCLevel ECCLevel;
         public XORMask.MaskType Mask;
 
@@ -176,6 +182,48 @@ namespace QRCodeBaseLib.MetaInfo
                 default:
                     throw new ArgumentException($"{0} is not a valid format information string.");
             }
+        }
+
+        public static List<Vector2D> GetFormatInformationLocations(QRCodeVersion version, FormatInformation.FormatInfoLocation loc)
+        {
+            var retList = new List<Vector2D>();
+            int edgeLen = (int)version.GetEdgeSizeFromVersion();
+
+            switch (loc)
+            {
+                case FormatInfoLocation.TopLeft:
+                    for (int x = 0; x < 9; x++) // left to right (including corner 7th bit)
+                    {
+                        if (x != 6)
+                        {
+                            retList.Add(new Vector2D(x, 8));
+                        }
+                    }
+                    for (int y = 7; y >= 0; y--) // towards top (excluding corner, bits 8-14)
+                    {
+                        if (y != 6)
+                        {
+                            retList.Add(new Vector2D(8, y));
+                        }
+                    }
+                    break;
+
+                case FormatInfoLocation.SplitBottomLeftTopRight:
+                    for (int y = edgeLen - 1; y >= edgeLen - 7; y--) // from bottom up
+                    {
+                        retList.Add(new Vector2D(8, y));
+                    }
+                    for (int x = edgeLen - 8; x < edgeLen; x++) // towards right edge
+                    {
+                        retList.Add(new Vector2D(x, 8));
+                    }
+                    break;
+
+                default:
+                    throw new NotImplementedException(); // TODO version information for version 8+?
+            }
+
+            return retList;
         }
     }
 }

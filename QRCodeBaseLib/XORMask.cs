@@ -80,27 +80,48 @@ namespace QRCodeBaseLib
 
         private static char[,] GetMask(MaskType mtype, QRCodeVersion version)
         {
+            char[,] retVal;
+
             switch (mtype)
             {
                 case MaskType.Mask000:
-                    return GetMask000(version);
+                    retVal = GetMask000(version);
+                    break;
                 case MaskType.Mask001:
-                    return GetMask001(version);
+                    retVal = GetMask001(version);
+                    break;
                 case MaskType.Mask010:
-                    return GetMask010(version);
+                    retVal = GetMask010(version);
+                    break;
                 case MaskType.Mask011:
-                    return GetMask011(version);
+                    retVal = GetMask011(version);
+                    break;
                 case MaskType.Mask100:
-                    return GetMask100(version);
+                    retVal = GetMask100(version);
+                    break;
                 case MaskType.Mask101:
-                    return GetMask101(version);
+                    retVal = GetMask101(version);
+                    break;
                 case MaskType.Mask110:
-                    return GetMask110(version);
+                    retVal = GetMask110(version);
+                    break;
                 case MaskType.Mask111:
-                    return GetMask111(version);
+                    retVal = GetMask111(version);
+                    break;
                 default:
-                    return GetEmptyMask(version);
+                    retVal = GetEmptyMask(version);
+                    break;
             }
+
+            var formatInfoLocs = FormatInformation.GetFormatInformationLocations(version, FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight);
+            formatInfoLocs.AddRange(FormatInformation.GetFormatInformationLocations(version, FormatInformation.FormatInfoLocation.TopLeft));
+
+            foreach (var loc in formatInfoLocs)
+            {
+                retVal[loc.X, loc.Y] = '0';
+            }
+
+            return retVal;
         }
         private static char[,] GetEmptyMask(QRCodeVersion version)
         {

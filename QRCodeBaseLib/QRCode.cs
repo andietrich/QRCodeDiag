@@ -21,12 +21,6 @@ namespace QRCodeBaseLib
         public event ECCLevelChangedHandler ECCLevelChangedEvent;
         public event MessageChangedHandler MessageChangedEvent;
 
-        private enum FormatInfoLocation
-        {
-            TopLeft,
-            SplitBottomLeftTopRight
-        }
-
         #region private members
 
         private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
@@ -157,9 +151,7 @@ namespace QRCodeBaseLib
             try
             {
                 this.version = QRCodeVersion.GetVersionFromSize((uint)cells.Count);
-
-                this.ECCLevel = ErrorCorrectionLevel.ECCLevel.Low; //ToDo read from data or default
-
+                
                 this.bits = new char[cells.Count, cells.Count];
                 for (int y = 0; y < cells.Count; y++)
                 {
@@ -352,49 +344,23 @@ namespace QRCodeBaseLib
             }
         }
 
-        private char[] GetFormatInfo(FormatInfoLocation loc)
+        private char[] GetFormatInfo(FormatInformation.FormatInfoLocation loc)
         {
             var fInfo = new List<char>();
-            var edgeLen = this.GetEdgeLength();
-            switch (loc)
+            var fInfoLocs = FormatInformation.GetFormatInformationLocations(this.version, loc);
+
+            for(int i = 0; i < fInfoLocs.Count; i++)
             {
-                case FormatInfoLocation.TopLeft:
-                    for (int x = 0; x < 9; x++) // left to right (including corner 7th bit)
-                    {
-                        if (x != 6)
-                        {
-                            fInfo.Add(this.bits[x, 8]);
-                        }
-                    }
-                    for (int y = 7; y >= 0; y--) // towards top (excluding corner, bits 8-14)
-                    {
-                        if (y != 6)
-                        {
-                            fInfo.Add(this.bits[8, y]);
-                        }
-                    }
-                    return fInfo.ToArray();
-
-                case FormatInfoLocation.SplitBottomLeftTopRight:
-                    for (int y = edgeLen - 1; y >= edgeLen - 7; y--) // from bottom up
-                    {
-                        fInfo.Add(this.bits[8, y]);
-                    }
-                    for (int x = edgeLen - 8; x < edgeLen; x++) // towards right edge
-                    {
-                        fInfo.Add(this.bits[x, 8]);
-                    }
-                    return fInfo.ToArray();
-
-                default:
-                    throw new NotImplementedException();
+                fInfo.Add(this.bits[fInfoLocs[i].X, fInfoLocs[i].Y]);
             }
+
+            return fInfo.ToArray();
         }
 
         private void ReadFormatInformation()
         {
-            var splitInfo = new string(this.GetFormatInfo(FormatInfoLocation.SplitBottomLeftTopRight));
-            var topLeftInfo = new string(this.GetFormatInfo(FormatInfoLocation.TopLeft));
+            var splitInfo = new string(this.GetFormatInfo(FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight));
+            var topLeftInfo = new string(this.GetFormatInfo(FormatInformation.FormatInfoLocation.TopLeft));
             // TODO use correction mechanism of format info
 
             if (splitInfo == topLeftInfo)
@@ -418,11 +384,12 @@ namespace QRCodeBaseLib
 
             var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
             var eccCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
-            this.interleavingBlocks.ForEach(
-                x =>  {
-                    dataCodeSymbols.Add(x.GetPostRepairData());
-                    eccCodeSymbols.Add(x.GetPostRepairECC());
-                });
+
+            for(int i = 0; i < this.interleavingBlocks.Count; i++)
+            {
+                dataCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairData());
+                eccCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairECC());
+            }
 
             this.rawDataBytes = new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
             this.rawECCBytes = new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);

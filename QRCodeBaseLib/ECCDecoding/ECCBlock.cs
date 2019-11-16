@@ -35,6 +35,11 @@ namespace QRCodeBaseLib.ECCDecoding
             var rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
             this.RepairSuccess = rsDecoder.decode(dataWithECC, this.preRepairECC.SymbolCount);
 
+
+            if (dataWithECC.All(x => x == 0))   // TODO determine better way to detect zeroing out of block
+                this.RepairSuccess = false;
+
+
             if(this.RepairSuccess)
             {
                 var dataArr = new int[this.preRepairData.SymbolCount];

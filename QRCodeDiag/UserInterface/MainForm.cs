@@ -146,6 +146,12 @@ namespace QRCodeDiag.UserInterface
 
                 if (this.ShowPaddingOverlay && rawDataBytes != null)
                     codeDrawer.DrawCodeSymbolCode(rawECCBytes, e.Graphics, Color.Purple, Color.LightBlue, true, true);
+
+                if (this.ShowEncodingOverlay && padding != null)
+                    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
+
+                if (this.ShowEncodingOverlay && terminator != null)
+                    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
                 //////////////////////////////////////// ^^^^^^^testing only
 
                 //if (this.ShowPaddingOverlay && padding != null)
