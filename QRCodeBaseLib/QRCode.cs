@@ -91,19 +91,15 @@ namespace QRCodeBaseLib
 
         public QRCode(char[,] setBits, ErrorCorrectionLevel.ECCLevel eccLevel)
         {
-            try
-            {
-                this.version = QRCodeVersion.GetVersionFromSize((uint) setBits.GetLength(0));
-                this.ECCLevel = eccLevel;
-            }
-            catch(ArgumentException ae)
-            {
-                throw new ArgumentException("Bad QR Code size: Not a valid version number", "setBits", ae);
-            }
             if (setBits.GetLength(0) != setBits.GetLength(1))
             {
                 throw new ArgumentException("Bad QR Code size: Not a square", "setBits");
             }
+            this.version = QRCodeVersion.GetVersionFromSize((uint) setBits.GetLength(0));
+
+
+
+            this.ECCLevel = eccLevel;
             this.bits = setBits;
             this.UpdateMessage();
         }
@@ -129,8 +125,11 @@ namespace QRCodeBaseLib
                 }
             }
 
-            this.PlaceStaticElements();
-            this.PlaceFormatInformation(new FormatInformation(eccLevel, maskType));
+            var elemWriter = new QRCodeElementWriter(this.bits);
+
+            elemWriter.PlaceStaticElements();
+            elemWriter.PlaceFormatInformation(new FormatInformation(eccLevel, maskType));
+
             this.UpdateMessage();
         }
 
@@ -179,143 +178,16 @@ namespace QRCodeBaseLib
             {
                 throw new QRCodeFormatException("QR Code column count is wrong.", ae);
             }
-            this.PlaceStaticElements(); // make sure static elements have correct value
+
+            var elemWriter = new QRCodeElementWriter(this.bits);
+
+            elemWriter.PlaceStaticElements(); // make sure static elements have correct value
+
             this.UpdateMessage();
         }
 
         #endregion
         #region private methods
-
-        private void PlaceFormatInformation(FormatInformation formatInfo)
-        {
-            var fiBits = formatInfo.GetFormatInfoBits();
-            var fiLocations = FormatInformation.GetFormatInformationLocations(this.Version, FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight);
-
-            for (int i = 0; i < fiLocations.Count; i++)
-            {
-                this.bits[fiLocations[i].X, fiLocations[i].Y] = fiBits[i];
-            }
-
-            fiLocations = FormatInformation.GetFormatInformationLocations(this.Version, FormatInformation.FormatInfoLocation.TopLeft);
-
-            for (int i = 0; i < fiLocations.Count; i++)
-            {
-                this.bits[fiLocations[i].X, fiLocations[i].Y] = fiBits[i];
-            }
-        }
-
-        private void PlaceStaticElements()
-        {
-            int edgeLength = this.bits.GetLength(0);
-
-            char[,] finderPattern = new char[,] 
-            {
-                { 'b', 'b', 'b', 'b', 'b', 'b', 'b'},
-                { 'b', 'w', 'w', 'w', 'w', 'w', 'b'},
-                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
-                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
-                { 'b', 'w', 'b', 'b', 'b', 'w', 'b'},
-                { 'b', 'w', 'w', 'w', 'w', 'w', 'b'},
-                { 'b', 'b', 'b', 'b', 'b', 'b', 'b'}
-            };
-            // Place Finder Patterns
-            for(int x = 0; x < 7; x++)
-            {
-                for (int y = 0; y < 7; y++)
-                {
-                    this.bits[x, y] = finderPattern[x, y]; // Top Left
-                    this.bits[edgeLength - 1 - x, y] = finderPattern[x, y]; // Top Right
-                    this.bits[x, edgeLength - 1 - y] = finderPattern[x, y]; // Bottom Left
-                }
-            }
-            // Place separators
-            for(int i = 0; i < 8; i++)
-            {
-                // Top Left
-                this.bits[7, i] = 'w';
-                this.bits[i, 7] = 'w';
-                // Top Right
-                this.bits[edgeLength - 1 - i, 7] = 'w';
-                this.bits[edgeLength - 8, i] = 'w';
-                // Bottom Left
-                this.bits[7, edgeLength - 1 - i] = 'w';
-                this.bits[i, edgeLength - 8] = 'w';
-            }
-            // Place Alignment Patterns
-            this.PlaceAlignmentPatterns();
-
-            // Place timing
-            for(int i = 6; i < edgeLength - 7; i++)
-            {
-                this.bits[6, i] = i % 2 == 0 ? 'b' : 'w';
-                this.bits[i, 6] = i % 2 == 0 ? 'b' : 'w';
-            }
-            // Place dark module
-            this.bits[8, (4 * this.Version.VersionNumber) + 9] = 'b';
-            // ToDo: Place format information, alternatively allow user to set it manually - mask information is required for this. Make selecting a mask mandatory/always associate a specific mask with a QRCode instance?
-            // ToDo: Place version information where needed
-        }
-
-        private void InsertAlignmentPattern(int centerX, int centerY)
-        {
-            char[,] alignmentPattern = new char[,]
-            {
-                { 'b', 'b', 'b', 'b', 'b', },
-                { 'b', 'w', 'w', 'w', 'b', },
-                { 'b', 'w', 'b', 'w', 'b', },
-                { 'b', 'w', 'w', 'w', 'b', },
-                { 'b', 'b', 'b', 'b', 'b', }
-            };
-
-            for (int x = 0; x < alignmentPattern.GetLength(0); x++)
-            {
-                for (int y = 0; y < alignmentPattern.GetLength(1); y++)
-                {
-                    this.bits[centerX + x - 2, centerY + y - 2] = alignmentPattern[x, y];
-                }
-            }
-        }
-
-        private void PlaceAlignmentPatterns()
-        {
-            int num_total = this.Version.VersionNumber == 1 ? 0 : (int)((this.Version.VersionNumber / 7) + 2); // number of coordinates (coordinates in x- and y-direction are identical)
-
-            int[] coordValues = new int[num_total];
-            
-            if (num_total > 1)
-            {
-                coordValues[0] = 6; // first coordinate is always 6
-
-                coordValues[num_total - 1] = 4 * (int)this.Version.VersionNumber + 10; // last coordinate is always 7 codeEls from the right/bottom border of the code
-
-                if (num_total > 2)
-                {
-                    coordValues[num_total - 2] = 2 * ((coordValues[0] + coordValues[num_total - 1] * (num_total - 2)) / ((num_total - 1) * 2));
-
-                    if (num_total > 3)
-                    {
-                        int step = coordValues[num_total - 1] - coordValues[num_total - 2];
-
-                        for (int i = num_total - 3; i > 0; i--)
-                        {
-                            coordValues[i] = coordValues[i + 1] - step;
-                        }
-                    }
-                }
-            }
-
-            foreach(var x in coordValues)
-            {
-                foreach(var y in coordValues)
-                {
-                    if(!(x <= 10 && (y <= 10 || y >= (int)this.Version.GetEdgeSizeFromVersion() - 10))
-                    && !(y <= 10 && (x <= 10 || x >= (int)this.Version.GetEdgeSizeFromVersion() - 10))) // no collision with finder pattern
-                    {
-                        this.InsertAlignmentPattern(x, y);
-                    }
-                }
-            }
-        }
 
         private void UpdateMessage()
         {
@@ -335,40 +207,7 @@ namespace QRCodeBaseLib
             }
         }
 
-        private void SetFormatInfo(char[] fInfo)    //ToDo create DataBlock/Symbol for Format Info 1 and 2
-        {
-            if (fInfo.Length != 15)
-                throw new ArgumentException("Wrong length", "fInfo");
-
-            var edgeLen = this.GetEdgeLength();
-            var index = 0;
-
-            for (int x = 0; x < 8; x++) // left to right
-            {
-                if (x != 6)
-                {
-                    this.bits[x, 8] = fInfo[index++];
-                }
-            }
-            for (int y = 7; y >= 0; y--) // towards top
-            {
-                if (y != 6)
-                {
-                    this.bits[8, y] = fInfo[index++];
-                }
-            }
-            index = 0;
-            for (int y = edgeLen - 1; y >= edgeLen - 7; y--) // from bottom up
-            {
-                this.bits[8, y] = fInfo[index++];
-            }
-            for (int x = edgeLen - 9; x < edgeLen; x++) // towards right edge
-            {
-                this.bits[x, 8] = fInfo[index++];
-            }
-        }
-
-        private char[] GetFormatInfo(FormatInformation.FormatInfoLocation loc)
+        private char[] GetFormatInfoBits(FormatInformation.FormatInfoLocation loc)
         {
             var fInfo = new List<char>();
             var fInfoLocs = FormatInformation.GetFormatInformationLocations(this.version, loc);
@@ -383,8 +222,8 @@ namespace QRCodeBaseLib
 
         private void ReadFormatInformation()
         {
-            var splitInfo = new string(this.GetFormatInfo(FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight));
-            var topLeftInfo = new string(this.GetFormatInfo(FormatInformation.FormatInfoLocation.TopLeft));
+            var splitInfo = new string(this.GetFormatInfoBits(FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight));
+            var topLeftInfo = new string(this.GetFormatInfoBits(FormatInformation.FormatInfoLocation.TopLeft));
             // TODO use correction mechanism of format info
 
             if (splitInfo == topLeftInfo)
@@ -579,40 +418,6 @@ namespace QRCodeBaseLib
                 return (this.bits[x, y] == '1') || (this.bits[x, y] == '0') || (this.bits[x, y] == 'u');
             }
         }
-
-        //public static bool IsDataCell(int x, int y, int version) //ToDo extend for other versions
-        //{
-        //    var versionSize = QRCode.GetEdgeSizeFromVersion(version);
-        //    const int finderPatternWidth = 7;
-        //    const int formatInfoWidth = 1; // width of the version information area
-        //    const int separatorWidth = 1; // width of the separator
-
-        //    bool ret = true;
-        //    if (x > versionSize || y > versionSize || x < 0 || y < 0)
-        //        return false;
-
-        //    if (x < 9) // left side
-        //    {
-        //        if (y < finderPatternWidth + separatorWidth + formatInfoWidth) // top left finder pattern
-        //            ret = false;
-        //        else if (y >= versionSize - finderPatternWidth - separatorWidth) // bottom left finder pattern
-        //            ret = false;
-        //    }
-        //    else if ((x >= versionSize - finderPatternWidth - separatorWidth) && (y < finderPatternWidth + separatorWidth + formatInfoWidth)) // Top right finder pattern
-        //    {
-        //        ret = false;
-        //    }
-        //    if (x > 19 && x < 25 && y > 19 && y < 25) // Alignment TODO for all versions
-        //    {
-        //        ret = false;
-        //    }
-        //    if (x == 6 || y == 6) // Timing
-        //    {
-        //        ret = false;
-        //    }
-
-        //    return ret;
-        //}
 
         public string GetRepairMessageStatusLine()
         {

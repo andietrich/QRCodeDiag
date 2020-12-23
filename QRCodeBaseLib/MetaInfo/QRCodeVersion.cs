@@ -16,7 +16,7 @@ namespace QRCodeBaseLib.MetaInfo
         public QRCodeVersion(uint versionNumber)
         {
             if (versionNumber < 1 || versionNumber > 40)
-                throw new ArgumentOutOfRangeException("versionNumber", "Version number must be in range 1 to 40");
+                throw new ArgumentOutOfRangeException(nameof(versionNumber), "Version number must be in range 1 to 40");
             this.VersionNumber = versionNumber;
         }
 
@@ -30,7 +30,7 @@ namespace QRCodeBaseLib.MetaInfo
             uint v = codeElCount - BASESIZE;
             if ((v % 4 != 0) || (codeElCount < BASESIZE))
             {
-                throw new ArgumentException("Not a valid codeEl count", "codeElCount");
+                throw new ArgumentException($"Bad QR Code size ({codeElCount}): Not a valid version number", nameof(codeElCount));
             }
             return new QRCodeVersion(1u + (v / 4u));
         }
