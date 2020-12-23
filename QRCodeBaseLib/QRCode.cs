@@ -109,10 +109,12 @@ namespace QRCodeBaseLib
         }
 
         /// <summary>
-        /// Generates an empty QRCode of the specified <paramref name="version"/>
+        /// Generates a QRCode of the specified <paramref name="version"/> with static elements and format information
         /// </summary>
-        /// <param name="version">The version defines the size of the QR Code. Valid versions are 1-40</param>
-        public QRCode(uint _version, ErrorCorrectionLevel.ECCLevel eccLevel)
+        /// <param name="_version">The version defines the size of the QR Code. Valid versions are 1-40</param>
+        /// <param name="eccLevel">Error correction code level</param>
+        /// <param name="maskType">XOR Mask-Type</param>
+        public QRCode(uint _version, ErrorCorrectionLevel.ECCLevel eccLevel, XORMask.MaskType maskType)
         {
             this.version = new QRCodeVersion(_version);
             this.ECCLevel = eccLevel;
@@ -128,6 +130,7 @@ namespace QRCodeBaseLib
             }
 
             this.PlaceStaticElements();
+            this.PlaceFormatInformation(new FormatInformation(eccLevel, maskType));
             this.UpdateMessage();
         }
 
@@ -183,6 +186,24 @@ namespace QRCodeBaseLib
         #endregion
         #region private methods
 
+        private void PlaceFormatInformation(FormatInformation formatInfo)
+        {
+            var fiBits = formatInfo.GetFormatInfoBits();
+            var fiLocations = FormatInformation.GetFormatInformationLocations(this.Version, FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight);
+
+            for (int i = 0; i < fiLocations.Count; i++)
+            {
+                this.bits[fiLocations[i].X, fiLocations[i].Y] = fiBits[i];
+            }
+
+            fiLocations = FormatInformation.GetFormatInformationLocations(this.Version, FormatInformation.FormatInfoLocation.TopLeft);
+
+            for (int i = 0; i < fiLocations.Count; i++)
+            {
+                this.bits[fiLocations[i].X, fiLocations[i].Y] = fiBits[i];
+            }
+        }
+
         private void PlaceStaticElements()
         {
             int edgeLength = this.bits.GetLength(0);
@@ -231,7 +252,7 @@ namespace QRCodeBaseLib
             }
             // Place dark module
             this.bits[8, (4 * this.Version.VersionNumber) + 9] = 'b';
-            // ToDo: Place format information, alternatively allow user to set it manually
+            // ToDo: Place format information, alternatively allow user to set it manually - mask information is required for this. Make selecting a mask mandatory/always associate a specific mask with a QRCode instance?
             // ToDo: Place version information where needed
         }
 
@@ -307,7 +328,10 @@ namespace QRCodeBaseLib
             catch(QRCodeFormatException qfe)
             {
                 this.ReadMessageSuccess = false;
-                this.Message = qfe.Message;
+                this.Message = qfe.Message + Environment.NewLine;
+
+                if (qfe.InnerException != null)
+                    this.Message += qfe.InnerException.Message;
             }
         }
 
@@ -375,9 +399,16 @@ namespace QRCodeBaseLib
             }
         }
 
-        private string ReadMessage() //ToDo length check of messageBytes, 
+        private string ReadMessage()
         {
-            this.ReadFormatInformation(); // TODO check where the right place to call this is
+            try
+            {
+                this.ReadFormatInformation();
+            }
+            catch(ArgumentException ae)
+            {
+                throw new QRCodeFormatException("Could not parse Format information: ", ae);
+            }
 
             this.rawCode = new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
             this.interleavingBlocks = DeInterleaver.DeInterleave(this.rawCode, this.eccLevel);
@@ -385,7 +416,7 @@ namespace QRCodeBaseLib
             var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
             var eccCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
 
-            for(int i = 0; i < this.interleavingBlocks.Count; i++)
+            for (int i = 0; i < this.interleavingBlocks.Count; i++)
             {
                 dataCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairData());
                 eccCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairECC());
@@ -417,7 +448,7 @@ namespace QRCodeBaseLib
                     throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count, but inform the user
                 }
 
-                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.eccLevel.Level, this.messageMode);
+                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.ECCLevel, this.messageMode);
                 if (characterCount > max_capacity)
                 {
                     throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);

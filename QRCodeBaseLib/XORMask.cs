@@ -26,7 +26,7 @@ namespace QRCodeBaseLib
         public static QRCode XOR(QRCode code, MaskType maskType)
         {
             if (code == null)
-                throw new ArgumentNullException("code");
+                throw new ArgumentNullException(nameof(code));
             return XORMask.XOR(code, XORMask.GetMask(maskType, code.Version));
         }
 

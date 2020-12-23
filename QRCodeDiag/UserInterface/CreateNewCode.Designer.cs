@@ -32,8 +32,10 @@
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.labelVersion = new System.Windows.Forms.Label();
             this.buttonCreate = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.comboBoxECCLevel = new System.Windows.Forms.ComboBox();
             this.labelECCLevel = new System.Windows.Forms.Label();
+            this.comboBoxXORMask = new System.Windows.Forms.ComboBox();
+            this.labelXORMask = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -90,19 +92,19 @@
             this.buttonCreate.Text = "Create";
             this.buttonCreate.UseVisualStyleBackColor = true;
             // 
-            // comboBox1
+            // comboBoxECCLevel
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.comboBoxECCLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxECCLevel.FormattingEnabled = true;
+            this.comboBoxECCLevel.Items.AddRange(new object[] {
             "Low",
             "Medium",
             "Quartile",
             "High"});
-            this.comboBox1.Location = new System.Drawing.Point(15, 64);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
-            this.comboBox1.TabIndex = 4;
+            this.comboBoxECCLevel.Location = new System.Drawing.Point(15, 64);
+            this.comboBoxECCLevel.Name = "comboBoxECCLevel";
+            this.comboBoxECCLevel.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxECCLevel.TabIndex = 4;
             // 
             // labelECCLevel
             // 
@@ -113,6 +115,34 @@
             this.labelECCLevel.TabIndex = 5;
             this.labelECCLevel.Text = "ECC level";
             // 
+            // comboBoxXORMask
+            // 
+            this.comboBoxXORMask.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxXORMask.FormattingEnabled = true;
+            this.comboBoxXORMask.Items.AddRange(new object[] {
+            "None",
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"});
+            this.comboBoxXORMask.Location = new System.Drawing.Point(15, 104);
+            this.comboBoxXORMask.Name = "comboBoxXORMask";
+            this.comboBoxXORMask.Size = new System.Drawing.Size(121, 21);
+            this.comboBoxXORMask.TabIndex = 6;
+            // 
+            // labelXORMask
+            // 
+            this.labelXORMask.AutoSize = true;
+            this.labelXORMask.Location = new System.Drawing.Point(12, 88);
+            this.labelXORMask.Name = "labelXORMask";
+            this.labelXORMask.Size = new System.Drawing.Size(59, 13);
+            this.labelXORMask.TabIndex = 5;
+            this.labelXORMask.Text = "XOR Mask";
+            // 
             // CreateNewCode
             // 
             this.AcceptButton = this.buttonCreate;
@@ -120,8 +150,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(198, 181);
+            this.Controls.Add(this.comboBoxXORMask);
+            this.Controls.Add(this.labelXORMask);
             this.Controls.Add(this.labelECCLevel);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.comboBoxECCLevel);
             this.Controls.Add(this.buttonCreate);
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.numericUpDown1);
@@ -143,7 +175,9 @@
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label labelVersion;
         private System.Windows.Forms.Button buttonCreate;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox comboBoxECCLevel;
         private System.Windows.Forms.Label labelECCLevel;
+        private System.Windows.Forms.ComboBox comboBoxXORMask;
+        private System.Windows.Forms.Label labelXORMask;
     }
 }

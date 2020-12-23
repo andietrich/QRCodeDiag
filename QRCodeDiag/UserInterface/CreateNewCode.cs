@@ -1,4 +1,5 @@
-﻿using QRCodeBaseLib.MetaInfo;
+﻿using QRCodeBaseLib;
+using QRCodeBaseLib.MetaInfo;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,24 +19,23 @@ namespace QRCodeDiag.UserInterface
         {
             get
             {
-                switch(this.comboBox1.SelectedItem.ToString())
-                {
-                    case "Low":
-                        return ErrorCorrectionLevel.ECCLevel.Low;
-                    case "Medium":
-                        return ErrorCorrectionLevel.ECCLevel.Medium;
-                    case "Quartile":
-                        return ErrorCorrectionLevel.ECCLevel.Quartile;
-                    case "High":
-                        return ErrorCorrectionLevel.ECCLevel.High;
-                    default:
-                        throw new InvalidOperationException("Invalid combobox item");
-                }
+                return (ErrorCorrectionLevel.ECCLevel)comboBoxECCLevel.SelectedItem;
+            }
+        }
+        public XORMask.MaskType MaskType
+        {
+            get
+            {
+                return (XORMask.MaskType)comboBoxXORMask.SelectedItem;
             }
         }
         public CreateNewCode()
         {
             InitializeComponent();
+            this.comboBoxECCLevel.DataSource = Enum.GetValues(typeof(ErrorCorrectionLevel.ECCLevel));
+            this.comboBoxECCLevel.SelectedItem = ErrorCorrectionLevel.ECCLevel.Low;
+            this.comboBoxXORMask.DataSource = Enum.GetValues(typeof(XORMask.MaskType));
+            this.comboBoxXORMask.SelectedItem = XORMask.MaskType.None;
         }
     }
 }
