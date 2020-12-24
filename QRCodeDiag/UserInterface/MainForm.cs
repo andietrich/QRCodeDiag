@@ -1,5 +1,6 @@
 ﻿using QRCodeBaseLib;
 using QRCodeBaseLib.DataBlocks.SymbolCodes;
+using QRCodeBaseLib.MetaInfo;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,8 +29,6 @@ namespace QRCodeDiag.UserInterface
         //}
 
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
-        private QRCode backgroundCode; // qrcode that is used for decoding ToDo: Make MaskType property of QRCode, let QRCode decide which mask to use
-        private XORMask.MaskType maskUsed; // ToDo use better solution when mask application gets automated
         //private ButtonDown buttonDown; //ToDo: hold button to draw lines
         public bool ShowRawOverlay { get; set; }
         public bool ShowEncodingOverlay { get; set; }
@@ -38,13 +37,20 @@ namespace QRCodeDiag.UserInterface
 
         private XORMask.MaskType CurrentMaskUsed
         {
-            get { return this.maskUsed; }
+            get
+            {
+                if (this.DisplayCode != null)
+                    return this.DisplayCode.AppliedXORMaskType;
+                else
+                    return XORMask.MaskType.None;
+            }
             set
             {
-                this.maskUsed = value;
                 if (this.DisplayCode != null)
                 {
-                    this.BackgroundCode = (value == XORMask.MaskType.None) ? this.DisplayCode : XORMask.XOR(this.DisplayCode, value);
+                    this.DisplayCode.AppliedXORMaskType = value;
+                    this.UpdateTextBox();
+                    this.pictureBox1.Invalidate();
                 }
             }
         }
@@ -56,27 +62,12 @@ namespace QRCodeDiag.UserInterface
             }
             set
             {
-                this.backgroundCode = value;
-                this.CurrentMaskUsed = XORMask.MaskType.None; // resetting the backgroundCode
-
                 this.displayCode = value;
                 this.UpdateTextBox();
                 this.pictureBox1.Invalidate();
             }
         }
-        private QRCode BackgroundCode
-        {
-            get
-            {
-                return this.backgroundCode;
-            }
-            set
-            {
-                this.backgroundCode = value;
-                this.UpdateTextBox();
-                this.pictureBox1.Invalidate();
-            }
-        }
+
         public MainForm()
         {
             InitializeComponent();
@@ -114,24 +105,21 @@ namespace QRCodeDiag.UserInterface
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            if (this.BackgroundCode != null)
+            if (this.DisplayCode != null)
             {
-                int     edgeLength      = this.BackgroundCode.GetEdgeLength();
+                int     edgeLength      = this.DisplayCode.GetEdgeLength();
                 float   codeElWidth     = (float)this.pictureBox1.Size.Width / edgeLength;
                 float   codeElHeight    = (float)this.pictureBox1.Size.Height / edgeLength;
                 bool    drawTransparent = this.pictureBox1.BackgroundImage != null;
                 var     codeDrawer      = new CodeElementDrawer(codeElWidth, codeElHeight);
-                var     rawCode         = this.BackgroundCode.GetRawCode();
-                var     rawDataBytes    = this.backgroundCode.GetRawDataBytes();
-                var     rawECCBytes     = this.backgroundCode.GetRawECCBytes();
-                var     encodedData     = this.BackgroundCode.GetEncodedSymbols();
-                var     padding         = this.BackgroundCode.GetPaddingBits();
-                var     terminator      = this.BackgroundCode.GetTerminator();
+                var     rawCode         = this.DisplayCode.GetRawCode();
+                var     rawDataBytes    = this.DisplayCode.GetRawDataBytes();
+                var     rawECCBytes     = this.DisplayCode.GetRawECCBytes();
+                var     encodedData     = this.DisplayCode.GetEncodedSymbols();
+                var     padding         = this.DisplayCode.GetPaddingBits();
+                var     terminator      = this.DisplayCode.GetTerminator();
 
-                if (this.ShowXORed)
-                    codeDrawer.DrawQRCode(this.BackgroundCode, e.Graphics, drawTransparent);
-                else
-                    codeDrawer.DrawQRCode(this.DisplayCode, e.Graphics, drawTransparent);
+                codeDrawer.DrawQRCode(this.DisplayCode.GetBits(this.ShowXORed), e.Graphics, drawTransparent);
 
                 if (this.ShowRawOverlay && rawCode != null)
                     codeDrawer.DrawCodeSymbolCode(rawCode, e.Graphics, Color.Orange, Color.Cyan, true, true);
@@ -186,28 +174,30 @@ namespace QRCodeDiag.UserInterface
                         this.DisplayCode.ToggleDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height);
                         break;
                 }
-                this.UpdateBackgroundCode();
+
+                this.UpdateTextBox();
+                this.pictureBox1.Invalidate();
             }
         }
 
         private void UpdateTextBox()
         {
-            if (this.BackgroundCode != null)
+            if (this.DisplayCode != null)
             {
                 var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
                 {
-                    var paddingBits = this.BackgroundCode.GetPaddingBits();
-                    var terminator = this.BackgroundCode.GetTerminator();
-                    sb.AppendLine("Message: " + this.BackgroundCode.Message);
-                    sb.AppendLine("Terminator: " + this.BackgroundCode.GetTerminator()?.BitString ?? "No terminator found");
+                    var paddingBits = this.DisplayCode.GetPaddingBits();
+                    var terminator = this.DisplayCode.GetTerminator();
+                    sb.AppendLine("Message: " + this.DisplayCode.Message);
+                    sb.AppendLine("Terminator: " + this.DisplayCode.GetTerminator()?.BitString ?? "No terminator found");
                     sb.AppendLine("Padding bits: ");
-                    if (this.BackgroundCode.GetPaddingBits() == null)
+                    if (this.DisplayCode.GetPaddingBits() == null)
                         sb.AppendLine("Padding bits have not been initialized yet.");
                     else
-                        sb.AppendLine(string.Join(Environment.NewLine, this.BackgroundCode.GetPaddingBits().GetSymbolBitStrings()));
+                        sb.AppendLine(string.Join(Environment.NewLine, this.DisplayCode.GetPaddingBits().GetSymbolBitStrings()));
                     
-                    sb.AppendLine("RepairMessage():" + this.BackgroundCode.GetRepairMessageStatusLine());
+                    sb.AppendLine("RepairMessage():" + this.DisplayCode.GetRepairMessageStatusLine());
                 }
                 catch (QRCodeFormatException qfe)
                 {
@@ -220,21 +210,6 @@ namespace QRCodeDiag.UserInterface
                 finally
                 {
                     this.textBox1.Text = sb.ToString();
-                }
-            }
-        }
-
-        private void UpdateBackgroundCode()
-        {
-            if(this.DisplayCode != null)
-            {
-                if (this.CurrentMaskUsed == XORMask.MaskType.None)
-                {
-                    this.BackgroundCode = this.DisplayCode;
-                }
-                else
-                {
-                    this.BackgroundCode = XORMask.XOR(this.DisplayCode, this.CurrentMaskUsed);
                 }
             }
         }
@@ -283,7 +258,7 @@ namespace QRCodeDiag.UserInterface
             var createForm = new CreateNewCode();
             if (createForm.ShowDialog(this) == DialogResult.OK)
             {
-                this.DisplayCode = new QRCode((uint) createForm.Version, createForm.ECCLevel, createForm.MaskType); //ToDo ask to save modified codes
+                this.DisplayCode = new QRCode(new QRCodeVersion((uint) createForm.Version), createForm.ECCLevel, createForm.MaskType); //ToDo ask to save modified codes
             }
         }
 

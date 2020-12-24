@@ -13,10 +13,10 @@ namespace QRCodeBaseLib.DataBlocks
         private int xPos, yPos;
         private bool directionUp;
         private bool rightCell;
-        public int XPos
+        private int XPos
         {
             get { return this.xPos; }
-            private set
+            set
             {
                 if (value < 0)
                     this.EndReached = true;
@@ -24,10 +24,10 @@ namespace QRCodeBaseLib.DataBlocks
                     this.xPos = value;
             }
         }
-        public int YPos
+        private int YPos
         {
             get { return this.yPos; }
-            private set
+            set
             {
                 if (value < 0)
                     this.EndReached = true;
@@ -43,7 +43,7 @@ namespace QRCodeBaseLib.DataBlocks
         {
             get
             {
-                return this.qrCode.GetBit(this.XPos, this.YPos);
+                return this.qrCode.GetBit((uint)this.XPos, (uint)this.YPos, true);
             }
         }
 
@@ -107,14 +107,14 @@ namespace QRCodeBaseLib.DataBlocks
                         }
                     }
                 }
-                if (this.qrCode.IsDataCell(this.XPos, this.YPos))
+                if (this.qrCode.IsDataCell((uint)this.XPos, (uint)this.YPos))
                 {
                     nextFound = true;
                 }
             }
             if (nextFound)
             {
-                return this.qrCode.GetBit(this.XPos, this.YPos);
+                return this.qrCode.GetBit((uint)this.XPos, (uint)this.YPos, true);
             }
             else
             {

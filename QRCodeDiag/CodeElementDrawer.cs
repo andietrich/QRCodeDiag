@@ -114,10 +114,10 @@ namespace QRCodeDiag
             }
         }
 
-        public void DrawQRCode(QRCode qrCode, Graphics g, bool transparent = false)
+        public void DrawQRCode(char[,] bits, Graphics g, bool transparent = false)
         {
             byte alpha      = transparent ? (byte)128 : (byte)255;
-            var edgeLength  = qrCode.GetEdgeLength();
+            var edgeLength  = bits.GetLength(0);
             var blackBrush  = new SolidBrush(Color.FromArgb(alpha, Color.Black.R, Color.Black.G, Color.Black.B));
             var whiteBrush  = new SolidBrush(Color.FromArgb(alpha, Color.White.R, Color.White.G, Color.White.B));
             var grayBrush   = new SolidBrush(Color.FromArgb(alpha, Color.Gray.R,  Color.Gray.G,  Color.Gray.B));
@@ -127,7 +127,7 @@ namespace QRCodeDiag
                 for (int x = 0; x < edgeLength; x++)
                 {
                     SolidBrush b;
-                    switch (qrCode.GetBits()[x, y])
+                    switch (bits[x, y])
                     {
                         case '0':
                         case 'w':
@@ -142,7 +142,7 @@ namespace QRCodeDiag
                             b = grayBrush;
                             break;
                         default:
-                            throw new QRCodeFormatException("Invalid codeEl value: " + qrCode.GetBits()[x, y]);
+                            throw new QRCodeFormatException("Invalid codeEl value: " + bits[x, y]);
                     }
                     g.FillRectangle(b, x * codeElWidth, y * codeElHeight, codeElWidth, codeElHeight);
                 }

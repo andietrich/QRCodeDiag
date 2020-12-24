@@ -39,6 +39,7 @@ namespace QRCodeBaseLib
         private List<ECCBlock> interleavingBlocks;
         private TerminatorSymbol terminator;
         private QRCodeVersion version;
+        private XORMask.MaskType appliedXORMaskType;
         private ErrorCorrectionLevel eccLevel; //ToDo parse correct value or use user-provided/default
                                                //ToDo Use/Set/Check Remainder Bits
                                                //ToDo highlight message mode
@@ -58,6 +59,18 @@ namespace QRCodeBaseLib
                 this.version = value;
                 //this.eccLevel = ErrorCorrectionLevel.GetECCLevel(ErrorCorrectionLevel.ECCLevel.Low, this.version); //ToDo parse correct value before reading the code
                 this.VersionChangedEvent?.Invoke(this.version);
+            }
+        }
+        public XORMask.MaskType AppliedXORMaskType
+        {
+            get
+            {
+                return this.appliedXORMaskType;
+            }
+            set
+            {
+                this.appliedXORMaskType = value;
+                this.UpdateMessage();
             }
         }
         public ErrorCorrectionLevel.ECCLevel ECCLevel
@@ -96,10 +109,8 @@ namespace QRCodeBaseLib
                 throw new ArgumentException("Bad QR Code size: Not a square", "setBits");
             }
             this.version = QRCodeVersion.GetVersionFromSize((uint) setBits.GetLength(0));
-
-
-
             this.ECCLevel = eccLevel;
+            this.appliedXORMaskType = XORMask.MaskType.None;
             this.bits = setBits;
             this.UpdateMessage();
         }
@@ -107,13 +118,14 @@ namespace QRCodeBaseLib
         /// <summary>
         /// Generates a QRCode of the specified <paramref name="version"/> with static elements and format information
         /// </summary>
-        /// <param name="_version">The version defines the size of the QR Code. Valid versions are 1-40</param>
+        /// <param name="setVersion">The version defines the size of the QR Code. Valid versions are 1-40</param>
         /// <param name="eccLevel">Error correction code level</param>
         /// <param name="maskType">XOR Mask-Type</param>
-        public QRCode(uint _version, ErrorCorrectionLevel.ECCLevel eccLevel, XORMask.MaskType maskType)
+        public QRCode(QRCodeVersion setVersion, ErrorCorrectionLevel.ECCLevel eccLevel, XORMask.MaskType maskType)
         {
-            this.version = new QRCodeVersion(_version);
+            this.version = setVersion;
             this.ECCLevel = eccLevel;
+            this.appliedXORMaskType = maskType;
 
             var size = version.GetEdgeSizeFromVersion();
             this.bits = new char[size, size];
@@ -126,7 +138,6 @@ namespace QRCodeBaseLib
             }
 
             var elemWriter = new QRCodeElementWriter(this.bits);
-
             elemWriter.PlaceStaticElements();
             elemWriter.PlaceFormatInformation(new FormatInformation(eccLevel, maskType));
 
@@ -180,8 +191,9 @@ namespace QRCodeBaseLib
             }
 
             var elemWriter = new QRCodeElementWriter(this.bits);
-
             elemWriter.PlaceStaticElements(); // make sure static elements have correct value
+
+            this.appliedXORMaskType = XORMask.MaskType.None;
 
             this.UpdateMessage();
         }
@@ -224,7 +236,7 @@ namespace QRCodeBaseLib
         {
             var splitInfo = new string(this.GetFormatInfoBits(FormatInformation.FormatInfoLocation.SplitBottomLeftTopRight));
             var topLeftInfo = new string(this.GetFormatInfoBits(FormatInformation.FormatInfoLocation.TopLeft));
-            // TODO use correction mechanism of format info
+            // TODO use error correction mechanisms of format info
 
             if (splitInfo == topLeftInfo)
             {
@@ -348,14 +360,40 @@ namespace QRCodeBaseLib
             File.WriteAllText(path, sb.ToString());
         }
 
-        public char GetBit(int x, int y)
+        /// <summary>
+        /// Gets the bit at the specified index.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="xored">
+        /// If true, the xor mask is applied so that the actual data bit values are returned.
+        /// Otherwise the value corresponding to the visible data cell is returned.</param>
+        /// <returns></returns>
+        public char GetBit(uint x, uint y, bool xored)
         {
-            return this.bits[x, y];
+            if (xored && this.IsDataCell(x, y))
+                return XORMask.ApplyXOR(this.AppliedXORMaskType, this.bits[x, y], x, y);
+            else
+                return this.bits[x, y];
         }
 
-        public char[,] GetBits()
+        public char[,] GetBits(bool xored)
         {
-            return (char[,])this.bits.Clone();
+            if (xored)
+            {
+                var edgeLen = this.GetEdgeLength();
+                char[,] retval = new char[edgeLen, edgeLen];
+
+                for (uint y = 0; y < edgeLen; y++)
+                    for (uint x = 0; x < edgeLen; x++)
+                        retval[x, y] = this.GetBit(x, y, xored);
+
+                return retval;
+            }
+            else
+            {
+                return (char[,])this.bits.Clone();
+            }
         }
 
         public void ToggleDataCell(int x, int y)
@@ -380,11 +418,11 @@ namespace QRCodeBaseLib
         public void SetDataCell(int x, int y, char cellValue)   //ToDo set as expected in un-masked view
         {
             if (x < 0 || x >= this.Version.GetEdgeSizeFromVersion())
-                throw new ArgumentOutOfRangeException("x");
+                throw new ArgumentOutOfRangeException(nameof(x));
             if (y < 0 || y >= this.Version.GetEdgeSizeFromVersion())
-                throw new ArgumentOutOfRangeException("y");
+                throw new ArgumentOutOfRangeException(nameof(y));
 
-            if (this.IsDataCell(x, y))
+            if (this.IsDataCell((uint)x, (uint)y))
             {
                 switch (cellValue)
                 {
@@ -400,10 +438,10 @@ namespace QRCodeBaseLib
             }
         }
 
-        public bool IsDataCell(int x, int y)
+        public bool IsDataCell(uint x, uint y)
         {
             if ((y == 8 && (x < 9 || x > this.GetEdgeLength() - 9))
-            ||  (x == 8 && (y < 9 || y > this.GetEdgeLength() - 8))) // Format Information //ToDo make editable
+            ||  (x == 8 && (y < 9 || y > this.GetEdgeLength() - 8))) // Format Information //ToDo make editable - but don't xor. Get conditions from FormatInformation class?
             {
                 return false;
             }
