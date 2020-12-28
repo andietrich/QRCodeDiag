@@ -123,7 +123,8 @@ namespace QRCodeDiag
 
             if (newRawCode != null)
             {
-                var drawableCode = new DrawableCodeSymbolCode(newRawCode, Color.Orange, Color.Orange, Color.Orange, Color.Orange);
+                var symbolColors = new SymbolColors(Color.Orange, Color.Orange, Color.Orange);
+                var drawableCode = new DrawableCodeSymbolCode(newRawCode, symbolColors, Color.Orange);
                 this.AddCodeSymbolCodeOptionsItem("Raw Code", drawableCode, propType);
             }
         }
@@ -135,7 +136,8 @@ namespace QRCodeDiag
 
             if (newRawDataBytes != null)
             {
-                var drawableCode = new DrawableCodeSymbolCode(newRawDataBytes, Color.Blue, Color.LightBlue, Color.LightBlue, Color.Orange);
+                var symbolColors = new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange);
+                var drawableCode = new DrawableCodeSymbolCode(newRawDataBytes, symbolColors, Color.LightBlue);
                 this.AddCodeSymbolCodeOptionsItem("Raw Data Bytes", drawableCode, propType);
             }
         }
@@ -147,7 +149,8 @@ namespace QRCodeDiag
 
             if (newRawECCBytes != null)
             {
-                var drawableCode = new DrawableCodeSymbolCode(newRawECCBytes, Color.Purple, Color.LightBlue, Color.LightBlue, Color.Orange);
+                var symbolColors = new SymbolColors(Color.Orange, Color.Orange, Color.Orange);
+                var drawableCode = new DrawableCodeSymbolCode(newRawECCBytes, symbolColors, Color.LightBlue);
                 this.AddCodeSymbolCodeOptionsItem("Raw ECC Bytes", drawableCode, propType);
             }
         }
@@ -159,7 +162,8 @@ namespace QRCodeDiag
 
             if (newPaddingBytes != null)
             {
-                var drawableCode = new DrawableCodeSymbolCode(newPaddingBytes, Color.Blue, Color.LightBlue, Color.LightBlue, Color.Orange);
+                var symbolColors = new SymbolColors(Color.Blue, Color.LightBlue, Color.DarkCyan);
+                var drawableCode = new DrawableCodeSymbolCode(newPaddingBytes, symbolColors, Color.LightBlue);
                 this.AddCodeSymbolCodeOptionsItem("Padding Bytes", drawableCode, propType);
             }
         }
@@ -171,7 +175,8 @@ namespace QRCodeDiag
 
             if (newEncodedSymbols != null)
             {
-                var drawableCode = new DrawableCodeSymbolCode(newEncodedSymbols, Color.Red, Color.LightBlue, Color.LightBlue, Color.Orange);
+                var symbolColors = new SymbolColors(Color.Red, Color.LightBlue, Color.Orange);
+                var drawableCode = new DrawableCodeSymbolCode(newEncodedSymbols, symbolColors, Color.LightBlue);
                 this.AddCodeSymbolCodeOptionsItem("Encoded Symbols", drawableCode, propType);
             }
         }

@@ -11,10 +11,8 @@ namespace QRCodeDiag
     interface IDrawableCodeSymbolCode
     {
         ICodeSymbolCode CodeSymbolCode { get; }
-        Color BitIndexColor { get; }
+        SymbolColors SymbolColoring { get; }
         Color SymbolIndexColor { get; }
-        Color SymbolOutlineColor { get; }
-        Color SymbolValueColor { get; }
         bool DrawSymbolCode { get; }
         bool DrawSymbolValues { get; }
         bool DrawSymbolIndices { get; }

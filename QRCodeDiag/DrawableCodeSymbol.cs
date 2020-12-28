@@ -11,18 +11,14 @@ namespace QRCodeDiag
     class DrawableCodeSymbol
     {
         public CodeSymbol CodeSymbol { get; private set; }
-        public Color BitIndexColor { get; private set; }
-        public Color OutlineColor { get; private set; }
-        public Color SymbolValueColor { get; private set; }
+        public SymbolColors SymbolColoring { get; private set; }
         public bool DrawSymbol { get; }
         public bool DrawSymbolValue { get; }
         public bool DrawBitIndices { get; }
-        public DrawableCodeSymbol(CodeSymbol codeSymbol, Color bitIndexColor, Color outlineColor, Color symbolValueColor)
+        public DrawableCodeSymbol(CodeSymbol codeSymbol, SymbolColors symbolColors)
         {
             this.CodeSymbol = codeSymbol;
-            this.BitIndexColor = bitIndexColor;
-            this.OutlineColor = outlineColor;
-            this.SymbolValueColor = symbolValueColor;
+            this.SymbolColoring = symbolColors;
 
             this.DrawSymbol = false;
             this.DrawSymbolValue = false;

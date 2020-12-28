@@ -52,6 +52,7 @@
     <Compile Include="IDrawableCodeSymbolCode.cs" />
     <Compile Include="SettingsPropertyManager.cs" />
     <Compile Include="CodeElementDrawer.cs" />
+    <Compile Include="SymbolColors.cs" />
     <Compile Include="UserInterface\BooleanValueOptionsItem.cs">
       <SubType>UserControl</SubType>
     </Compile>

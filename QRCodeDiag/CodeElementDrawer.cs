@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeDiag
 {
-    class CodeElementDrawer
+    internal class CodeElementDrawer
     {
         private readonly FontFamily fontFamily;
         public float CodeElWidth { get; set; }
@@ -24,26 +24,22 @@ namespace QRCodeDiag
         {
             this.DrawCodeSymbol(drawableSymbol.CodeSymbol,
                                 g,
-                                drawableSymbol.BitIndexColor,
-                                drawableSymbol.OutlineColor,
-                                drawableSymbol.SymbolValueColor,
+                                drawableSymbol.SymbolColoring,
                                 drawableSymbol.DrawBitIndices,
                                 drawableSymbol.DrawSymbolValue);
         }
         public void DrawCodeSymbol(CodeSymbol symbol,
                                   Graphics g,
-                                  Color bitIndexColor,
-                                  Color outlineColor,
-                                  Color symbolValueColor,
+                                  SymbolColors symbolColors,
                                   bool drawBitIndices,
                                   bool drawSymbolValue)
         {
             // Draw symbol edges
             float penWidth = 2;
-            var p = new Pen(outlineColor, penWidth);
+            var p = new Pen(symbolColors.Outline, penWidth);
             var smallFont = new Font(this.fontFamily, 0.5F * CodeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
             var largeFont = new Font(this.fontFamily, CodeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var solidbrush = new SolidBrush(bitIndexColor);
+            var solidbrush = new SolidBrush(symbolColors.BitIndex);
             foreach (var edge in symbol.GetContour())
             {
                 var edgeStartX = edge.Start.X * this.CodeElWidth;
@@ -99,7 +95,7 @@ namespace QRCodeDiag
                 if (symbol.CurrentSymbolLength > 0)
                 {
                     var drawLocation = symbol.GetBitCoordinate(Math.Min(4, symbol.CurrentSymbolLength - 1));
-                    var solidBrush = new SolidBrush(symbolValueColor);
+                    var solidBrush = new SolidBrush(symbolColors.SymbolValue);
 
                     g.DrawString(symbol.ToString(),
                                  largeFont,
@@ -123,9 +119,7 @@ namespace QRCodeDiag
                     var sym = codeSymbolList[j];
                     this.DrawCodeSymbol(sym,
                                         g,
-                                        drawableCode.BitIndexColor,
-                                        drawableCode.SymbolOutlineColor,
-                                        drawableCode.SymbolValueColor,
+                                        drawableCode.SymbolColoring,
                                         drawableCode.DrawBitIndices, 
                                         drawableCode.DrawSymbolValues);
 
