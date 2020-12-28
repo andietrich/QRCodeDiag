@@ -388,7 +388,7 @@ namespace QRCodeBaseLib
                     this.Terminator = new TerminatorSymbol(this.RawDataBytes.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
                     this.PaddingBits = this.RawDataBytes.ToCodeSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
 
-                    return EncodedSymbols.DecodeSymbols('_');
+                    return EncodedSymbols.ToString();
                 }
                 else
                 {

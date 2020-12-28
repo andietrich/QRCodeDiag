@@ -37,6 +37,7 @@ namespace QRCodeDiag.UserInterface
 
             this.CodeSymbolName = codeSymbolName;
             this.DrawableCodeSymbolCode = setDrawableCodeSymbolCode;
+            this.stringValueOptionsItem1.StringValue = setDrawableCodeSymbolCode.CodeSymbolCode.ToString();
         }
 
         private void checkBoxDrawElement_CheckedChanged(object sender, EventArgs e)

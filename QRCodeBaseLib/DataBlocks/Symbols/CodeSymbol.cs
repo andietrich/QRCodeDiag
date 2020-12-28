@@ -73,5 +73,10 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             }
             return this.bitCoordinates[bitNumber];
         }
+
+        public override string ToString()
+        {
+            return $"-0b{this.BitString}-";
+        }
     }
 }

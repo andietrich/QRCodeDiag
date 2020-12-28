@@ -134,14 +134,9 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         {
             return new CodeSymbolCode<T2>(this.GetBitIterator(startIndex, length));
         }
-        public string DecodeSymbols(char unknownSymbol)
+        public override string ToString()
         {
-            var sb = new StringBuilder();
-            for(int i = 0; i < this.codeSymbolList.Count; i++)
-            {
-                sb.Append(this.codeSymbolList[i].ToString());
-            }
-            return sb.ToString();
+            return String.Join("", this.codeSymbolList.Select(s => s.ToString()));
         }
     }
 }
