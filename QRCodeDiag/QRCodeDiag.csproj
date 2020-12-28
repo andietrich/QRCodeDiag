@@ -46,7 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColoringSchema.cs" />
+    <Compile Include="DrawableCodeSymbol.cs" />
+    <Compile Include="DrawableCodeSymbolCode.cs" />
+    <Compile Include="DrawingManager.cs" />
+    <Compile Include="IDrawableCodeSymbolCode.cs" />
     <Compile Include="SettingsPropertyManager.cs" />
     <Compile Include="CodeElementDrawer.cs" />
     <Compile Include="UserInterface\BooleanValueOptionsItem.cs">

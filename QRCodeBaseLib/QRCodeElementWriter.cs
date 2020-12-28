@@ -5,7 +5,7 @@ using System.Text;
 
 namespace QRCodeBaseLib
 {
-    class QRCodeElementWriter
+    internal class QRCodeElementWriter
     {
         private readonly char[,] qrCodeBits;
         private readonly QRCodeVersion version;

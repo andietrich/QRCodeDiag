@@ -15,24 +15,11 @@ namespace QRCodeDiag.UserInterface
 {
     public partial class MainForm : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
-        //[Flags] //ToDo: hold button to draw lines
-        //private enum ButtonDown
-        //{
-        //    None = 0x00,
-        //    MouseLeft = 0x01,
-        //    MouseRight = 0x02,
-        //    MouseMiddle = 0x04,
-        //    MouseOther = 0x08,
-        //    ControlButton = 0x10,
-        //    ShiftButton = 0x20,
-        //    AltButton = 0x40
-        //}
-
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
-        //private ButtonDown buttonDown; //ToDo: hold button to draw lines
-        public bool ShowRawOverlay { get; set; }
-        public bool ShowEncodingOverlay { get; set; }
-        public bool ShowPaddingOverlay { get; set; }
+        private SettingsPropertyManager settingsPropertyManager;
+        private CodeElementDrawer codeDrawer;
+        private DrawingManager drawingManager;
+
         public bool ShowXORed { get; set; }
 
         private XORMask.MaskType CurrentMaskUsed
@@ -63,6 +50,7 @@ namespace QRCodeDiag.UserInterface
             set
             {
                 this.displayCode = value;
+                this.settingsPropertyManager.SetQRCode(value);
                 this.UpdateTextBox();
                 this.pictureBox1.Invalidate();
             }
@@ -71,21 +59,13 @@ namespace QRCodeDiag.UserInterface
         public MainForm()
         {
             InitializeComponent();
-            this.ShowRawOverlay = false;
-            this.ShowEncodingOverlay = true;
-            this.ShowPaddingOverlay = true;
             this.ShowXORed = false;
             this.CurrentMaskUsed = XORMask.MaskType.None;
+            this.codeDrawer = new CodeElementDrawer(new FontFamily("Lucida Console"));
+            this.drawingManager = new DrawingManager(this.codeDrawer);
+            this.settingsPropertyManager = new SettingsPropertyManager(this.drawingManager, this.optionsTableLayoutPanel.Controls);
             this.RecalculateFormMinimumSize();
-
-            var optitem = new CodeSymbolCodeOptionsItem();
-            optitem.CodeSymbolName = "Code symbol 1";
-            var optitem2 = new CodeSymbolCodeOptionsItem();
-            optitem2.CodeSymbolName = "Code symbol 2";
-            this.optionsTableLayoutPanel.Controls.Add(optitem, 0, 0);
-            //this.optionsTableLayoutPanel.Controls.Add(button_x, 0, 0);
-            //this.optionsTableLayoutPanel.Controls.Add(button_x2, 0, 1);
-            this.optionsTableLayoutPanel.Controls.Add(optitem2, 0, 1);
+            this.settingsPropertyManager.PropertyChangedEvent += this.pictureBox1.Invalidate;
         }
 
         private void openToolStripButton_Click(object sender, EventArgs e)
@@ -108,45 +88,11 @@ namespace QRCodeDiag.UserInterface
             if (this.DisplayCode != null)
             {
                 int     edgeLength      = this.DisplayCode.GetEdgeLength();
-                float   codeElWidth     = (float)this.pictureBox1.Size.Width / edgeLength;
-                float   codeElHeight    = (float)this.pictureBox1.Size.Height / edgeLength;
                 bool    drawTransparent = this.pictureBox1.BackgroundImage != null;
-                var     codeDrawer      = new CodeElementDrawer(codeElWidth, codeElHeight);
-                var     rawCode         = this.DisplayCode.GetRawCode();
-                var     rawDataBytes    = this.DisplayCode.GetRawDataBytes();
-                var     rawECCBytes     = this.DisplayCode.GetRawECCBytes();
-                var     encodedData     = this.DisplayCode.GetEncodedSymbols();
-                var     padding         = this.DisplayCode.GetPaddingBits();
-                var     terminator      = this.DisplayCode.GetTerminator();
-
-                codeDrawer.DrawQRCode(this.DisplayCode.GetBits(this.ShowXORed), e.Graphics, drawTransparent);
-
-                if (this.ShowRawOverlay && rawCode != null)
-                    codeDrawer.DrawCodeSymbolCode(rawCode, e.Graphics, Color.Orange, Color.Cyan, true, true);
-
-                if (this.ShowEncodingOverlay && encodedData != null)
-                    codeDrawer.DrawCodeSymbolCode(encodedData, e.Graphics, Color.Red, Color.LightBlue, true, true);
-
-
-                //////////////////////////////////////// testing only
-                if (this.ShowPaddingOverlay && rawDataBytes != null)
-                    codeDrawer.DrawCodeSymbolCode(rawDataBytes, e.Graphics, Color.Blue, Color.LightBlue, true, true);
-
-                if (this.ShowPaddingOverlay && rawDataBytes != null)
-                    codeDrawer.DrawCodeSymbolCode(rawECCBytes, e.Graphics, Color.Purple, Color.LightBlue, true, true);
-
-                if (this.ShowEncodingOverlay && padding != null)
-                    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
-
-                if (this.ShowEncodingOverlay && terminator != null)
-                    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
-                //////////////////////////////////////// ^^^^^^^testing only
-
-                //if (this.ShowPaddingOverlay && padding != null)
-                //    codeDrawer.DrawCodeSymbolCode(padding, e.Graphics, Color.Blue, Color.LightBlue, true, true);
-
-                //if (this.ShowPaddingOverlay && terminator != null)  // ToDo separate condition this.ShowPaddingOverlay for terminator
-                //    codeDrawer.DrawCodeSymbol(terminator, e.Graphics, Color.Purple, true);
+                this.codeDrawer.CodeElWidth = (float)this.pictureBox1.Size.Width / edgeLength;
+                this.codeDrawer.CodeElHeight = (float)this.pictureBox1.Size.Height / edgeLength;
+                this.codeDrawer.DrawQRCode(this.DisplayCode.GetBits(this.ShowXORed), e.Graphics, drawTransparent);
+                this.drawingManager.Draw(e.Graphics);
             }
         }
 
@@ -158,19 +104,15 @@ namespace QRCodeDiag.UserInterface
                 switch(e.Button)
                 {
                     case MouseButtons.Left:
-                        //this.buttonDown |= ButtonDown.MouseLeft; //ToDo: hold button to draw lines
                         this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, '1');
                         break;
                     case MouseButtons.Right:
-                        //this.buttonDown |= ButtonDown.MouseRight; //ToDo: hold button to draw lines
                         this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, '0');
                         break;
                     case MouseButtons.Middle:
-                        //this.buttonDown |= ButtonDown.MouseMiddle; //ToDo: hold button to draw lines
                         this.DisplayCode.SetDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height, 'u');
                         break;
                     default:
-                        //this.buttonDown |= ButtonDown.MouseOther; //ToDo: hold button to draw lines
                         this.DisplayCode.ToggleDataCell(edgeLength * e.Location.X / pictureBox1.Size.Width, edgeLength * e.Location.Y / pictureBox1.Size.Height);
                         break;
                 }
@@ -187,15 +129,13 @@ namespace QRCodeDiag.UserInterface
                 var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
                 {
-                    var paddingBits = this.DisplayCode.GetPaddingBits();
-                    var terminator = this.DisplayCode.GetTerminator();
                     sb.AppendLine("Message: " + this.DisplayCode.Message);
-                    sb.AppendLine("Terminator: " + this.DisplayCode.GetTerminator()?.BitString ?? "No terminator found");
+                    sb.AppendLine("Terminator: " + this.DisplayCode.Terminator?.BitString ?? "No terminator found");
                     sb.AppendLine("Padding bits: ");
-                    if (this.DisplayCode.GetPaddingBits() == null)
+                    if (this.DisplayCode.PaddingBits == null)
                         sb.AppendLine("Padding bits have not been initialized yet.");
                     else
-                        sb.AppendLine(string.Join(Environment.NewLine, this.DisplayCode.GetPaddingBits().GetSymbolBitStrings()));
+                        sb.AppendLine(string.Join(Environment.NewLine, this.DisplayCode.PaddingBits.GetSymbolBitStrings()));
                     
                     sb.AppendLine("RepairMessage():" + this.DisplayCode.GetRepairMessageStatusLine());
                 }
@@ -227,24 +167,6 @@ namespace QRCodeDiag.UserInterface
                     MessageBox.Show(this, "Could not save file: " + ex.Message);
                 }
             }
-        }
-
-        private void rawOverlayToolStripButton_Click(object sender, EventArgs e)
-        {
-            this.ShowRawOverlay = !this.ShowRawOverlay;
-            this.pictureBox1.Invalidate();
-        }
-
-        private void encodingToolStripButton_Click(object sender, EventArgs e)
-        {
-            this.ShowEncodingOverlay = !this.ShowEncodingOverlay;
-            this.pictureBox1.Invalidate();
-        }
-
-        private void paddingToolStripButton_Click(object sender, EventArgs e)
-        {
-            this.ShowPaddingOverlay = !this.ShowPaddingOverlay;
-            this.pictureBox1.Invalidate();
         }
 
         private void showXORedToolStripButton_Click(object sender, EventArgs e)

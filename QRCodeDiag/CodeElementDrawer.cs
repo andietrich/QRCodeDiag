@@ -13,29 +13,43 @@ namespace QRCodeDiag
     class CodeElementDrawer
     {
         private readonly FontFamily fontFamily;
-        private readonly float codeElWidth;
-        private readonly float codeElHeight;
-        public CodeElementDrawer(float codeElementWidth, float codeElementHeight)
+        public float CodeElWidth { get; set; }
+        public float CodeElHeight { get; set; }
+        public CodeElementDrawer(FontFamily setFontFamily)
         {
-            this.codeElWidth        = codeElementWidth;
-            this.codeElHeight       = codeElementHeight;
-            this.fontFamily         = new FontFamily("Lucida Console");
+            this.fontFamily = new FontFamily("Lucida Console");
         }
 
-        public void DrawCodeSymbol(CodeSymbol symbol, Graphics g, Color color, bool drawBitIndices)
+        public void DrawCodeSymbol(DrawableCodeSymbol drawableSymbol, Graphics g)
+        {
+            this.DrawCodeSymbol(drawableSymbol.CodeSymbol,
+                                g,
+                                drawableSymbol.BitIndexColor,
+                                drawableSymbol.OutlineColor,
+                                drawableSymbol.SymbolValueColor,
+                                drawableSymbol.DrawBitIndices,
+                                drawableSymbol.DrawSymbolValue);
+        }
+        public void DrawCodeSymbol(CodeSymbol symbol,
+                                  Graphics g,
+                                  Color bitIndexColor,
+                                  Color outlineColor,
+                                  Color symbolValueColor,
+                                  bool drawBitIndices,
+                                  bool drawSymbolValue)
         {
             // Draw symbol edges
             float penWidth = 2;
-            var p = new Pen(color, penWidth);
-            var smallFont = new Font(this.fontFamily, 0.5F * codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var largeFont = new Font(this.fontFamily, codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var solidrush = new SolidBrush(color);
+            var p = new Pen(outlineColor, penWidth);
+            var smallFont = new Font(this.fontFamily, 0.5F * CodeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+            var largeFont = new Font(this.fontFamily, CodeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+            var solidbrush = new SolidBrush(bitIndexColor);
             foreach (var edge in symbol.GetContour())
             {
-                var edgeStartX = edge.Start.X * this.codeElWidth;
-                var edgeStartY = edge.Start.Y * this.codeElHeight;
-                var edgeEndX = edge.End.X * this.codeElWidth;
-                var edgeEndY = edge.End.Y * this.codeElHeight;
+                var edgeStartX = edge.Start.X * this.CodeElWidth;
+                var edgeStartY = edge.Start.Y * this.CodeElHeight;
+                var edgeEndX = edge.End.X * this.CodeElWidth;
+                var edgeEndY = edge.End.Y * this.CodeElHeight;
                 switch (edge.GetDirection()) // Inside is on the right looking in edge direction.
                 {
                     case PolygonEdge.Direction.Down:
@@ -75,41 +89,54 @@ namespace QRCodeDiag
                     var pixCoord = symbol.GetBitCoordinate(i);
                     g.DrawString(i.ToString(),
                                  smallFont,
-                                 solidrush,
-                                 new Point((int)((pixCoord.X + 0.4F) * codeElWidth), (int)((pixCoord.Y + 0.4F) * codeElHeight)));
+                                 solidbrush,
+                                 new Point((int)((pixCoord.X + 0.4F) * CodeElWidth), (int)((pixCoord.Y + 0.4F) * CodeElHeight)));
                 }
             }
 
-            if (symbol.CurrentSymbolLength > 0)
+            if (drawSymbolValue)
             {
-                var drawLocation = symbol.GetBitCoordinate(Math.Min(4, symbol.CurrentSymbolLength - 1));
-                var solidBrush = new SolidBrush(Color.Orange);
+                if (symbol.CurrentSymbolLength > 0)
+                {
+                    var drawLocation = symbol.GetBitCoordinate(Math.Min(4, symbol.CurrentSymbolLength - 1));
+                    var solidBrush = new SolidBrush(symbolValueColor);
 
-                g.DrawString(symbol.ToString(),
-                             largeFont,
-                             solidBrush,
-                             new Point((int)(drawLocation.X * codeElWidth), (int)(drawLocation.Y * codeElHeight)));
+                    g.DrawString(symbol.ToString(),
+                                 largeFont,
+                                 solidBrush,
+                                 new Point((int)(drawLocation.X * CodeElWidth), (int)(drawLocation.Y * CodeElHeight)));
+                }
             }
         }
 
-        public void DrawCodeSymbolCode<T>(CodeSymbolCode<T> codeToDraw, Graphics g, Color bitColor, Color symbolColor, bool drawBitIndices, bool drawSymbolIndices) where T : CodeSymbol, new()
+        public void DrawCodeSymbolCode(IDrawableCodeSymbolCode drawableCode, Graphics g)
         {
-            const int preferredSymbolDrawLocation = 2;
-            var largeFont = new Font(this.fontFamily, this.codeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
-            var symbolIndexBrush = new SolidBrush(symbolColor);
-            var codeSymbolList = codeToDraw.GetCodeSymbols();
-
-            for (int j = 0; j < codeSymbolList.Count; j++)
+            if (drawableCode.DrawSymbolCode)
             {
-                var sym = codeSymbolList[j];
-                this.DrawCodeSymbol(sym, g, bitColor, drawBitIndices);
-                if (drawSymbolIndices && sym.CurrentSymbolLength > 0)
+                const int preferredSymbolDrawLocation = 2;
+                var largeFont = new Font(this.fontFamily, this.CodeElHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+                var symbolIndexBrush = new SolidBrush(drawableCode.SymbolIndexColor);
+                var codeSymbolList = drawableCode.CodeSymbolCode.GetCodeSymbols();
+
+                for (int j = 0; j < codeSymbolList.Count; j++)
                 {
-                    var drawIndexCoord = sym.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, sym.CurrentSymbolLength));
-                    g.DrawString(j.ToString(),
-                                 largeFont,
-                                 symbolIndexBrush,
-                                 new Point((int)(drawIndexCoord.X * this.codeElWidth), (int)(drawIndexCoord.Y * this.codeElHeight)));
+                    var sym = codeSymbolList[j];
+                    this.DrawCodeSymbol(sym,
+                                        g,
+                                        drawableCode.BitIndexColor,
+                                        drawableCode.SymbolOutlineColor,
+                                        drawableCode.SymbolValueColor,
+                                        drawableCode.DrawBitIndices, 
+                                        drawableCode.DrawSymbolValues);
+
+                    if (drawableCode.DrawSymbolIndices && sym.CurrentSymbolLength > 0)
+                    {
+                        var drawIndexCoord = sym.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, sym.CurrentSymbolLength));
+                        g.DrawString(j.ToString(),
+                                     largeFont,
+                                     symbolIndexBrush,
+                                     new Point((int)(drawIndexCoord.X * this.CodeElWidth), (int)(drawIndexCoord.Y * this.CodeElHeight)));
+                    }
                 }
             }
         }
@@ -144,7 +171,7 @@ namespace QRCodeDiag
                         default:
                             throw new QRCodeFormatException("Invalid codeEl value: " + bits[x, y]);
                     }
-                    g.FillRectangle(b, x * codeElWidth, y * codeElHeight, codeElWidth, codeElHeight);
+                    g.FillRectangle(b, x * CodeElWidth, y * CodeElHeight, CodeElWidth, CodeElHeight);
                 }
             }
         }

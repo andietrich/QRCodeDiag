@@ -17,9 +17,21 @@ namespace QRCodeBaseLib
         public delegate void VersionChangedHandler(QRCodeVersion newVersion);
         public delegate void ECCLevelChangedHandler(ErrorCorrectionLevel.ECCLevel newECCLevel);
         public delegate void MessageChangedHandler(string newMessage, bool messageIsValid);
+        public delegate void RawCodeChangedHandler(CodeSymbolCode<RawCodeByte> newRawCode);
+        public delegate void RawDataBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawDataBytes);
+        public delegate void RawECCBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawECCBytes);
+        public delegate void PaddingBytesChangedHandler(CodeSymbolCode<RawCodeByte> newPaddingBytes);
+        public delegate void EncodedSymbolsChangedHandler(CodeSymbolCode<ByteEncodingSymbol> newEncodedSymbols);
+        public delegate void TerminatorSymbolChangedHandler(TerminatorSymbol newTerminatorSymbol);
         public event VersionChangedHandler VersionChangedEvent;
         public event ECCLevelChangedHandler ECCLevelChangedEvent;
         public event MessageChangedHandler MessageChangedEvent;
+        public event RawCodeChangedHandler RawCodeChangedEvent;
+        public event RawDataBytesChangedHandler RawDataBytesChangedEvent;
+        public event RawECCBytesChangedHandler RawECCBytesChangedEvent;
+        public event PaddingBytesChangedHandler PaddingBytesChangedEvent;
+        public event EncodedSymbolsChangedHandler EncodedSymbolsChangedEvent;
+        public event TerminatorSymbolChangedHandler TerminatorSymbolChangedEvent;
 
         #region private members
 
@@ -36,10 +48,11 @@ namespace QRCodeBaseLib
         private CodeSymbolCode<RawCodeByte> rawECCBytes;
         private CodeSymbolCode<RawCodeByte> paddingBits;
         private CodeSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
-        private List<ECCBlock> interleavingBlocks;
         private TerminatorSymbol terminator;
+        private List<ECCBlock> interleavingBlocks;
         private QRCodeVersion version;
         private XORMask.MaskType appliedXORMaskType;
+        private XORMask.MaskType detectedXORMaskType;
         private ErrorCorrectionLevel eccLevel; //ToDo parse correct value or use user-provided/default
                                                //ToDo Use/Set/Check Remainder Bits
                                                //ToDo highlight message mode
@@ -73,6 +86,11 @@ namespace QRCodeBaseLib
                 this.UpdateMessage();
             }
         }
+        public XORMask.MaskType DetectedXORMaskType
+        {
+            get { return this.detectedXORMaskType; }
+            set { this.detectedXORMaskType = value; }
+        }
         public ErrorCorrectionLevel.ECCLevel ECCLevel
         {
             get
@@ -98,6 +116,60 @@ namespace QRCodeBaseLib
             }
         }
         public bool ReadMessageSuccess { get; private set; }
+        public CodeSymbolCode<RawCodeByte> RawCode
+        {
+            get { return this.rawCode; }
+            private set
+            {
+                this.rawCode = value;
+                this.RawCodeChangedEvent?.Invoke(value);
+            }
+        }
+        public CodeSymbolCode<RawCodeByte> RawDataBytes
+        {
+            get { return this.rawDataBytes; }
+            private set
+            {
+                this.rawDataBytes = value;
+                this.RawDataBytesChangedEvent?.Invoke(value);
+            }
+        }
+        public CodeSymbolCode<RawCodeByte> RawECCBytes
+        {
+            get { return this.rawECCBytes; }
+            private set
+            {
+                this.rawECCBytes = value;
+                this.RawECCBytesChangedEvent?.Invoke(value);
+            }
+        }
+        public CodeSymbolCode<RawCodeByte> PaddingBits
+        {
+            get { return this.paddingBits; }
+            private set
+            {
+                this.paddingBits = value;
+                this.PaddingBytesChangedEvent?.Invoke(value);
+            }
+        }
+        public CodeSymbolCode<ByteEncodingSymbol> EncodedSymbols
+        {
+            get { return this.encodedSymbols; }
+            private set
+            {
+                this.encodedSymbols = value;
+                this.EncodedSymbolsChangedEvent?.Invoke(value);
+            }
+        }
+        public TerminatorSymbol Terminator
+        {
+            get { return this.terminator; }
+            private set
+            {
+                this.terminator = value;
+                this.TerminatorSymbolChangedEvent?.Invoke(value);
+            }
+        }
 
         #endregion
         #region constructors
@@ -242,7 +314,7 @@ namespace QRCodeBaseLib
             {
                 var fi = new FormatInformation(splitInfo);
                 this.ECCLevel = fi.ECCLevel;
-                // TODO do something with Mask information
+                this.DetectedXORMaskType = fi.Mask; // TODO do something with Mask information
             }
             else
             {
@@ -252,17 +324,10 @@ namespace QRCodeBaseLib
 
         private string ReadMessage()
         {
-            try
-            {
-                this.ReadFormatInformation();
-            }
-            catch(ArgumentException ae)
-            {
-                throw new QRCodeFormatException("Could not parse Format information: ", ae);
-            }
+            this.ReadFormatInformation();
 
-            this.rawCode = new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
-            this.interleavingBlocks = DeInterleaver.DeInterleave(this.rawCode, this.eccLevel);
+            this.RawCode = new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
+            this.interleavingBlocks = DeInterleaver.DeInterleave(this.RawCode, this.eccLevel);
 
             var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
             var eccCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
@@ -273,17 +338,17 @@ namespace QRCodeBaseLib
                 eccCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairECC());
             }
 
-            this.rawDataBytes = new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
-            this.rawECCBytes = new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);
+            this.RawDataBytes = new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
+            this.RawECCBytes = new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);
 
             int modeNibble;
             try
             {
-                modeNibble = Convert.ToInt32(this.rawDataBytes.GetBitString(0, MODEINFOLENGTH), 2);
+                modeNibble = Convert.ToInt32(this.RawDataBytes.GetBitString(0, MODEINFOLENGTH), 2);
             }
             catch (FormatException fe)
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawDataBytes.GetBitString(0, MODEINFOLENGTH), fe);
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.RawDataBytes.GetBitString(0, MODEINFOLENGTH), fe);
             }
 
             if (MessageMode.TryParse(modeNibble, out this.messageMode))
@@ -292,7 +357,7 @@ namespace QRCodeBaseLib
                 int characterCount;
                 try
                 {
-                    characterCount = Convert.ToInt32(this.rawDataBytes.GetBitString(MODEINFOLENGTH, charIndicatorLength), 2);
+                    characterCount = Convert.ToInt32(this.RawDataBytes.GetBitString(MODEINFOLENGTH, charIndicatorLength), 2);
                 }
                 catch (FormatException fe)
                 {
@@ -316,14 +381,14 @@ namespace QRCodeBaseLib
 
                     for (int i = 0, bitNumber = messageEndOffset; i < terminatorLength; i++, bitNumber++)
                     {
-                        terminatorLocation[i] = this.rawDataBytes.GetBitPosition(bitNumber);
+                        terminatorLocation[i] = this.RawDataBytes.GetBitPosition(bitNumber);
                     }
 
-                    this.encodedSymbols = this.rawDataBytes.ToCodeSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
-                    this.terminator = new TerminatorSymbol(this.rawDataBytes.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
-                    this.paddingBits = this.rawDataBytes.ToCodeSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
+                    this.EncodedSymbols = this.RawDataBytes.ToCodeSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
+                    this.Terminator = new TerminatorSymbol(this.RawDataBytes.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
+                    this.PaddingBits = this.RawDataBytes.ToCodeSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
 
-                    return encodedSymbols.DecodeSymbols('_');
+                    return EncodedSymbols.DecodeSymbols('_');
                 }
                 else
                 {
@@ -332,7 +397,7 @@ namespace QRCodeBaseLib
             }
             else
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.rawCode.GetBitString(0, 4));
+                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.RawCode.GetBitString(0, 4));
             }
         }
 
@@ -475,47 +540,9 @@ namespace QRCodeBaseLib
             }
         }
 
-        public void PrintBlocks()
-        {
-            Console.WriteLine(this.Message);
-        }
-
         public int GetEdgeLength()
         {
             return this.bits.GetLength(0);
-        }
-
-        public CodeSymbolCode<RawCodeByte> GetRawCode()
-        {
-            return this.rawCode;
-        }
-
-        public CodeSymbolCode<RawCodeByte> GetPaddingBits()
-        {
-            return this.paddingBits;
-        }
-
-        public CodeSymbolCode<ByteEncodingSymbol> GetEncodedSymbols()
-        {
-            return this.encodedSymbols;
-        }
-
-        //public List<ECCBlock> GetInterleavingBlocks()
-        //{
-        //    return this.interleavingBlocks;
-        //}
-        public TerminatorSymbol GetTerminator()
-        {
-            return this.terminator;
-        }
-
-        public CodeSymbolCode<RawCodeByte> GetRawDataBytes()
-        {
-            return this.rawDataBytes;
-        }
-        public CodeSymbolCode<RawCodeByte> GetRawECCBytes()
-        {
-            return this.rawECCBytes;
         }
 
         //public void AnalyzeCode()

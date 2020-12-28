@@ -10,8 +10,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 {
     public class CodeSymbolCode<T> : ICodeSymbolCode where T : CodeSymbol, new()
     {
-        protected List<T> codeSymbolList;
-        private string bitString;
+        protected List<CodeSymbol> codeSymbolList;
         public int SymbolCount => this.codeSymbolList.Count;
         public int BitCount
         {
@@ -38,7 +37,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         /// <param name="it"><see cref="IBitIterator"/> to iterate through all bits the <see cref="CodeSymbolCode{T}"/> will be composed of.</param>
         internal CodeSymbolCode(IBitIterator it)
         {
-            this.codeSymbolList = new List<T>();
+            this.codeSymbolList = new List<CodeSymbol>();
 
             var wd = new T();
             char c = it.NextBit();
@@ -56,32 +55,26 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
 
             //ToDo handle remainder bits or error: if(!wd.IsComplete){ if(wd.CurrentSymbolLength > 0) or: if(wd.CurrentSymbolLength != number of remainder bits) for QRCodeBitIterator
-
-            this.InitializeBitString();
         }
 
         public CodeSymbolCode(List<T> codeSymbols)
         {
-            this.codeSymbolList = new List<T>();
+            this.codeSymbolList = new List<CodeSymbol>();
 
             for (int i = 0; i < codeSymbols.Count; i++)
             {
                 this.codeSymbolList.Add(codeSymbols[i]);
             }
-
-            this.InitializeBitString();
         }
 
         public CodeSymbolCode(List<CodeSymbolCode<T>> codeSymbolCodes)  // TODO
         {
-            this.codeSymbolList = new List<T>();
+            this.codeSymbolList = new List<CodeSymbol>();
 
             for (int i = 0; i < codeSymbolCodes.Count; i++)
             {
                 this.codeSymbolList.AddRange(codeSymbolCodes[i].GetCodeSymbols());
             }
-
-            this.InitializeBitString();
         }
 
         internal IBitIterator GetBitIterator()
@@ -92,25 +85,16 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         {
             return new CodeSymbolCodeBitIterator(this, startIndex, length);
         }
-        private void InitializeBitString()
-        {
-            var sb = new StringBuilder();
-            for (int i = 0; i < this.codeSymbolList.Count; i++)
-            {
-                sb.Append(this.codeSymbolList[i].BitString);
-            }
-            this.bitString = sb.ToString();
-        }
-        public List<T> GetCodeSymbols()
+        public List<CodeSymbol> GetCodeSymbols()
         {
             return this.codeSymbolList;
         }
         public T GetSymbolAt(int index)
         {
             if (index < 0 || index > this.codeSymbolList.Count)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             else
-                return this.codeSymbolList[index];
+                return this.codeSymbolList[index] as T;
         }
         public string GetBitString()
         {

@@ -28,30 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBoxDrawElement = new System.Windows.Forms.CheckBox();
+            this.checkBoxDrawValues = new System.Windows.Forms.CheckBox();
             this.stringValueOptionsItem1 = new QRCodeDiag.UserInterface.StringValueOptionsItem();
+            this.checkBoxSymbolIndices = new System.Windows.Forms.CheckBox();
+            this.checkBoxBitIndices = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
-            // checkBox1
+            // checkBoxDrawElement
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(7, 57);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(120, 17);
-            this.checkBox1.TabIndex = 1;
-            this.checkBox1.Text = "Draw Code Element";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBoxDrawElement.AutoSize = true;
+            this.checkBoxDrawElement.Location = new System.Drawing.Point(7, 57);
+            this.checkBoxDrawElement.Name = "checkBoxDrawElement";
+            this.checkBoxDrawElement.Size = new System.Drawing.Size(120, 17);
+            this.checkBoxDrawElement.TabIndex = 1;
+            this.checkBoxDrawElement.Text = "Draw Code Element";
+            this.checkBoxDrawElement.UseVisualStyleBackColor = true;
+            this.checkBoxDrawElement.CheckedChanged += new System.EventHandler(this.checkBoxDrawElement_CheckedChanged);
             // 
-            // checkBox2
+            // checkBoxDrawValues
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(174, 57);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(120, 17);
-            this.checkBox2.TabIndex = 2;
-            this.checkBox2.Text = "Hide Symbol Values";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBoxDrawValues.AutoSize = true;
+            this.checkBoxDrawValues.Location = new System.Drawing.Point(174, 57);
+            this.checkBoxDrawValues.Name = "checkBoxDrawValues";
+            this.checkBoxDrawValues.Size = new System.Drawing.Size(123, 17);
+            this.checkBoxDrawValues.TabIndex = 2;
+            this.checkBoxDrawValues.Text = "Draw Symbol Values";
+            this.checkBoxDrawValues.UseVisualStyleBackColor = true;
+            this.checkBoxDrawValues.CheckedChanged += new System.EventHandler(this.checkBoxDrawValues_CheckedChanged);
             // 
             // stringValueOptionsItem1
             // 
@@ -62,25 +66,51 @@
             this.stringValueOptionsItem1.TabIndex = 3;
             this.stringValueOptionsItem1.ValueName = "Name of the Value";
             // 
+            // checkBoxSymbolIndices
+            // 
+            this.checkBoxSymbolIndices.AutoSize = true;
+            this.checkBoxSymbolIndices.Location = new System.Drawing.Point(7, 80);
+            this.checkBoxSymbolIndices.Name = "checkBoxSymbolIndices";
+            this.checkBoxSymbolIndices.Size = new System.Drawing.Size(125, 17);
+            this.checkBoxSymbolIndices.TabIndex = 4;
+            this.checkBoxSymbolIndices.Text = "Draw Symbol Indices";
+            this.checkBoxSymbolIndices.UseVisualStyleBackColor = true;
+            this.checkBoxSymbolIndices.CheckedChanged += new System.EventHandler(this.checkBoxSymbolIndices_CheckedChanged);
+            // 
+            // checkBoxBitIndices
+            // 
+            this.checkBoxBitIndices.AutoSize = true;
+            this.checkBoxBitIndices.Location = new System.Drawing.Point(174, 80);
+            this.checkBoxBitIndices.Name = "checkBoxBitIndices";
+            this.checkBoxBitIndices.Size = new System.Drawing.Size(103, 17);
+            this.checkBoxBitIndices.TabIndex = 4;
+            this.checkBoxBitIndices.Text = "Draw Bit Indices";
+            this.checkBoxBitIndices.UseVisualStyleBackColor = true;
+            this.checkBoxBitIndices.CheckedChanged += new System.EventHandler(this.checkBoxBitIndices_CheckedChanged);
+            // 
             // CodeSymbolCodeOptionsItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.checkBoxBitIndices);
+            this.Controls.Add(this.checkBoxSymbolIndices);
             this.Controls.Add(this.stringValueOptionsItem1);
-            this.Controls.Add(this.checkBox2);
-            this.Controls.Add(this.checkBox1);
-            this.MaximumSize = new System.Drawing.Size(303, 84);
+            this.Controls.Add(this.checkBoxDrawValues);
+            this.Controls.Add(this.checkBoxDrawElement);
+            this.MaximumSize = new System.Drawing.Size(303, 104);
             this.MinimumSize = new System.Drawing.Size(303, 84);
             this.Name = "CodeSymbolCodeOptionsItem";
-            this.Size = new System.Drawing.Size(303, 84);
+            this.Size = new System.Drawing.Size(303, 104);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox checkBoxDrawElement;
+        private System.Windows.Forms.CheckBox checkBoxDrawValues;
         private StringValueOptionsItem stringValueOptionsItem1;
+        private System.Windows.Forms.CheckBox checkBoxSymbolIndices;
+        private System.Windows.Forms.CheckBox checkBoxBitIndices;
     }
 }

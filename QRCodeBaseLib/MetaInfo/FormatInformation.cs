@@ -12,8 +12,8 @@ namespace QRCodeBaseLib.MetaInfo
             SplitBottomLeftTopRight
         }
 
-        public ErrorCorrectionLevel.ECCLevel ECCLevel;
-        public XORMask.MaskType Mask;
+        public ErrorCorrectionLevel.ECCLevel ECCLevel { get; set; }
+        public XORMask.MaskType Mask { get; set; }
 
         public FormatInformation(ErrorCorrectionLevel.ECCLevel eccLevel, XORMask.MaskType mask)
         {
@@ -186,7 +186,7 @@ namespace QRCodeBaseLib.MetaInfo
                     break;
 
                 default:
-                    throw new ArgumentException($"{0} is not a valid format information string.");
+                    throw new InvalidFormatInformationException($"{0} is not a valid format information string.");
             }
         }
 

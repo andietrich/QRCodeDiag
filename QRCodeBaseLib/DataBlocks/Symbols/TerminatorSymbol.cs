@@ -8,7 +8,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
 {
     public class TerminatorSymbol : CodeSymbol
     {
-        private string terminatorBitString;
+        private readonly string terminatorBitString;
         public override string BitString { get { return this.terminatorBitString; } }
         public TerminatorSymbol(string terminatorBits, ICollection<Vector2D> coordinates) : base((uint)terminatorBits.Length)
         {

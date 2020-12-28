@@ -33,9 +33,6 @@
             this.newCodeToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.rawOverlayToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.encodingToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.paddingToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.showXORedToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.mask000ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,9 +62,6 @@
             this.newCodeToolStripButton,
             this.openToolStripButton,
             this.saveToolStripButton,
-            this.rawOverlayToolStripButton,
-            this.encodingToolStripButton,
-            this.paddingToolStripButton,
             this.showXORedToolStripButton,
             this.toolStripDropDownButton1,
             this.bgImgToolStripButton});
@@ -107,36 +101,6 @@
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "Save Data";
             this.saveToolStripButton.Click += new System.EventHandler(this.saveToolStripButton_Click);
-            // 
-            // rawOverlayToolStripButton
-            // 
-            this.rawOverlayToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.rawOverlayToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("rawOverlayToolStripButton.Image")));
-            this.rawOverlayToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.rawOverlayToolStripButton.Name = "rawOverlayToolStripButton";
-            this.rawOverlayToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.rawOverlayToolStripButton.Text = "Raw byte overlay on/off";
-            this.rawOverlayToolStripButton.Click += new System.EventHandler(this.rawOverlayToolStripButton_Click);
-            // 
-            // encodingToolStripButton
-            // 
-            this.encodingToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.encodingToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("encodingToolStripButton.Image")));
-            this.encodingToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.encodingToolStripButton.Name = "encodingToolStripButton";
-            this.encodingToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.encodingToolStripButton.Text = "Encoded message overlay on/off";
-            this.encodingToolStripButton.Click += new System.EventHandler(this.encodingToolStripButton_Click);
-            // 
-            // paddingToolStripButton
-            // 
-            this.paddingToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.paddingToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("paddingToolStripButton.Image")));
-            this.paddingToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.paddingToolStripButton.Name = "paddingToolStripButton";
-            this.paddingToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.paddingToolStripButton.Text = "Padding and Terminator overlay on/off";
-            this.paddingToolStripButton.Click += new System.EventHandler(this.paddingToolStripButton_Click);
             // 
             // showXORedToolStripButton
             // 
@@ -249,7 +213,7 @@
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(12, 584);
+            this.textBox1.Location = new System.Drawing.Point(12, 905);
             this.textBox1.MinimumSize = new System.Drawing.Size(500, 116);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
@@ -296,7 +260,7 @@
             this.topTableLayoutPanel.Name = "topTableLayoutPanel";
             this.topTableLayoutPanel.RowCount = 1;
             this.topTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.topTableLayoutPanel.Size = new System.Drawing.Size(937, 550);
+            this.topTableLayoutPanel.Size = new System.Drawing.Size(937, 871);
             this.topTableLayoutPanel.TabIndex = 3;
             this.topTableLayoutPanel.Resize += new System.EventHandler(this.topTableLayoutPanel_Resize);
             // 
@@ -318,7 +282,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(961, 712);
+            this.ClientSize = new System.Drawing.Size(961, 1033);
             this.Controls.Add(this.topTableLayoutPanel);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.toolStrip1);
@@ -344,9 +308,6 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.ToolStripButton rawOverlayToolStripButton;
-        private System.Windows.Forms.ToolStripButton encodingToolStripButton;
-        private System.Windows.Forms.ToolStripButton paddingToolStripButton;
         private System.Windows.Forms.ToolStripButton showXORedToolStripButton;
         private System.Windows.Forms.ToolStripButton newCodeToolStripButton;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
