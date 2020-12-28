@@ -261,6 +261,10 @@ namespace QRCodeBaseLib
             {
                 throw new QRCodeFormatException("QR Code column count is wrong.", ae);
             }
+            catch (ArgumentException ae)
+            {
+                throw new QRCodeFormatException("QR Code size is wrong.", ae);
+            }
 
             var elemWriter = new QRCodeElementWriter(this.bits);
             elemWriter.PlaceStaticElements(); // make sure static elements have correct value
