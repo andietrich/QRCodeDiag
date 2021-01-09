@@ -12,13 +12,14 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
     {
         protected List<CodeSymbol> codeSymbolList;
         public int SymbolCount => this.codeSymbolList.Count;
-        public int BitCount
+        public uint BitCount
         {
             get
             {
                 if(this.codeSymbolList.Count > 1)
                 {
-                    return (this.codeSymbolList.Count-1) * ((int)this.codeSymbolList[0].SymbolLength) + this.codeSymbolList[this.codeSymbolList.Count - 1].CurrentSymbolLength;
+                    return (uint)((this.codeSymbolList.Count-1) * ((int)this.codeSymbolList[0].SymbolLength)
+                                 + this.codeSymbolList[this.codeSymbolList.Count - 1].CurrentSymbolLength);
                 }
                 else if (this.codeSymbolList.Count == 1)
                 {
@@ -26,7 +27,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
                 }
                 else
                 {
-                    return 0;
+                    return 0u;
                 }
             }
         }
@@ -81,7 +82,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         {
             return new CodeSymbolCodeBitIterator(this);
         }
-        internal IBitIterator GetBitIterator(int startIndex, int length)
+        internal IBitIterator GetBitIterator(uint startIndex, uint length)
         {
             return new CodeSymbolCodeBitIterator(this, startIndex, length);
         }
@@ -105,9 +106,9 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
             return sb.ToString();
         }
-        public string GetBitString(int startIndex, int length)
+        public string GetBitString(uint startIndex, uint length)
         {
-            return this.GetBitString().Substring(startIndex, length);
+            return this.GetBitString().Substring((int)startIndex, (int)length);
         }
         public string[] GetSymbolBitStrings()
         {
@@ -118,19 +119,19 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
             return symbolBitStrings;
         }
-        public Vector2D GetBitPosition(int bitNumber)
+        public Vector2D GetBitPosition(uint bitNumber)
         {
             if (this.codeSymbolList.Count > 0)
             {
-                var symbollength = (int)this.codeSymbolList[0].SymbolLength;
-                return this.codeSymbolList[bitNumber / symbollength].GetBitCoordinate(bitNumber % symbollength);
+                var symbollength = this.codeSymbolList[0].SymbolLength;
+                return this.codeSymbolList[(int)(bitNumber / symbollength)].GetBitCoordinate(bitNumber % symbollength);
             }
             else
             {
                 throw new InvalidOperationException("The code is empty.");
             }
         }
-        public CodeSymbolCode<T2> ToCodeSymbolCode<T2>(int startIndex, int length) where T2 : CodeSymbol, new()
+        public CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length) where T2 : CodeSymbol, new()
         {
             return new CodeSymbolCode<T2>(this.GetBitIterator(startIndex, length));
         }

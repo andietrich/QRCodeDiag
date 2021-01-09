@@ -9,11 +9,11 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 {
     public interface ICodeSymbolCode
     {
-        int BitCount { get; }
+        uint BitCount { get; }
         string GetBitString();
-        string GetBitString(int startIndex, int length);
+        string GetBitString(uint startIndex, uint length);
         string[] GetSymbolBitStrings();
-        Vector2D GetBitPosition(int bitNumber);
+        Vector2D GetBitPosition(uint bitNumber);
         List<CodeSymbol> GetCodeSymbols();
     }
 }

@@ -80,7 +80,7 @@ namespace QRCodeDiag
             // Draw bit index
             if (drawBitIndices)
             {
-                for (int i = 0; i < symbol.CurrentSymbolLength; i++)
+                for (uint i = 0; i < symbol.CurrentSymbolLength; i++)
                 {
                     var pixCoord = symbol.GetBitCoordinate(i);
                     g.DrawString(i.ToString(),
@@ -90,18 +90,15 @@ namespace QRCodeDiag
                 }
             }
 
-            if (drawSymbolValue)
+            if (drawSymbolValue && (symbol.CurrentSymbolLength > 0))
             {
-                if (symbol.CurrentSymbolLength > 0)
-                {
-                    var drawLocation = symbol.GetBitCoordinate(Math.Min(4, symbol.CurrentSymbolLength - 1));
-                    var solidBrush = new SolidBrush(symbolColors.SymbolValue);
+                var drawLocation = symbol.GetBitCoordinate(Math.Min(4, symbol.CurrentSymbolLength - 1));
+                var solidBrush = new SolidBrush(symbolColors.SymbolValue);
 
-                    g.DrawString(symbol.ToString(),
-                                 largeFont,
-                                 solidBrush,
-                                 new Point((int)(drawLocation.X * CodeElWidth), (int)(drawLocation.Y * CodeElHeight)));
-                }
+                g.DrawString(symbol.ToString(),
+                                largeFont,
+                                solidBrush,
+                                new Point((int)(drawLocation.X * CodeElWidth), (int)(drawLocation.Y * CodeElHeight)));
             }
         }
 
@@ -123,7 +120,7 @@ namespace QRCodeDiag
                                         drawableCode.DrawBitIndices, 
                                         drawableCode.DrawSymbolValues);
 
-                    if (drawableCode.DrawSymbolIndices && sym.CurrentSymbolLength > 0)
+                    if (drawableCode.DrawSymbolIndices && (sym.CurrentSymbolLength > 0))
                     {
                         var drawIndexCoord = sym.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, sym.CurrentSymbolLength));
                         g.DrawString(j.ToString(),

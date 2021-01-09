@@ -30,6 +30,7 @@ namespace QRCodeDiag
             RawCode,
             RawDataBytes,
             RawECCBytes,
+            MessageModeSymbol,
             PaddingBytes,
             EncodedSymbols,
             TerminatorSymbol
@@ -53,6 +54,7 @@ namespace QRCodeDiag
             qrCode.RawCodeChangedEvent -= HandleRawCodeChanged;
             qrCode.RawDataBytesChangedEvent -= HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent -= HandleRawECCBytesChanged;
+            qrCode.MessageModeChangedEvent -= HandleMessageModeChanged;
             qrCode.PaddingBytesChangedEvent -= HandlePaddingBytesChanged;
             qrCode.EncodedSymbolsChangedEvent -= HandleEncodedSymbolsChanged;
             qrCode.TerminatorSymbolChangedEvent -= HandleTerminatorSymbolChanged;
@@ -62,6 +64,7 @@ namespace QRCodeDiag
             qrCode.RawCodeChangedEvent += HandleRawCodeChanged;
             qrCode.RawDataBytesChangedEvent += HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent += HandleRawECCBytesChanged;
+            qrCode.MessageModeChangedEvent += HandleMessageModeChanged;
             qrCode.PaddingBytesChangedEvent += HandlePaddingBytesChanged;
             qrCode.EncodedSymbolsChangedEvent += HandleEncodedSymbolsChanged;
             qrCode.TerminatorSymbolChangedEvent += HandleTerminatorSymbolChanged;
@@ -99,7 +102,7 @@ namespace QRCodeDiag
 
         private void RemoveAllControlTypes()
         {
-            foreach(PropertyType pType in Enum.GetValues(typeof(PropertyType)))
+            foreach (PropertyType pType in Enum.GetValues(typeof(PropertyType)))
             {
                 RemoveControlType(pType);
             }
@@ -152,6 +155,19 @@ namespace QRCodeDiag
                 var symbolColors = new SymbolColors(Color.Orange, Color.Orange, Color.Orange);
                 var drawableCode = new DrawableCodeSymbolCode(newRawECCBytes, symbolColors, Color.LightBlue);
                 this.AddCodeSymbolCodeOptionsItem("Raw ECC Bytes", drawableCode, propType);
+            }
+        }
+        private void HandleMessageModeChanged(CodeSymbolCode<MessageModeSymbol> newMessageModeSymbol)
+        {
+            var propType = PropertyType.MessageModeSymbol;
+
+            this.RemoveControlType(propType);
+
+            if(newMessageModeSymbol != null)
+            {
+                var symbolColors = new SymbolColors(Color.Blue, Color.LightBlue, Color.DarkCyan);
+                var drawableCode = new DrawableCodeSymbolCode(newMessageModeSymbol, symbolColors, Color.LightBlue);
+                this.AddCodeSymbolCodeOptionsItem("Message Mode", drawableCode, propType);
             }
         }
         private void HandlePaddingBytesChanged(CodeSymbolCode<RawCodeByte> newPaddingBytes)

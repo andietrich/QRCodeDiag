@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QRCodeBaseLib.DataBlocks.Symbols;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace QRCodeBaseLib.MetaInfo
 {
     public class MessageMode
     {
-        public enum Mode
+        public enum EncodingMode
         {
             Numeric = 1,
             Alphanumeric = 2,
@@ -15,65 +16,93 @@ namespace QRCodeBaseLib.MetaInfo
             Kanji = 8
         }
 
-        internal static bool TryParse(int value, out Mode mode)
+        public const uint MODEINFOLENGTH = 4u; // the message mode information is stored in the first nibble (4 bits)
+
+        public EncodingMode Mode { get; private set; }
+        public uint CharacterCountIndicatorLength { get; private set; }
+
+        private MessageMode(EncodingMode mode, uint characterCountIndicatorLength)
         {
-            if (Enum.IsDefined(typeof(MessageMode.Mode), value))
+            this.Mode = mode;
+            this.CharacterCountIndicatorLength = characterCountIndicatorLength;
+        }
+
+        internal static MessageMode ParseMessageMode(MessageModeSymbol modeSymbol, QRCodeVersion version)
+        {
+            var mode = modeSymbol.GetMessageMode();
+            return new MessageMode(mode, MessageMode.GetCharacterCountIndicatorLength(version, mode));
+        }
+
+        internal static bool TryParse(byte value, out EncodingMode mode)
+        {
+            if (Enum.IsDefined(typeof(EncodingMode), value))
             {
-                mode = (Mode)value;
+                mode = (EncodingMode)value;
                 return true;
             }
             else
             {
-                mode = Mode.Byte;
+                mode = EncodingMode.Byte;
                 return false;
             }
         }
 
-        internal static int GetCharacterCountIndicatorLength(QRCodeVersion version, Mode mode)
+        internal static EncodingMode Parse(int value)
+        {
+            if (Enum.IsDefined(typeof(MessageMode.EncodingMode), value))
+            {
+                return (EncodingMode)value;
+            }
+            else
+            {
+                throw new ArgumentException($"{value} is not a valid Message Mode.");
+            }
+        }
+
+        internal static uint GetCharacterCountIndicatorLength(QRCodeVersion version, EncodingMode mode)
         {
             switch (mode)
             {
-                case Mode.Byte:
-                    return version.VersionNumber < 10 ? 8 : 16;
-                case Mode.Alphanumeric:
+                case EncodingMode.Byte:
+                    return version.VersionNumber < 10u ? 8u : 16u;
+                case EncodingMode.Alphanumeric:
                     {
-                        if (version.VersionNumber < 10)
-                            return 9;
-                        else if (version.VersionNumber < 27)
-                            return 11;
+                        if (version.VersionNumber < 10u)
+                            return 9u;
+                        else if (version.VersionNumber < 27u)
+                            return 11u;
                         else
-                            return 13;
+                            return 13u;
                     }
-                case Mode.Kanji:
+                case EncodingMode.Kanji:
                     {
-                        if (version.VersionNumber < 10)
-                            return 8;
-                        else if (version.VersionNumber < 27)
-                            return 10;
+                        if (version.VersionNumber < 10u)
+                            return 8u;
+                        else if (version.VersionNumber < 27u)
+                            return 10u;
                         else
-                            return 12;
+                            return 12u;
                     }
-                case Mode.Numeric:
+                case EncodingMode.Numeric:
                     {
-                        if (version.VersionNumber < 10)
-                            return 10;
-                        else if (version.VersionNumber < 27)
-                            return 12;
+                        if (version.VersionNumber < 10u)
+                            return 10u;
+                        else if (version.VersionNumber < 27u)
+                            return 12u;
                         else
-                            return 14;
+                            return 14u;
                     }
-                case Mode.ECI:
+                case EncodingMode.ECI:
                 default:
                     throw new NotImplementedException();
             }
         }
 
-
-        internal static int GetCharacterLength(Mode mode)
+        internal static uint GetCharacterLength(EncodingMode mode)
         {
             switch (mode)
             {
-                case Mode.Byte:
+                case EncodingMode.Byte:
                     return 8;
                 default:
                     throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count

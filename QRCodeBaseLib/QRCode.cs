@@ -20,6 +20,7 @@ namespace QRCodeBaseLib
         public delegate void RawCodeChangedHandler(CodeSymbolCode<RawCodeByte> newRawCode);
         public delegate void RawDataBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawDataBytes);
         public delegate void RawECCBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawECCBytes);
+        public delegate void MessageModeChangedHandler(CodeSymbolCode<MessageModeSymbol> newMessageModeSymbol);
         public delegate void PaddingBytesChangedHandler(CodeSymbolCode<RawCodeByte> newPaddingBytes);
         public delegate void EncodedSymbolsChangedHandler(CodeSymbolCode<ByteEncodingSymbol> newEncodedSymbols);
         public delegate void TerminatorSymbolChangedHandler(TerminatorSymbol newTerminatorSymbol);
@@ -29,23 +30,23 @@ namespace QRCodeBaseLib
         public event RawCodeChangedHandler RawCodeChangedEvent;
         public event RawDataBytesChangedHandler RawDataBytesChangedEvent;
         public event RawECCBytesChangedHandler RawECCBytesChangedEvent;
+        public event MessageModeChangedHandler MessageModeChangedEvent;
         public event PaddingBytesChangedHandler PaddingBytesChangedEvent;
         public event EncodedSymbolsChangedHandler EncodedSymbolsChangedEvent;
         public event TerminatorSymbolChangedHandler TerminatorSymbolChangedEvent;
 
         #region private members
 
-        private const int MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
-
         private readonly char[,] bits; //ToDo consider BitArray class, at least where no unknown values appear
 
-        private MessageMode.Mode messageMode; // ToDo: set initial value: byte? Mode.Unknown?
+        private MessageMode messageMode; // ToDo: set initial value: byte? Mode.Unknown?
         private string message;
 
         // parsed/drawable code elements
         private CodeSymbolCode<RawCodeByte> rawCode;
         private CodeSymbolCode<RawCodeByte> rawDataBytes;
         private CodeSymbolCode<RawCodeByte> rawECCBytes;
+        private CodeSymbolCode<MessageModeSymbol> messageModeSymbolCode;
         private CodeSymbolCode<RawCodeByte> paddingBits;
         private CodeSymbolCode<ByteEncodingSymbol> encodedSymbols; //ToDo generalize encoding
         private TerminatorSymbol terminator;
@@ -57,6 +58,53 @@ namespace QRCodeBaseLib
                                                //ToDo Use/Set/Check Remainder Bits
                                                //ToDo highlight message mode
                                                //ToDo highlight version/ecc info 1 + 2
+        #endregion
+        #region private properties
+        private CodeSymbolCode<RawCodeByte> RawCode
+        {
+            get { return this.rawCode; }
+            set
+            {
+                this.rawCode = value;
+                this.RawCodeChangedEvent?.Invoke(value);
+            }
+        }
+        private CodeSymbolCode<RawCodeByte> RawDataBytes
+        {
+            get { return this.rawDataBytes; }
+            set
+            {
+                this.rawDataBytes = value;
+                this.RawDataBytesChangedEvent?.Invoke(value);
+            }
+        }
+        private CodeSymbolCode<RawCodeByte> RawECCBytes
+        {
+            get { return this.rawECCBytes; }
+            set
+            {
+                this.rawECCBytes = value;
+                this.RawECCBytesChangedEvent?.Invoke(value);
+            }
+        }
+        private CodeSymbolCode<MessageModeSymbol> MessageModeSymbolCode
+        {
+            get { return this.messageModeSymbolCode; }
+            set
+            {
+                this.messageModeSymbolCode = value;
+                this.MessageModeChangedEvent?.Invoke(value);
+            }
+        }
+        private CodeSymbolCode<ByteEncodingSymbol> EncodedSymbols
+        {
+            get { return this.encodedSymbols; }
+            set
+            {
+                this.encodedSymbols = value;
+                this.EncodedSymbolsChangedEvent?.Invoke(value);
+            }
+        }
 
         #endregion
         #region public properties
@@ -116,33 +164,6 @@ namespace QRCodeBaseLib
             }
         }
         public bool ReadMessageSuccess { get; private set; }
-        public CodeSymbolCode<RawCodeByte> RawCode
-        {
-            get { return this.rawCode; }
-            private set
-            {
-                this.rawCode = value;
-                this.RawCodeChangedEvent?.Invoke(value);
-            }
-        }
-        public CodeSymbolCode<RawCodeByte> RawDataBytes
-        {
-            get { return this.rawDataBytes; }
-            private set
-            {
-                this.rawDataBytes = value;
-                this.RawDataBytesChangedEvent?.Invoke(value);
-            }
-        }
-        public CodeSymbolCode<RawCodeByte> RawECCBytes
-        {
-            get { return this.rawECCBytes; }
-            private set
-            {
-                this.rawECCBytes = value;
-                this.RawECCBytesChangedEvent?.Invoke(value);
-            }
-        }
         public CodeSymbolCode<RawCodeByte> PaddingBits
         {
             get { return this.paddingBits; }
@@ -150,15 +171,6 @@ namespace QRCodeBaseLib
             {
                 this.paddingBits = value;
                 this.PaddingBytesChangedEvent?.Invoke(value);
-            }
-        }
-        public CodeSymbolCode<ByteEncodingSymbol> EncodedSymbols
-        {
-            get { return this.encodedSymbols; }
-            private set
-            {
-                this.encodedSymbols = value;
-                this.EncodedSymbolsChangedEvent?.Invoke(value);
             }
         }
         public TerminatorSymbol Terminator
@@ -326,82 +338,95 @@ namespace QRCodeBaseLib
             }
         }
 
+        private CodeSymbolCode<RawCodeByte> ExtractRawCode()
+        {
+            return new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
+        }
+        private static CodeSymbolCode<RawCodeByte> GetRawDataBytes(List<ECCBlock> deinterleavedBlocks)
+        {
+            var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
+
+            for (int i = 0; i < deinterleavedBlocks.Count; i++)
+            {
+                dataCodeSymbols.Add(deinterleavedBlocks[i].GetPostRepairData());
+            }
+
+            return new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
+        }
+
+        private static CodeSymbolCode<RawCodeByte> GetRawECCBytes(List<ECCBlock> deinterleavedBlocks)
+        {
+            var eccCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
+
+            for (int i = 0; i < deinterleavedBlocks.Count; i++)
+            {
+                eccCodeSymbols.Add(deinterleavedBlocks[i].GetPostRepairECC());
+            }
+
+            return new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);
+        }
+
+        private static string GetCharacterCountIndicator(uint charIndicatorLength, CodeSymbolCode<RawCodeByte> rawDataBytes)
+        {
+            return rawDataBytes.GetBitString(MessageModeSymbol.MODEINFOLENGTH, charIndicatorLength);
+        }
+
+        private static uint GetCharacterCount(string charCountIndicator)
+        {
+            try
+            {
+                return Convert.ToUInt32(charCountIndicator, 2);
+            }
+            catch (FormatException fe)
+            {
+                throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count, but inform the user
+            }
+        }
+
         private string ReadMessage()
         {
             this.ReadFormatInformation();
 
-            this.RawCode = new CodeSymbolCode<RawCodeByte>(this.GetBitIterator());
+            this.RawCode = this.ExtractRawCode();
             this.interleavingBlocks = DeInterleaver.DeInterleave(this.RawCode, this.eccLevel);
+            this.RawDataBytes = QRCode.GetRawDataBytes(this.interleavingBlocks);
+            this.RawECCBytes = QRCode.GetRawECCBytes(this.interleavingBlocks);
+            this.MessageModeSymbolCode = this.rawDataBytes.ToCodeSymbolCode<MessageModeSymbol>(0, MessageModeSymbol.MODEINFOLENGTH);
+            this.messageMode = MessageMode.ParseMessageMode(this.MessageModeSymbolCode.GetSymbolAt(0), this.Version);
 
-            var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
-            var eccCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
+            var charCountIndicator = QRCode.GetCharacterCountIndicator(this.messageMode.CharacterCountIndicatorLength, this.RawDataBytes);
+            uint characterCount = QRCode.GetCharacterCount(charCountIndicator);
 
-            for (int i = 0; i < this.interleavingBlocks.Count; i++)
+            var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.ECCLevel, this.messageMode.Mode);
+
+            if (characterCount > max_capacity)
             {
-                dataCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairData());
-                eccCodeSymbols.Add(this.interleavingBlocks[i].GetPostRepairECC());
+                throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);
             }
 
-            this.RawDataBytes = new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
-            this.RawECCBytes = new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);
-
-            int modeNibble;
-            try
+            if (this.messageMode.Mode == MessageMode.EncodingMode.Byte)
             {
-                modeNibble = Convert.ToInt32(this.RawDataBytes.GetBitString(0, MODEINFOLENGTH), 2);
-            }
-            catch (FormatException fe)
-            {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.RawDataBytes.GetBitString(0, MODEINFOLENGTH), fe);
-            }
+                var encodedCharacterLength = MessageMode.GetCharacterLength(this.messageMode.Mode);
+                var firstSymbolOffset = MessageModeSymbol.MODEINFOLENGTH + this.messageMode.CharacterCountIndicatorLength;
+                var messageLenghtInBits = characterCount * encodedCharacterLength;
+                var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
+                var terminatorLength = 4u; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode. // TODO generalize as terminatorLength = RAWBYTELENGTH - (messageEndOffset % RAWBYTELENGTH) to fill up the remaining bits in the last used raw code byte?
+                var terminatorLocation = new Vector2D[terminatorLength];
 
-            if (MessageMode.TryParse(modeNibble, out this.messageMode))
-            {
-                var charIndicatorLength = MessageMode.GetCharacterCountIndicatorLength(this.Version, this.messageMode);
-                int characterCount;
-                try
+                for (uint i = 0u, bitNumber = messageEndOffset; i < terminatorLength; i++, bitNumber++)
                 {
-                    characterCount = Convert.ToInt32(this.RawDataBytes.GetBitString(MODEINFOLENGTH, charIndicatorLength), 2);
-                }
-                catch (FormatException fe)
-                {
-                    throw new QRCodeFormatException("Could not parse character count.", fe); //ToDo continue with max possible character count, but inform the user
+                    terminatorLocation[i] = this.RawDataBytes.GetBitPosition(bitNumber);
                 }
 
-                var max_capacity = QRCodeCapacities.GetCapacity(this.Version, this.ECCLevel, this.messageMode);
-                if (characterCount > max_capacity)
-                {
-                    throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);
-                }
+                this.EncodedSymbols = this.RawDataBytes.ToCodeSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
+                this.Terminator = new TerminatorSymbol(this.RawDataBytes.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
+                this.PaddingBits = this.RawDataBytes.ToCodeSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
 
-                if (this.messageMode == MessageMode.Mode.Byte)
-                {
-                    var encodedCharacterLength = MessageMode.GetCharacterLength(this.messageMode);
-                    var firstSymbolOffset = MODEINFOLENGTH + charIndicatorLength;
-                    var messageLenghtInBits = characterCount * encodedCharacterLength;
-                    var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
-                    var terminatorLength = 4; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode. // TODO generalize as terminatorLength = RAWBYTELENGTH - (messageEndOffset % RAWBYTELENGTH) to fill up the remaining bits in the last used raw code byte?
-                    var terminatorLocation = new Vector2D[terminatorLength];
-
-                    for (int i = 0, bitNumber = messageEndOffset; i < terminatorLength; i++, bitNumber++)
-                    {
-                        terminatorLocation[i] = this.RawDataBytes.GetBitPosition(bitNumber);
-                    }
-
-                    this.EncodedSymbols = this.RawDataBytes.ToCodeSymbolCode<ByteEncodingSymbol>(firstSymbolOffset, messageLenghtInBits);
-                    this.Terminator = new TerminatorSymbol(this.RawDataBytes.GetBitString(messageEndOffset, terminatorLength), terminatorLocation);
-                    this.PaddingBits = this.RawDataBytes.ToCodeSymbolCode<RawCodeByte>(messageEndOffset + terminatorLength, QRCodeCapacities.GetDataBytes(this.Version, this.eccLevel.Level) * 8 - (messageEndOffset + terminatorLength));
-
-                    return EncodedSymbols.ToString();
-                }
-                else
-                {
-                    throw new NotImplementedException("Other encodings are not implemented yet."); //ToDo implement reading other encodings
-                }
+                return EncodedSymbols.ToString();
             }
             else
             {
-                throw new QRCodeFormatException("Mode indicator nibble could not be decoded: " + this.RawCode.GetBitString(0, 4));
+                throw new NotImplementedException("Other encodings are not implemented yet."); //ToDo implement reading other encodings
             }
         }
 

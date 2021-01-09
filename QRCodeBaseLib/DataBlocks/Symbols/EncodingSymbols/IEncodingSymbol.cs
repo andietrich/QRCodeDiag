@@ -10,6 +10,6 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
 {
     public interface IEncodingSymbol
     {
-        MessageMode.Mode EncodingType { get; }
+        MessageMode.EncodingMode EncodingType { get; }
     }
 }

@@ -15,8 +15,8 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         protected List<Vector2D> bitCoordinates;
         protected char[] bitArray;
         public uint SymbolLength { get; private set; }
-        public int CurrentSymbolLength { get { return this.bitCoordinates.Count; } }
-        public virtual string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } }
+        public uint CurrentSymbolLength { get { return (uint)this.bitCoordinates.Count; } }
+        public virtual string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } } // TODO this should not be a property, but a get method, because it creates a new object every call
         public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
         protected CodeSymbol(uint symbolLength)
         {
@@ -33,6 +33,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             this.bitArray[bitCoordinates.Count] = bit;
             this.bitCoordinates.Add(bitPosition);
         }
+
         //ToDo generate point array and use drawPolygon method
         //Define: Square at x, y has corner points at x, y, x+1, y+1
         public List<PolygonEdge> GetContour()
@@ -61,9 +62,9 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             return edges.ToList();
         }
 
-        public Vector2D GetBitCoordinate(int bitNumber)
+        public Vector2D GetBitCoordinate(uint bitNumber)
         {
-            if (bitNumber < 0 || bitNumber >= this.bitCoordinates.Count)
+            if (bitNumber >= this.bitCoordinates.Count)
             {
                 throw new ArgumentOutOfRangeException(
                     "bitNumber",
@@ -71,12 +72,25 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
                     bitNumber,
                     this.bitCoordinates.Count));
             }
-            return this.bitCoordinates[bitNumber];
+            return this.bitCoordinates[(int)bitNumber];
         }
 
         public override string ToString()
         {
             return $"-0b{this.BitString}-";
+        }
+
+        public bool HasUnknownBits()
+        {
+            bool unknownBits = false;
+
+            foreach (var bit in this.BitString)
+            {
+                if ((bit != '0') && (bit != '1'))
+                    unknownBits = true;
+            }
+
+            return unknownBits;
         }
     }
 }

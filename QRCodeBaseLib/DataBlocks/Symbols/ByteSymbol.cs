@@ -28,22 +28,13 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             if (unknownBitValue > 1)
                 throw new ArgumentException("Invalid bit value", "unknownBitValue");
 
-            bool unknownBits = false;
-            value = 0;
+            bool unknownBits = this.HasUnknownBits();
 
-            for (int i = 0; i < this.bitCoordinates.Count; i++)
-            {
-                if (this.bitArray[i] == '1')
-                {
-                    value |= (byte)(0x80 >> i);
-                }
-                else if(this.bitArray[i] != '0')
-                {
-                    value |= (byte)(unknownBitValue << (byte)(8u - i));
-                    unknownBits = true;
-                }
-            }
-            System.Diagnostics.Debug.Assert(Convert.ToByte(this.BitString.Replace("u", unknownBitValue.ToString()), 2) == value);
+            if (unknownBits)
+                value = Convert.ToByte(this.BitString.Replace("u", unknownBitValue.ToString()), 2);
+            else
+                value = Convert.ToByte(this.BitString, 2);
+
             return !unknownBits;
         }
 

@@ -10,20 +10,20 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
     {
         private readonly ICodeSymbolCode symbolCode;
         private readonly string bitString;
-        private readonly int endPosition;
-        private readonly int startPosition;
+        private readonly uint endPosition;
+        private readonly uint startPosition;
         private int currentPosition;
 
         public CodeSymbolCodeBitIterator(ICodeSymbolCode csc) : this(csc, 0, csc.BitCount)
         {
         }
-        public CodeSymbolCodeBitIterator(ICodeSymbolCode csc, int startIndex, int length)
+        public CodeSymbolCodeBitIterator(ICodeSymbolCode csc, uint startIndex, uint length)
         {
             this.symbolCode = csc;
             this.bitString = csc.GetBitString();
             this.startPosition = startIndex;
             this.endPosition = startIndex + length;
-            this.currentPosition = this.startPosition-1;
+            this.currentPosition = (int)this.startPosition-1;
         }
         public bool EndReached { get { return this.currentPosition == this.endPosition; } }
 
@@ -33,7 +33,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             {
                 if (this.currentPosition < this.startPosition)
                 {
-                    return this.bitString[this.startPosition];
+                    return this.bitString[(int)this.startPosition];
                 }
                 else if (this.currentPosition < this.endPosition)
                 {
@@ -56,7 +56,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
                 }
                 else
                 {
-                    return this.symbolCode.GetBitPosition(this.currentPosition);
+                    return this.symbolCode.GetBitPosition((uint)this.currentPosition);
                 }
             }
         }

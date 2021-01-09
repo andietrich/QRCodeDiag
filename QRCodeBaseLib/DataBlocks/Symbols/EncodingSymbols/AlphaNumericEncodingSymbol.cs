@@ -10,7 +10,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
 {
     public class AlphaNumericEncodingSymbol : CodeSymbol, IEncodingSymbol
     {
-        public MessageMode.Mode EncodingType { get { return MessageMode.Mode.Alphanumeric; } }
+        public MessageMode.EncodingMode EncodingType { get { return MessageMode.EncodingMode.Alphanumeric; } }
         public AlphaNumericEncodingSymbol() : base(GetSymbolLength())
         { }
 
