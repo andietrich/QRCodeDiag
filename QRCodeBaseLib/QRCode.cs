@@ -402,7 +402,11 @@ namespace QRCodeBaseLib
 
             if (characterCount > max_capacity)
             {
-                throw new QRCodeFormatException("Character count " + characterCount + " exceeds max. capacity of " + max_capacity);
+                this.EncodedSymbols = null;
+                this.Terminator = null;
+                this.PaddingBits = null;
+
+                throw new QRCodeFormatException($"Character count {characterCount} exceeds max. capacity of {max_capacity}");
             }
 
             if (this.messageMode.Mode == MessageMode.EncodingMode.Byte)
