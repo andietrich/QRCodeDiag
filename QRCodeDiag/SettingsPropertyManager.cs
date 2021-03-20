@@ -39,13 +39,28 @@ namespace QRCodeDiag
         private QRCode qrCode;
         private readonly DrawingManager drawingManager;
         private readonly Dictionary<PropertyType, CodeSymbolCodeOptionsItem> settingsControls;
+        private readonly Dictionary<PropertyType, CodeSymbolCodeDrawingProperties> drawingProperties;
         private readonly ControlCollection ctrlCollection;
 
         public SettingsPropertyManager(DrawingManager setDrawingManager, ControlCollection setCtrlCollection)
         {
             this.drawingManager = setDrawingManager;
             this.settingsControls = new Dictionary<PropertyType, CodeSymbolCodeOptionsItem>();
+            this.drawingProperties = CreateDrawingProperties();
             this.ctrlCollection = setCtrlCollection;
+        }
+
+        private static Dictionary<PropertyType, CodeSymbolCodeDrawingProperties> CreateDrawingProperties()
+        {
+            return new Dictionary<PropertyType, CodeSymbolCodeDrawingProperties>
+            {
+                [PropertyType.RawCode]           = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.Orange,    "Raw Code"           ),
+                [PropertyType.RawDataBytes]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange), Color.LightBlue, "Raw Data Bytes"     ),
+                [PropertyType.RawECCBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.LightBlue, "Raw ECC Bytes"      ),
+                [PropertyType.MessageModeSymbol] = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Message Mode Symbol"),
+                [PropertyType.PaddingBytes]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Padding Bytes"      ),
+                [PropertyType.EncodedSymbols]    = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Encoded Symbols"    ),
+            };
         }
 
         #region private methods
@@ -108,93 +123,50 @@ namespace QRCodeDiag
             }
         }
 
-        private void AddCodeSymbolCodeOptionsItem(string codeSymbolName, DrawableCodeSymbolCode drawableCode, PropertyType ctrlType)
+        private void AddCodeSymbolCodeOptionsItem(DrawableCodeSymbolCode drawableCode, PropertyType ctrlType)
         {
-            var newOptionsItem = new CodeSymbolCodeOptionsItem(codeSymbolName, drawableCode);
+            var newOptionsItem = new CodeSymbolCodeOptionsItem(drawableCode.DisplayName, drawableCode);
 
             newOptionsItem.PropertyChangedEvent += this.PropertyChangedEvent;
             this.ctrlCollection.Add(newOptionsItem);
             this.drawingManager.RegisterCodeSymbolCode(drawableCode);
             this.settingsControls[ctrlType] = newOptionsItem;
         }
+        private void HandleCodeChange(ICodeSymbolCode codeSymbolCode, PropertyType propertyType)
+        {
+            var drawProps = this.drawingProperties[propertyType];
 
+            this.RemoveControlType(propertyType);
+
+            if (codeSymbolCode != null)
+            {
+                var drawableCode = new DrawableCodeSymbolCode(codeSymbolCode, drawProps);
+                this.AddCodeSymbolCodeOptionsItem(drawableCode, propertyType);
+            }
+        }
         private void HandleRawCodeChanged(CodeSymbolCode<RawCodeByte> newRawCode)
         {
-            var propType = PropertyType.RawCode;
-
-            this.RemoveControlType(propType);
-
-            if (newRawCode != null)
-            {
-                var symbolColors = new SymbolColors(Color.Orange, Color.Orange, Color.Orange);
-                var drawableCode = new DrawableCodeSymbolCode(newRawCode, symbolColors, Color.Orange);
-                this.AddCodeSymbolCodeOptionsItem("Raw Code", drawableCode, propType);
-            }
+            this.HandleCodeChange(newRawCode, PropertyType.RawCode);
         }
         private void HandleRawDataBytesChanged(CodeSymbolCode<RawCodeByte> newRawDataBytes)
         {
-            var propType = PropertyType.RawDataBytes;
-
-            this.RemoveControlType(propType);
-
-            if (newRawDataBytes != null)
-            {
-                var symbolColors = new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange);
-                var drawableCode = new DrawableCodeSymbolCode(newRawDataBytes, symbolColors, Color.LightBlue);
-                this.AddCodeSymbolCodeOptionsItem("Raw Data Bytes", drawableCode, propType);
-            }
+            this.HandleCodeChange(newRawDataBytes, PropertyType.RawDataBytes);
         }
         private void HandleRawECCBytesChanged(CodeSymbolCode<RawCodeByte> newRawECCBytes)
         {
-            var propType = PropertyType.RawECCBytes;
-
-            this.RemoveControlType(propType);
-
-            if (newRawECCBytes != null)
-            {
-                var symbolColors = new SymbolColors(Color.Orange, Color.Orange, Color.Orange);
-                var drawableCode = new DrawableCodeSymbolCode(newRawECCBytes, symbolColors, Color.LightBlue);
-                this.AddCodeSymbolCodeOptionsItem("Raw ECC Bytes", drawableCode, propType);
-            }
+            this.HandleCodeChange(newRawECCBytes, PropertyType.RawECCBytes);
         }
         private void HandleMessageModeChanged(CodeSymbolCode<MessageModeSymbol> newMessageModeSymbol)
         {
-            var propType = PropertyType.MessageModeSymbol;
-
-            this.RemoveControlType(propType);
-
-            if(newMessageModeSymbol != null)
-            {
-                var symbolColors = new SymbolColors(Color.Blue, Color.LightBlue, Color.DarkCyan);
-                var drawableCode = new DrawableCodeSymbolCode(newMessageModeSymbol, symbolColors, Color.LightBlue);
-                this.AddCodeSymbolCodeOptionsItem("Message Mode", drawableCode, propType);
-            }
+            this.HandleCodeChange(newMessageModeSymbol, PropertyType.MessageModeSymbol);
         }
         private void HandlePaddingBytesChanged(CodeSymbolCode<RawCodeByte> newPaddingBytes)
         {
-            var propType = PropertyType.PaddingBytes;
-
-            this.RemoveControlType(propType);
-
-            if (newPaddingBytes != null)
-            {
-                var symbolColors = new SymbolColors(Color.Blue, Color.LightBlue, Color.DarkCyan);
-                var drawableCode = new DrawableCodeSymbolCode(newPaddingBytes, symbolColors, Color.LightBlue);
-                this.AddCodeSymbolCodeOptionsItem("Padding Bytes", drawableCode, propType);
-            }
+            this.HandleCodeChange(newPaddingBytes, PropertyType.PaddingBytes);
         }
         private void HandleEncodedSymbolsChanged(CodeSymbolCode<ByteEncodingSymbol> newEncodedSymbols)
         {
-            var propType = PropertyType.EncodedSymbols;
-
-            this.RemoveControlType(propType);
-
-            if (newEncodedSymbols != null)
-            {
-                var symbolColors = new SymbolColors(Color.Red, Color.LightBlue, Color.Orange);
-                var drawableCode = new DrawableCodeSymbolCode(newEncodedSymbols, symbolColors, Color.LightBlue);
-                this.AddCodeSymbolCodeOptionsItem("Encoded Symbols", drawableCode, propType);
-            }
+            this.HandleCodeChange(newEncodedSymbols, PropertyType.EncodedSymbols);
         }
         private void HandleTerminatorSymbolChanged(TerminatorSymbol newTerminatorSymbol)
         {

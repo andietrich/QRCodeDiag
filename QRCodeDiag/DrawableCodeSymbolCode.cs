@@ -11,18 +11,18 @@ namespace QRCodeDiag
     public class DrawableCodeSymbolCode : IDrawableCodeSymbolCode
     {
         public ICodeSymbolCode CodeSymbolCode { get; set; }
-        public Color SymbolIndexColor { get; set; }
-        public SymbolColors SymbolColoring { get; private set; }
+        public Color SymbolIndexColor => this.DrawingProperties.SymbolIndexColor;
+        public SymbolColors SymbolColoring => this.DrawingProperties.SymbolColoring;
+        public string DisplayName => this.DrawingProperties.DisplayName;
+        CodeSymbolCodeDrawingProperties DrawingProperties { get; set; }
         public bool DrawSymbolCode { get; set; }
         public bool DrawSymbolValues { get; set; }
         public bool DrawSymbolIndices { get; set; }
         public bool DrawBitIndices { get; set; }
-        public DrawableCodeSymbolCode(ICodeSymbolCode codeSymbolCode, SymbolColors symbolColors, Color symbolIndexColor)
+        public DrawableCodeSymbolCode(ICodeSymbolCode codeSymbolCode, CodeSymbolCodeDrawingProperties drawingProperties)
         {
             this.CodeSymbolCode = codeSymbolCode;
-            this.SymbolColoring = symbolColors;
-            this.SymbolIndexColor = symbolIndexColor;
-
+            this.DrawingProperties = drawingProperties;
             this.DrawSymbolCode = false;
             this.DrawSymbolValues = false;
             this.DrawSymbolIndices = false;
