@@ -68,7 +68,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
         }
 
-        public CodeSymbolCode(List<CodeSymbolCode<T>> codeSymbolCodes)  // TODO
+        public CodeSymbolCode(List<CodeSymbolCode<T>> codeSymbolCodes)
         {
             this.codeSymbolList = new List<CodeSymbol>();
 

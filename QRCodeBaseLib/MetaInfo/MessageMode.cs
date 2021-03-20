@@ -20,11 +20,13 @@ namespace QRCodeBaseLib.MetaInfo
 
         public EncodingMode Mode { get; private set; }
         public uint CharacterCountIndicatorLength { get; private set; }
+        public uint CharacterLength { get; private set; }
 
         private MessageMode(EncodingMode mode, uint characterCountIndicatorLength)
         {
             this.Mode = mode;
             this.CharacterCountIndicatorLength = characterCountIndicatorLength;
+            this.CharacterLength = MessageMode.GetCharacterLength(mode);
         }
 
         internal static MessageMode ParseMessageMode(MessageModeSymbol modeSymbol, QRCodeVersion version)

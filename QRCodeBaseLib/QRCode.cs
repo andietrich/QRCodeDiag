@@ -394,6 +394,7 @@ namespace QRCodeBaseLib
             this.MessageModeSymbolCode = this.rawDataBytes.ToCodeSymbolCode<MessageModeSymbol>(0, MessageModeSymbol.MODEINFOLENGTH);
             this.messageMode = MessageMode.ParseMessageMode(this.MessageModeSymbolCode.GetSymbolAt(0), this.Version);
 
+            // TODO var charCountIndicatorSymbol = this.RawDataBytes.ToCodeSymbolCode<>
             var charCountIndicator = QRCode.GetCharacterCountIndicator(this.messageMode.CharacterCountIndicatorLength, this.RawDataBytes);
             uint characterCount = QRCode.GetCharacterCount(charCountIndicator);
 
@@ -406,9 +407,8 @@ namespace QRCodeBaseLib
 
             if (this.messageMode.Mode == MessageMode.EncodingMode.Byte)
             {
-                var encodedCharacterLength = MessageMode.GetCharacterLength(this.messageMode.Mode);
                 var firstSymbolOffset = MessageModeSymbol.MODEINFOLENGTH + this.messageMode.CharacterCountIndicatorLength;
-                var messageLenghtInBits = characterCount * encodedCharacterLength;
+                var messageLenghtInBits = characterCount * this.messageMode.CharacterLength;
                 var messageEndOffset = messageLenghtInBits + firstSymbolOffset;
                 var terminatorLength = 4u; // Always 4 for MessageMode.Byte, no incomplete padding bytes for this mode. // TODO generalize as terminatorLength = RAWBYTELENGTH - (messageEndOffset % RAWBYTELENGTH) to fill up the remaining bits in the last used raw code byte?
                 var terminatorLocation = new Vector2D[terminatorLength];
