@@ -101,14 +101,14 @@ namespace QRCodeDiag
         /// <param name="ctrlType">Type of control to be removed</param>
         private void RemoveControlType(PropertyType ctrlType)
         {
-            if (this.settingsControls.TryGetValue(ctrlType, out var oldOptionsItem))
+            if (this.settingsControls.TryGetValue(ctrlType, out var optionsItem))
             {
-                oldOptionsItem.PropertyChangedEvent -= this.PropertyChangedEvent;
-                this.drawingManager.UnregisterCodeSymbolCode(oldOptionsItem.DrawableCodeSymbolCode);
+                optionsItem.PropertyChangedEvent -= this.PropertyChangedEvent;
+                this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
 
-                if (this.ctrlCollection.Contains(oldOptionsItem))
+                if (this.ctrlCollection.Contains(optionsItem))
                 {
-                    this.ctrlCollection.Remove(oldOptionsItem);
+                    this.ctrlCollection.Remove(optionsItem);
                 }
 
                 this.settingsControls.Remove(ctrlType);
@@ -134,13 +134,25 @@ namespace QRCodeDiag
         }
         private void HandleCodeChange(ICodeSymbolCode codeSymbolCode, PropertyType propertyType)
         {
-            var drawProps = this.drawingProperties[propertyType];
-
-            this.RemoveControlType(propertyType);
-
-            if (codeSymbolCode != null)
+            if (this.settingsControls.TryGetValue(propertyType, out var optionsItem))
             {
-                var drawableCode = new DrawableCodeSymbolCode(codeSymbolCode, drawProps);
+                if (codeSymbolCode == null)
+                {
+                    RemoveControlType(propertyType);
+                }
+                else
+                {
+                    var newDrawableCode = new DrawableCodeSymbolCode(codeSymbolCode, this.drawingProperties[propertyType]);
+
+                    this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
+                    optionsItem.DrawableCodeSymbolCode = newDrawableCode;
+                    this.drawingManager.RegisterCodeSymbolCode(newDrawableCode);
+                }
+            }
+            else if(codeSymbolCode != null)
+            {
+                var drawableCode = new DrawableCodeSymbolCode(codeSymbolCode, this.drawingProperties[propertyType]);
+
                 this.AddCodeSymbolCodeOptionsItem(drawableCode, propertyType);
             }
         }

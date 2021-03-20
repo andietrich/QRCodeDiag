@@ -14,7 +14,22 @@ namespace QRCodeDiag.UserInterface
     public partial class CodeSymbolCodeOptionsItem : UserControl
     {
         internal event SettingsPropertyChangedEventHandler PropertyChangedEvent;
-        public DrawableCodeSymbolCode DrawableCodeSymbolCode { get; set; }
+        private DrawableCodeSymbolCode drawableCodeSymbolCode;
+        public DrawableCodeSymbolCode DrawableCodeSymbolCode 
+        {
+            get => this.drawableCodeSymbolCode;
+            set 
+            {
+                this.drawableCodeSymbolCode = value;
+                this.DrawableCodeSymbolCode.DrawSymbolCode = this.checkBoxDrawElement.Checked;
+                this.DrawableCodeSymbolCode.DrawSymbolValues = this.checkBoxDrawValues.Checked;
+                this.DrawableCodeSymbolCode.DrawSymbolIndices = this.checkBoxSymbolIndices.Checked;
+                this.DrawableCodeSymbolCode.DrawBitIndices = this.checkBoxBitIndices.Checked;
+
+                this.stringValueOptionsItem1.StringValue = this.drawableCodeSymbolCode.CodeSymbolCode.ToString();
+                this.PropertyChangedEvent?.Invoke();
+            }
+        }
 
         public string CodeSymbolName
         {
@@ -37,7 +52,6 @@ namespace QRCodeDiag.UserInterface
 
             this.CodeSymbolName = codeSymbolName;
             this.DrawableCodeSymbolCode = setDrawableCodeSymbolCode;
-            this.stringValueOptionsItem1.StringValue = setDrawableCodeSymbolCode.CodeSymbolCode.ToString();
         }
 
         private void checkBoxDrawElement_CheckedChanged(object sender, EventArgs e)
