@@ -16,7 +16,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
             var ret = new RawCodeByte();
             for (int i = 0; i < base.bitCoordinates.Count; i++)
             {
-                ret.AddBit(base.bitArray[i], base.bitCoordinates[i]);
+                ret.AddBit(base.bitValues[i], base.bitCoordinates[i]);
             }
             return ret;
         }

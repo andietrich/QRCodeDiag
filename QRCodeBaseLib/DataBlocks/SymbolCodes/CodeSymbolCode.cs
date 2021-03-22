@@ -1,4 +1,5 @@
 ﻿using QRCodeBaseLib.DataBlocks.Symbols;
+using QRCodeBaseLib.DataBlocks.Symbols.SymbolFactories;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 {
-    public class CodeSymbolCode<T> : ICodeSymbolCode where T : CodeSymbol, new()
+    public class CodeSymbolCode<T> : ICodeSymbolCode where T : CodeSymbol
     {
         protected List<CodeSymbol> codeSymbolList;
         public int SymbolCount => this.codeSymbolList.Count;
@@ -16,19 +17,14 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         {
             get
             {
-                if(this.codeSymbolList.Count > 1)
+                uint count = 0;
+
+                foreach(var codeSymbol in this.codeSymbolList)
                 {
-                    return (uint)((this.codeSymbolList.Count-1) * ((int)this.codeSymbolList[0].SymbolLength)
-                                 + this.codeSymbolList[this.codeSymbolList.Count - 1].CurrentSymbolLength);
+                    count += codeSymbol.CurrentSymbolLength;
                 }
-                else if (this.codeSymbolList.Count == 1)
-                {
-                    return this.codeSymbolList[0].CurrentSymbolLength;
-                }
-                else
-                {
-                    return 0u;
-                }
+
+                return count;
             }
         }
 
@@ -36,22 +32,26 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         /// Iterates through all bits of <see cref="IBitIterator"/> <paramref name="it"/> creating a list of type <typeparamref name="T"/> <see cref="ByteSymbol"/>s.
         /// </summary>
         /// <param name="it"><see cref="IBitIterator"/> to iterate through all bits the <see cref="CodeSymbolCode{T}"/> will be composed of.</param>
-        internal CodeSymbolCode(IBitIterator it)
+        internal CodeSymbolCode(IBitIterator it, ICodeSymbolFactory<T> symbolFactory)
         {
             this.codeSymbolList = new List<CodeSymbol>();
 
-            var wd = new T();
+            var wd = symbolFactory.GenerateCodeSymbol();
             char c = it.NextBit();
+
             while(c != 'e')
             {
                 if (c != '0' && c != '1' && c != 'u')
                     throw new NotImplementedException("Bit value " + c + " was not defined.");
+
                 wd.AddBit(c, it.Position);
+
                 if (wd.IsComplete)
                 {
                     codeSymbolList.Add(wd);
-                    wd = new T();
+                    wd = symbolFactory.GenerateCodeSymbol();
                 }
+
                 c = it.NextBit();
             }
 
@@ -121,19 +121,23 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         }
         public Vector2D GetBitPosition(uint bitNumber)
         {
-            if (this.codeSymbolList.Count > 0)
+            uint bitsFound = 0;
+
+            for(int i = 0; i < this.codeSymbolList.Count; i++)
             {
-                var symbollength = this.codeSymbolList[0].SymbolLength;
-                return this.codeSymbolList[(int)(bitNumber / symbollength)].GetBitCoordinate(bitNumber % symbollength);
+                uint bitsInSymbol = this.codeSymbolList[i].CurrentSymbolLength;
+
+                if (bitNumber < bitsFound + bitsInSymbol)
+                    return this.codeSymbolList[i].GetBitCoordinate(bitNumber - bitsFound);
+                else
+                    bitsFound += bitsInSymbol;
             }
-            else
-            {
-                throw new InvalidOperationException("The code is empty.");
-            }
+
+            throw new ArgumentOutOfRangeException();
         }
-        public CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length) where T2 : CodeSymbol, new()
+        internal CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length, ICodeSymbolFactory<T2> codeSymbolFactory) where T2 : CodeSymbol
         {
-            return new CodeSymbolCode<T2>(this.GetBitIterator(startIndex, length));
+            return new CodeSymbolCode<T2>(this.GetBitIterator(startIndex, length), codeSymbolFactory);
         }
         public override string ToString()
         {

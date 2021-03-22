@@ -1,21 +1,19 @@
-﻿using System;
+﻿using QRCodeBaseLib.MetaInfo;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols
 {
-    class CharCountIndicatorSymbol : CodeSymbol
+    public class CharCountIndicatorSymbol : CodeSymbol
     {
-        private string charCountIndicatorBitString;
-        public override string BitString { get { return this.charCountIndicatorBitString; } }
-        public CharCountIndicatorSymbol(string charCountIndicatorBits, ICollection<Vector2D> coordinates) : base((uint)charCountIndicatorBits.Length)
-        {
-            if (coordinates.Count != charCountIndicatorBits.Length)
-                throw new ArgumentException("The coordinates count doesn't match the bit count.");
+        private readonly uint size;
+        public override bool IsComplete => this.bitCoordinates.Count == this.size;
 
-            this.charCountIndicatorBitString = charCountIndicatorBits;
-            this.bitCoordinates = new List<Vector2D>(coordinates);
-            this.bitArray = charCountIndicatorBits.ToCharArray();
+        public CharCountIndicatorSymbol(MessageMode messageMode) : base()
+        {
+            this.size = messageMode.CharacterCountIndicatorLength;
         }
 
         public bool TryGetAsUInt(out uint value, byte unknownBitValue = 0)
@@ -45,6 +43,18 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
                 return value.ToString();
             else
                 return $"-{this.BitString}-";
+        }
+
+        public uint GetCharacterCount()
+        {
+            try
+            {
+                return Convert.ToUInt32(this.BitString, 2);
+            }
+            catch (FormatException fe)
+            {
+                throw new QRCodeFormatException("Could not parse character count.", fe);
+            }
         }
     }
 }

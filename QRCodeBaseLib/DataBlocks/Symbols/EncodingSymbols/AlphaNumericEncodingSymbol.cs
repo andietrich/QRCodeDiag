@@ -11,12 +11,8 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
     public class AlphaNumericEncodingSymbol : CodeSymbol, IEncodingSymbol
     {
         public MessageMode.EncodingMode EncodingType { get { return MessageMode.EncodingMode.Alphanumeric; } }
-        public AlphaNumericEncodingSymbol() : base(GetSymbolLength())
+        public override bool IsComplete => throw new NotImplementedException();
+        public AlphaNumericEncodingSymbol() : base()
         { }
-
-        private static uint GetSymbolLength()
-        {
-            throw new NotImplementedException();
-        }        
     }
 }

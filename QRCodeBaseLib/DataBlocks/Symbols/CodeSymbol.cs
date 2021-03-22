@@ -13,24 +13,23 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     public abstract class CodeSymbol
     {
         protected List<Vector2D> bitCoordinates;
-        protected char[] bitArray;
-        public uint SymbolLength { get; private set; }
+        protected List<char> bitValues;
         public uint CurrentSymbolLength { get { return (uint)this.bitCoordinates.Count; } }
-        public virtual string BitString { get { return new string(this.bitArray, 0, this.bitCoordinates.Count); } } // TODO this should not be a property, but a get method, because it creates a new object every call
-        public bool IsComplete { get { return this.bitCoordinates.Count == this.bitArray.Length; } }
-        protected CodeSymbol(uint symbolLength)
+        public virtual string BitString { get { return new string(this.bitValues.ToArray(), 0, this.bitCoordinates.Count); } } // TODO this should not be a property, but a get method, because it creates a new object every call
+        public abstract bool IsComplete { get; }
+        protected CodeSymbol()
         {
-            this.SymbolLength = symbolLength;
-            this.bitArray = new char[symbolLength];
-            this.bitCoordinates = new List<Vector2D>((int)symbolLength);
+            this.bitValues = new List<char>();
+            this.bitCoordinates = new List<Vector2D>();
         }
 
         /* Filling from most significant bit to least significant bit */
         internal void AddBit(char bit, Vector2D bitPosition)
         {
-            if (this.bitCoordinates.Count == this.SymbolLength)
-                throw new InvalidOperationException("The maximum symbol length " + this.SymbolLength + " has already been reached.");
-            this.bitArray[bitCoordinates.Count] = bit;
+            if (this.IsComplete)
+                throw new InvalidOperationException($"The maximum symbol length {this.CurrentSymbolLength} has already been reached.");
+
+            this.bitValues.Add(bit);
             this.bitCoordinates.Add(bitPosition);
         }
 

@@ -11,10 +11,10 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
     public class NumericEncodingSymbol : CodeSymbol, IEncodingSymbol
     {
         public MessageMode.EncodingMode EncodingType { get { return MessageMode.EncodingMode.Numeric; } }
-        public NumericEncodingSymbol() : base(GetSymbolLength())
-        { }
 
-        private static uint GetSymbolLength()
+        public override bool IsComplete => throw new NotImplementedException();
+
+        public NumericEncodingSymbol() : base()
         {
             throw new NotImplementedException();
         }

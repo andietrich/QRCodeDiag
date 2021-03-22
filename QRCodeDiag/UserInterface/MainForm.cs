@@ -129,8 +129,9 @@ namespace QRCodeDiag.UserInterface
                 var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
                 {
-                    sb.AppendLine("Message: " + this.DisplayCode.Message);
-                    sb.AppendLine("Terminator: " + this.DisplayCode.Terminator?.BitString ?? "No terminator found");
+                    sb.AppendLine($"Message: {this.DisplayCode.Message}");
+                    sb.AppendLine($"Character count: {this.DisplayCode.CharCountIndicatorSymbolCode?.GetSymbolAt(0)?.BitString}" ?? "No char count indicator found");
+                    sb.AppendLine($"Terminator: {this.DisplayCode.TerminatorSymbolCode?.GetSymbolAt(0)?.BitString}" ?? "No terminator found");
                     sb.AppendLine("Padding bits: ");
                     if (this.DisplayCode.PaddingBits == null)
                         sb.AppendLine("Padding bits have not been initialized yet.");

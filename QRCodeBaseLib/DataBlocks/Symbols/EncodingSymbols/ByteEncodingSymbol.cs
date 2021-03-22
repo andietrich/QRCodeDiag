@@ -20,7 +20,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
             var ret = new ByteEncodingSymbol();
             for (int i = 0; i < base.bitCoordinates.Count; i++)
             {
-                ret.AddBit(base.bitArray[i], base.bitCoordinates[i]);
+                ret.AddBit(base.bitValues[i], base.bitCoordinates[i]);
             }
             return ret;
         }

@@ -1,6 +1,7 @@
 ﻿using QRCodeBaseLib.DataBlocks;
 using QRCodeBaseLib.DataBlocks.SymbolCodes;
 using QRCodeBaseLib.DataBlocks.Symbols;
+using QRCodeBaseLib.DataBlocks.Symbols.SymbolFactories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,8 +49,9 @@ namespace QRCodeBaseLib.ECCDecoding
                 Array.Copy(dataWithECC, dataArr.Length, eccArr, 0, eccArr.Length);
                 var dataIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairData, dataArr);
                 var eccIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairECC, eccArr);
-                this.postRepairData = new CodeSymbolCode<RawCodeByte>(dataIt);
-                this.postRepairECC = new CodeSymbolCode<RawCodeByte>(eccIt);
+                var factory = new RawCodeByteFactory();
+                this.postRepairData = new CodeSymbolCode<RawCodeByte>(dataIt, factory);
+                this.postRepairECC = new CodeSymbolCode<RawCodeByte>(eccIt, factory);
             }
             else
             {

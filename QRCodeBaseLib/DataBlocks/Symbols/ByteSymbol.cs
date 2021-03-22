@@ -12,8 +12,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     public abstract class ByteSymbol : CodeSymbol
     {
         public const uint BYTESYMBOLLENGTH = 8;
-        public ByteSymbol() : base(BYTESYMBOLLENGTH)
-        { }
+        public override bool IsComplete => this.bitCoordinates.Count == BYTESYMBOLLENGTH;
         public abstract object Clone();
         /// <summary>
         /// Gets the byte representation of the ByteSymbol.

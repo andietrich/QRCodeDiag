@@ -20,17 +20,18 @@ namespace QRCodeDiag
         public event SettingsPropertyChangedEventHandler PropertyChangedEvent;
         private enum PropertyType
         {
-            VersionNumber,
-            ECCLevel,
-            EncodingType,
-            MessageContent,
-            MessageLength,
-            MaskType,
+            //VersionNumber,
+            //ECCLevel,
+            //EncodingType,
+            //MessageContent,
+            //MessageLength,
+            //MaskType,
             ///////////
             RawCode,
             RawDataBytes,
             RawECCBytes,
             MessageModeSymbol,
+            CharCountIndicator,
             PaddingBytes,
             EncodedSymbols,
             TerminatorSymbol
@@ -54,12 +55,14 @@ namespace QRCodeDiag
         {
             return new Dictionary<PropertyType, CodeSymbolCodeDrawingProperties>
             {
-                [PropertyType.RawCode]           = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.Orange,    "Raw Code"           ),
-                [PropertyType.RawDataBytes]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange), Color.LightBlue, "Raw Data Bytes"     ),
-                [PropertyType.RawECCBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.LightBlue, "Raw ECC Bytes"      ),
-                [PropertyType.MessageModeSymbol] = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Message Mode Symbol"),
-                [PropertyType.PaddingBytes]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Padding Bytes"      ),
-                [PropertyType.EncodedSymbols]    = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Encoded Symbols"    ),
+                [PropertyType.RawCode]            = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.Orange,    "Raw Code"            ),
+                [PropertyType.RawDataBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange), Color.LightBlue, "Raw Data Bytes"      ),
+                [PropertyType.RawECCBytes]        = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.LightBlue, "Raw ECC Bytes"       ),
+                [PropertyType.MessageModeSymbol]  = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Message Mode Symbol" ),
+                [PropertyType.CharCountIndicator] = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Char Count Indicator"),
+                [PropertyType.PaddingBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Padding Bytes"       ),
+                [PropertyType.EncodedSymbols]     = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Encoded Symbols"     ),
+                [PropertyType.TerminatorSymbol]   = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Terminator Symbol"   ),
             };
         }
 
@@ -70,9 +73,10 @@ namespace QRCodeDiag
             qrCode.RawDataBytesChangedEvent -= HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent -= HandleRawECCBytesChanged;
             qrCode.MessageModeChangedEvent -= HandleMessageModeChanged;
+            qrCode.CharCountIndicatorChangedEvent -= HandleCharCountIndicatorChanged;
             qrCode.PaddingBytesChangedEvent -= HandlePaddingBytesChanged;
             qrCode.EncodedSymbolsChangedEvent -= HandleEncodedSymbolsChanged;
-            qrCode.TerminatorSymbolChangedEvent -= HandleTerminatorSymbolChanged;
+            qrCode.TerminatorSymbolCodeChangedEvent -= HandleTerminatorSymbolChanged;
         }
         private void RegisterEventHandlers()
         {
@@ -80,9 +84,10 @@ namespace QRCodeDiag
             qrCode.RawDataBytesChangedEvent += HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent += HandleRawECCBytesChanged;
             qrCode.MessageModeChangedEvent += HandleMessageModeChanged;
+            qrCode.CharCountIndicatorChangedEvent += HandleCharCountIndicatorChanged;
             qrCode.PaddingBytesChangedEvent += HandlePaddingBytesChanged;
             qrCode.EncodedSymbolsChangedEvent += HandleEncodedSymbolsChanged;
-            qrCode.TerminatorSymbolChangedEvent += HandleTerminatorSymbolChanged;
+            qrCode.TerminatorSymbolCodeChangedEvent += HandleTerminatorSymbolChanged;
         }
         //private void RegisterMessageContentListener()
         //{
@@ -172,6 +177,10 @@ namespace QRCodeDiag
         {
             this.HandleCodeChange(newMessageModeSymbol, PropertyType.MessageModeSymbol);
         }
+        private void HandleCharCountIndicatorChanged(CodeSymbolCode<CharCountIndicatorSymbol> newCharCountIndicator)
+        {
+            this.HandleCodeChange(newCharCountIndicator, PropertyType.CharCountIndicator);
+        }
         private void HandlePaddingBytesChanged(CodeSymbolCode<RawCodeByte> newPaddingBytes)
         {
             this.HandleCodeChange(newPaddingBytes, PropertyType.PaddingBytes);
@@ -180,9 +189,9 @@ namespace QRCodeDiag
         {
             this.HandleCodeChange(newEncodedSymbols, PropertyType.EncodedSymbols);
         }
-        private void HandleTerminatorSymbolChanged(TerminatorSymbol newTerminatorSymbol)
+        private void HandleTerminatorSymbolChanged(CodeSymbolCode<TerminatorSymbol> newTerminatorSymbol)
         {
-
+            this.HandleCodeChange(newTerminatorSymbol, PropertyType.TerminatorSymbol);
         }
         #endregion
         #region public methods
