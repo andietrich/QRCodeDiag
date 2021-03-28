@@ -161,35 +161,35 @@ namespace QRCodeDiag
                 this.AddCodeSymbolCodeOptionsItem(drawableCode, propertyType);
             }
         }
-        private void HandleRawCodeChanged(CodeSymbolCode<RawCodeByte> newRawCode)
+        private void HandleRawCodeChanged(ICodeSymbolCode newRawCode)
         {
             this.HandleCodeChange(newRawCode, PropertyType.RawCode);
         }
-        private void HandleRawDataBytesChanged(CodeSymbolCode<RawCodeByte> newRawDataBytes)
+        private void HandleRawDataBytesChanged(ICodeSymbolCode newRawDataBytes)
         {
             this.HandleCodeChange(newRawDataBytes, PropertyType.RawDataBytes);
         }
-        private void HandleRawECCBytesChanged(CodeSymbolCode<RawCodeByte> newRawECCBytes)
+        private void HandleRawECCBytesChanged(ICodeSymbolCode newRawECCBytes)
         {
             this.HandleCodeChange(newRawECCBytes, PropertyType.RawECCBytes);
         }
-        private void HandleMessageModeChanged(CodeSymbolCode<MessageModeSymbol> newMessageModeSymbol)
+        private void HandleMessageModeChanged(ICodeSymbolCode newMessageModeSymbol)
         {
             this.HandleCodeChange(newMessageModeSymbol, PropertyType.MessageModeSymbol);
         }
-        private void HandleCharCountIndicatorChanged(CodeSymbolCode<CharCountIndicatorSymbol> newCharCountIndicator)
+        private void HandleCharCountIndicatorChanged(ICodeSymbolCode newCharCountIndicator)
         {
             this.HandleCodeChange(newCharCountIndicator, PropertyType.CharCountIndicator);
         }
-        private void HandlePaddingBytesChanged(CodeSymbolCode<RawCodeByte> newPaddingBytes)
+        private void HandlePaddingBytesChanged(ICodeSymbolCode newPaddingBytes)
         {
             this.HandleCodeChange(newPaddingBytes, PropertyType.PaddingBytes);
         }
-        private void HandleEncodedSymbolsChanged(CodeSymbolCode<ByteEncodingSymbol> newEncodedSymbols)
+        private void HandleEncodedSymbolsChanged(ICodeSymbolCode newEncodedSymbols)
         {
             this.HandleCodeChange(newEncodedSymbols, PropertyType.EncodedSymbols);
         }
-        private void HandleTerminatorSymbolChanged(CodeSymbolCode<TerminatorSymbol> newTerminatorSymbol)
+        private void HandleTerminatorSymbolChanged(ICodeSymbolCode newTerminatorSymbol)
         {
             this.HandleCodeChange(newTerminatorSymbol, PropertyType.TerminatorSymbol);
         }

@@ -9,7 +9,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     /// <summary>
     /// Represents a byte of the interleaved block code (data or ecc)
     /// </summary>
-    public class RawCodeByte : ByteSymbol
+    internal class RawCodeByte : ByteSymbol
     {
         public override object Clone()
         {

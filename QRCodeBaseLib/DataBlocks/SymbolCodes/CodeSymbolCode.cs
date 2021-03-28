@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 {
-    public class CodeSymbolCode<T> : ICodeSymbolCode where T : CodeSymbol
+    public class CodeSymbolCode<T> : ICodeSymbolCode where T : ICodeSymbol
     {
-        protected List<CodeSymbol> codeSymbolList;
+        protected List<ICodeSymbol> codeSymbolList;
         public int SymbolCount => this.codeSymbolList.Count;
         public uint BitCount
         {
@@ -28,39 +28,38 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
         }
 
-        /// <summary>
-        /// Iterates through all bits of <see cref="IBitIterator"/> <paramref name="it"/> creating a list of type <typeparamref name="T"/> <see cref="ByteSymbol"/>s.
-        /// </summary>
-        /// <param name="it"><see cref="IBitIterator"/> to iterate through all bits the <see cref="CodeSymbolCode{T}"/> will be composed of.</param>
-        internal CodeSymbolCode(IBitIterator it, ICodeSymbolFactory<T> symbolFactory)
-        {
-            this.codeSymbolList = new List<CodeSymbol>();
 
-            var wd = symbolFactory.GenerateCodeSymbol();
+        #region Internal Functions
+        internal static CodeSymbolCode<T2> CreateInstance<T2>(IBitIterator it, ICodeSymbolFactory<T2> symbolFactory) where T2 : IBuildableCodeSymbol
+        {
+            var codeSymbolList = new List<T2>();
+            var sym = symbolFactory.GenerateCodeSymbol();
             char c = it.NextBit();
 
-            while(c != 'e')
+            while (c != 'e')
             {
                 if (c != '0' && c != '1' && c != 'u')
                     throw new NotImplementedException("Bit value " + c + " was not defined.");
 
-                wd.AddBit(c, it.Position);
+                sym.AddBit(c, it.Position);
 
-                if (wd.IsComplete)
+                if (sym.IsComplete)
                 {
-                    codeSymbolList.Add(wd);
-                    wd = symbolFactory.GenerateCodeSymbol();
+                    codeSymbolList.Add(sym);
+                    sym = symbolFactory.GenerateCodeSymbol();
                 }
 
                 c = it.NextBit();
             }
 
             //ToDo handle remainder bits or error: if(!wd.IsComplete){ if(wd.CurrentSymbolLength > 0) or: if(wd.CurrentSymbolLength != number of remainder bits) for QRCodeBitIterator
+
+            return new CodeSymbolCode<T2>(codeSymbolList);
         }
 
-        public CodeSymbolCode(List<T> codeSymbols)
+        internal CodeSymbolCode(IReadOnlyList<T> codeSymbols)
         {
-            this.codeSymbolList = new List<CodeSymbol>();
+            this.codeSymbolList = new List<ICodeSymbol>();
 
             for (int i = 0; i < codeSymbols.Count; i++)
             {
@@ -68,9 +67,9 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
         }
 
-        public CodeSymbolCode(List<CodeSymbolCode<T>> codeSymbolCodes)
+        internal CodeSymbolCode(IReadOnlyList<CodeSymbolCode<T>> codeSymbolCodes)
         {
-            this.codeSymbolList = new List<CodeSymbol>();
+            this.codeSymbolList = new List<ICodeSymbol>();
 
             for (int i = 0; i < codeSymbolCodes.Count; i++)
             {
@@ -86,7 +85,13 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         {
             return new CodeSymbolCodeBitIterator(this, startIndex, length);
         }
-        public List<CodeSymbol> GetCodeSymbols()
+        internal CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length, ICodeSymbolFactory<T2> codeSymbolFactory) where T2 : IBuildableCodeSymbol
+        {
+            return CreateInstance(this.GetBitIterator(startIndex, length), codeSymbolFactory);
+        }
+        #endregion
+        #region Public Functions
+        public List<ICodeSymbol> GetCodeSymbols()
         {
             return this.codeSymbolList;
         }
@@ -95,7 +100,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             if (index < 0 || index > this.codeSymbolList.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
             else
-                return this.codeSymbolList[index] as T;
+                return (T)this.codeSymbolList[index];
         }
         public string GetBitString()
         {
@@ -135,13 +140,10 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 
             throw new ArgumentOutOfRangeException();
         }
-        internal CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length, ICodeSymbolFactory<T2> codeSymbolFactory) where T2 : CodeSymbol
-        {
-            return new CodeSymbolCode<T2>(this.GetBitIterator(startIndex, length), codeSymbolFactory);
-        }
         public override string ToString()
         {
             return String.Join("", this.codeSymbolList.Select(s => s.ToString()));
         }
+        #endregion
     }
 }

@@ -10,7 +10,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     /// Provides functions accumulatively store bit values with coordinates, checking completeness
     /// and drawing a contour of all bits in the code including each bit with a bit number indicator.
     /// </summary>
-    public abstract class CodeSymbol
+    internal abstract class CodeSymbol : IBuildableCodeSymbol
     {
         protected List<Vector2D> bitCoordinates;
         protected List<char> bitValues;
@@ -24,7 +24,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         }
 
         /* Filling from most significant bit to least significant bit */
-        internal void AddBit(char bit, Vector2D bitPosition)
+        public void AddBit(char bit, Vector2D bitPosition)
         {
             if (this.IsComplete)
                 throw new InvalidOperationException($"The maximum symbol length {this.CurrentSymbolLength} has already been reached.");

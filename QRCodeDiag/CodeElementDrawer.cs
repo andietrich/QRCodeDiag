@@ -28,7 +28,7 @@ namespace QRCodeDiag
                                 drawableSymbol.DrawBitIndices,
                                 drawableSymbol.DrawSymbolValue);
         }
-        public void DrawCodeSymbol(CodeSymbol symbol,
+        public void DrawCodeSymbol(ICodeSymbol symbol,
                                   Graphics g,
                                   SymbolColors symbolColors,
                                   bool drawBitIndices,

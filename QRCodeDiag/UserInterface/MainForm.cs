@@ -16,9 +16,9 @@ namespace QRCodeDiag.UserInterface
     public partial class MainForm : Form //ToDo: implement selecting symbol with mouse to change its value. Implement automatic generation of all elements like format info, encoding info, message, ...
     {
         private QRCode displayCode; // stores the non-xored QRCode for displaying while the backgroundCode is xored for analysis
-        private SettingsPropertyManager settingsPropertyManager;
-        private CodeElementDrawer codeDrawer;
-        private DrawingManager drawingManager;
+        private readonly SettingsPropertyManager settingsPropertyManager;
+        private readonly CodeElementDrawer codeDrawer;
+        private readonly DrawingManager drawingManager;
 
         public bool ShowXORed { get; set; }
 
@@ -126,19 +126,12 @@ namespace QRCodeDiag.UserInterface
         {
             if (this.DisplayCode != null)
             {
-                var sb = new StringBuilder("Mask Used: " + this.CurrentMaskUsed.ToString());
+                var sb = new StringBuilder();
+                
+                sb.AppendLine("Mask Used: " + this.CurrentMaskUsed.ToString());
                 try
-                {
-                    sb.AppendLine($"Message: {this.DisplayCode.Message}");
-                    sb.AppendLine($"Character count: {this.DisplayCode.CharCountIndicatorSymbolCode?.GetSymbolAt(0)?.BitString}" ?? "No char count indicator found");
-                    sb.AppendLine($"Terminator: {this.DisplayCode.TerminatorSymbolCode?.GetSymbolAt(0)?.BitString}" ?? "No terminator found");
-                    sb.AppendLine("Padding bits: ");
-                    if (this.DisplayCode.PaddingBits == null)
-                        sb.AppendLine("Padding bits have not been initialized yet.");
-                    else
-                        sb.AppendLine(string.Join(Environment.NewLine, this.DisplayCode.PaddingBits.GetSymbolBitStrings()));
-                    
-                    sb.AppendLine("RepairMessage():" + this.DisplayCode.GetRepairMessageStatusLine());
+                {   
+                    sb.AppendLine($"RepairMessage(): {Environment.NewLine}{this.DisplayCode.GetRepairMessageStatusLine()}");
                 }
                 catch (QRCodeFormatException qfe)
                 {

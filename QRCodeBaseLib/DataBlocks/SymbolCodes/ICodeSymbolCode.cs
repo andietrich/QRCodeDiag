@@ -14,6 +14,6 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         string GetBitString(uint startIndex, uint length);
         string[] GetSymbolBitStrings();
         Vector2D GetBitPosition(uint bitNumber);
-        List<CodeSymbol> GetCodeSymbols();
+        List<ICodeSymbol> GetCodeSymbols();
     }
 }

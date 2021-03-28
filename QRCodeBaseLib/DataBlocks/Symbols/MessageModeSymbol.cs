@@ -5,7 +5,7 @@ using System.Text;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols
 {
-    public class MessageModeSymbol : CodeSymbol
+    internal class MessageModeSymbol : CodeSymbol
     {
         public const uint MODEINFOLENGTH = 4; // the message mode information is stored in the first nibble (4 bits)
         public MessageModeSymbol() : base()

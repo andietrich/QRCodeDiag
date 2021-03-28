@@ -18,14 +18,14 @@ namespace QRCodeBaseLib
         public delegate void VersionChangedHandler(QRCodeVersion newVersion);
         public delegate void ECCLevelChangedHandler(ErrorCorrectionLevel.ECCLevel newECCLevel);
         public delegate void MessageChangedHandler(string newMessage, bool messageIsValid);
-        public delegate void RawCodeChangedHandler(CodeSymbolCode<RawCodeByte> newRawCode);
-        public delegate void RawDataBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawDataBytes);
-        public delegate void RawECCBytesChangedHandler(CodeSymbolCode<RawCodeByte> newRawECCBytes);
-        public delegate void MessageModeChangedHandler(CodeSymbolCode<MessageModeSymbol> newMessageMode);
-        public delegate void CharCountIndicatorChangedHandler(CodeSymbolCode<CharCountIndicatorSymbol> newCharCountIndicator);
-        public delegate void PaddingBytesChangedHandler(CodeSymbolCode<RawCodeByte> newPaddingBytes);
-        public delegate void EncodedSymbolsChangedHandler(CodeSymbolCode<ByteEncodingSymbol> newEncodedSymbols);
-        public delegate void TerminatorSymbolCodeChangedHandler(CodeSymbolCode<TerminatorSymbol> newTerminatorSymbol);
+        public delegate void RawCodeChangedHandler(ICodeSymbolCode newRawCode);
+        public delegate void RawDataBytesChangedHandler(ICodeSymbolCode newRawDataBytes);
+        public delegate void RawECCBytesChangedHandler(ICodeSymbolCode newRawECCBytes);
+        public delegate void MessageModeChangedHandler(ICodeSymbolCode newMessageMode);
+        public delegate void CharCountIndicatorChangedHandler(ICodeSymbolCode newCharCountIndicator);
+        public delegate void PaddingBytesChangedHandler(ICodeSymbolCode newPaddingBytes);
+        public delegate void EncodedSymbolsChangedHandler(ICodeSymbolCode newEncodedSymbols);
+        public delegate void TerminatorSymbolCodeChangedHandler(ICodeSymbolCode newTerminatorSymbol);
         public event VersionChangedHandler VersionChangedEvent;
         public event ECCLevelChangedHandler ECCLevelChangedEvent;
         public event MessageChangedHandler MessageChangedEvent;
@@ -64,8 +64,8 @@ namespace QRCodeBaseLib
                                                //ToDo highlight version/ecc info 1 + 2
         #endregion
 
-        #region public properties
-        public CodeSymbolCode<RawCodeByte> RawCode
+        #region internal properties
+        internal CodeSymbolCode<RawCodeByte> RawCode
         {
             get { return this.rawCode; }
             private set
@@ -74,7 +74,7 @@ namespace QRCodeBaseLib
                 this.RawCodeChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<RawCodeByte> RawDataBytes
+        internal CodeSymbolCode<RawCodeByte> RawDataBytes
         {
             get { return this.rawDataBytes; }
             private set
@@ -83,7 +83,7 @@ namespace QRCodeBaseLib
                 this.RawDataBytesChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<RawCodeByte> RawECCBytes
+        internal CodeSymbolCode<RawCodeByte> RawECCBytes
         {
             get { return this.rawECCBytes; }
             private set
@@ -92,7 +92,7 @@ namespace QRCodeBaseLib
                 this.RawECCBytesChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<CharCountIndicatorSymbol> CharCountIndicatorSymbolCode
+        internal CodeSymbolCode<CharCountIndicatorSymbol> CharCountIndicatorSymbolCode
         {
             get { return this.charCountIndicatorSymbolCode; }
             private set
@@ -101,7 +101,7 @@ namespace QRCodeBaseLib
                 this.CharCountIndicatorChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<MessageModeSymbol> MessageModeSymbolCode
+        internal CodeSymbolCode<MessageModeSymbol> MessageModeSymbolCode
         {
             get { return this.messageModeSymbolCode; }
             private set
@@ -110,7 +110,7 @@ namespace QRCodeBaseLib
                 this.MessageModeChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<ByteEncodingSymbol> EncodedSymbols
+        internal CodeSymbolCode<ByteEncodingSymbol> EncodedSymbols
         {
             get { return this.encodedSymbols; }
             private set
@@ -119,7 +119,7 @@ namespace QRCodeBaseLib
                 this.EncodedSymbolsChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<RawCodeByte> PaddingBits
+        internal CodeSymbolCode<RawCodeByte> PaddingBits
         {
             get { return this.paddingBits; }
             private set
@@ -128,7 +128,7 @@ namespace QRCodeBaseLib
                 this.PaddingBytesChangedEvent?.Invoke(value);
             }
         }
-        public CodeSymbolCode<TerminatorSymbol> TerminatorSymbolCode
+        internal CodeSymbolCode<TerminatorSymbol> TerminatorSymbolCode
         {
             get { return this.terminatorSymbolCode; }
             private set
@@ -137,7 +137,9 @@ namespace QRCodeBaseLib
                 this.TerminatorSymbolCodeChangedEvent?.Invoke(value);
             }
         }
+        #endregion
 
+        #region internal properties
         public QRCodeVersion Version
         {
             get
@@ -192,6 +194,8 @@ namespace QRCodeBaseLib
                 this.MessageChangedEvent?.Invoke(this.message, this.ReadMessageSuccess);
             }
         }
+        public uint? CharacterCount => this.charCountIndicatorSymbolCode?.GetSymbolAt(0).CurrentSymbolLength;
+
         public bool ReadMessageSuccess { get; private set; }
 
         #endregion
@@ -349,10 +353,6 @@ namespace QRCodeBaseLib
             }
         }
 
-        private CodeSymbolCode<RawCodeByte> ExtractRawCode()
-        {
-            return new CodeSymbolCode<RawCodeByte>(this.GetBitIterator(), new RawCodeByteFactory());
-        }
         private static CodeSymbolCode<RawCodeByte> GetRawDataBytes(List<ECCBlock> deinterleavedBlocks)
         {
             var dataCodeSymbols = new List<CodeSymbolCode<RawCodeByte>>();
@@ -381,7 +381,7 @@ namespace QRCodeBaseLib
         {
             this.ReadFormatInformation();
 
-            this.RawCode = this.ExtractRawCode();
+            this.RawCode = CodeSymbolCode<RawCodeByte>.CreateInstance(this.GetBitIterator(), new RawCodeByteFactory());
             this.interleavingBlocks = DeInterleaver.DeInterleave(this.RawCode, this.eccLevel);
             this.RawDataBytes = QRCode.GetRawDataBytes(this.interleavingBlocks);
             this.RawECCBytes = QRCode.GetRawECCBytes(this.interleavingBlocks);

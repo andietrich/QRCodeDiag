@@ -9,7 +9,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     /// <summary>
     /// Abstract super class for any type of symbol that has byte length (8 bits)
     /// </summary>
-    public abstract class ByteSymbol : CodeSymbol
+    internal abstract class ByteSymbol : CodeSymbol
     {
         public const uint BYTESYMBOLLENGTH = 8;
         public override bool IsComplete => this.bitCoordinates.Count == BYTESYMBOLLENGTH;

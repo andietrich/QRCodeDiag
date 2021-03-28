@@ -6,7 +6,7 @@ using System.Text;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols
 {
-    public class CharCountIndicatorSymbol : CodeSymbol
+    internal class CharCountIndicatorSymbol : CodeSymbol
     {
         private readonly uint size;
         public override bool IsComplete => this.bitCoordinates.Count == this.size;
