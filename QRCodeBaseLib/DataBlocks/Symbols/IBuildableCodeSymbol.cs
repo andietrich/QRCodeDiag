@@ -6,6 +6,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
 {
     internal interface IBuildableCodeSymbol : ICodeSymbol
     {
+        uint MaxSymbolLength { get; }
         void AddBit(char bit, Vector2D bitPosition);
     }
 }

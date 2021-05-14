@@ -122,7 +122,7 @@ namespace QRCodeDiag
 
                     if (drawableCode.DrawSymbolIndices && (sym.CurrentSymbolLength > 0))
                     {
-                        var drawIndexCoord = sym.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, sym.CurrentSymbolLength));
+                        var drawIndexCoord = sym.GetBitCoordinate(Math.Min(preferredSymbolDrawLocation, sym.CurrentSymbolLength - 1));
                         g.DrawString(j.ToString(),
                                      largeFont,
                                      symbolIndexBrush,

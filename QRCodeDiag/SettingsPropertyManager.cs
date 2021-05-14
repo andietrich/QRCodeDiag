@@ -1,4 +1,5 @@
 ﻿using QRCodeBaseLib;
+using QRCodeBaseLib.DataBlocks;
 using QRCodeBaseLib.DataBlocks.SymbolCodes;
 using QRCodeBaseLib.DataBlocks.Symbols;
 using QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols;
@@ -20,13 +21,6 @@ namespace QRCodeDiag
         public event SettingsPropertyChangedEventHandler PropertyChangedEvent;
         private enum PropertyType
         {
-            //VersionNumber,
-            //ECCLevel,
-            //EncodingType,
-            //MessageContent,
-            //MessageLength,
-            //MaskType,
-            ///////////
             RawCode,
             RawDataBytes,
             RawECCBytes,
@@ -39,14 +33,14 @@ namespace QRCodeDiag
 
         private QRCode qrCode;
         private readonly DrawingManager drawingManager;
-        private readonly Dictionary<PropertyType, CodeSymbolCodeOptionsItem> settingsControls;
+        private readonly Dictionary<PropertyType, List<CodeSymbolCodeOptionsItem>> settingsControls;
         private readonly Dictionary<PropertyType, CodeSymbolCodeDrawingProperties> drawingProperties;
         private readonly ControlCollection ctrlCollection;
 
         public SettingsPropertyManager(DrawingManager setDrawingManager, ControlCollection setCtrlCollection)
         {
             this.drawingManager = setDrawingManager;
-            this.settingsControls = new Dictionary<PropertyType, CodeSymbolCodeOptionsItem>();
+            this.settingsControls = new Dictionary<PropertyType, List<CodeSymbolCodeOptionsItem>>();
             this.drawingProperties = CreateDrawingProperties();
             this.ctrlCollection = setCtrlCollection;
         }
@@ -72,22 +66,18 @@ namespace QRCodeDiag
             qrCode.RawCodeChangedEvent -= HandleRawCodeChanged;
             qrCode.RawDataBytesChangedEvent -= HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent -= HandleRawECCBytesChanged;
-            qrCode.MessageModeChangedEvent -= HandleMessageModeChanged;
-            qrCode.CharCountIndicatorChangedEvent -= HandleCharCountIndicatorChanged;
             qrCode.PaddingBytesChangedEvent -= HandlePaddingBytesChanged;
-            qrCode.EncodedSymbolsChangedEvent -= HandleEncodedSymbolsChanged;
             qrCode.TerminatorSymbolCodeChangedEvent -= HandleTerminatorSymbolChanged;
+            qrCode.EncodedMessagesChangedEvent -= HandleEncodedMessagesChanged;
         }
         private void RegisterEventHandlers()
         {
             qrCode.RawCodeChangedEvent += HandleRawCodeChanged;
             qrCode.RawDataBytesChangedEvent += HandleRawDataBytesChanged;
             qrCode.RawECCBytesChangedEvent += HandleRawECCBytesChanged;
-            qrCode.MessageModeChangedEvent += HandleMessageModeChanged;
-            qrCode.CharCountIndicatorChangedEvent += HandleCharCountIndicatorChanged;
             qrCode.PaddingBytesChangedEvent += HandlePaddingBytesChanged;
-            qrCode.EncodedSymbolsChangedEvent += HandleEncodedSymbolsChanged;
             qrCode.TerminatorSymbolCodeChangedEvent += HandleTerminatorSymbolChanged;
+            qrCode.EncodedMessagesChangedEvent += HandleEncodedMessagesChanged;
         }
         //private void RegisterMessageContentListener()
         //{
@@ -99,24 +89,29 @@ namespace QRCodeDiag
         //}
 
         /// <summary>
-        /// If a Control exists for the given <paramref name="ctrlType"/> this function removes it
+        /// If a Control with index <paramref name="index"/>exists for the given <paramref name="ctrlType"/> this function removes it
         /// from <cref>ctrlCollection</cref> and <cref>settingsControls</cref>.
         /// The associated <cref>DrawableCodeSymbolCode</cref> is also removed from <cref>drawingManager</cref>
         /// </summary>
         /// <param name="ctrlType">Type of control to be removed</param>
-        private void RemoveControlType(PropertyType ctrlType)
+        /// <param name="index">Index of the control to be removed</param>
+        private void RemoveControlTypeElement(PropertyType ctrlType, int index)
         {
-            if (this.settingsControls.TryGetValue(ctrlType, out var optionsItem))
+            if (this.settingsControls.TryGetValue(ctrlType, out var optionsItemList))
             {
-                optionsItem.PropertyChangedEvent -= this.PropertyChangedEvent;
-                this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
-
-                if (this.ctrlCollection.Contains(optionsItem))
+                if(optionsItemList.Count >= index)
                 {
-                    this.ctrlCollection.Remove(optionsItem);
-                }
+                    var optionsItem = optionsItemList[index];
+                    optionsItemList.RemoveAt(index);
 
-                this.settingsControls.Remove(ctrlType);
+                    optionsItem.PropertyChangedEvent -= this.PropertyChangedEvent;
+                    this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
+
+                    if (this.ctrlCollection.Contains(optionsItem))
+                    {
+                        this.ctrlCollection.Remove(optionsItem);
+                    }
+                }
             }
         }
 
@@ -124,7 +119,13 @@ namespace QRCodeDiag
         {
             foreach (PropertyType pType in Enum.GetValues(typeof(PropertyType)))
             {
-                RemoveControlType(pType);
+                if (this.settingsControls.TryGetValue(pType, out var optionsItemList))
+                {
+                    for (int i = 0; i < optionsItemList.Count; i++)
+                    {
+                        RemoveControlTypeElement(pType, i);
+                    }
+                }
             }
         }
 
@@ -135,63 +136,85 @@ namespace QRCodeDiag
             newOptionsItem.PropertyChangedEvent += this.PropertyChangedEvent;
             this.ctrlCollection.Add(newOptionsItem);
             this.drawingManager.RegisterCodeSymbolCode(drawableCode);
-            this.settingsControls[ctrlType] = newOptionsItem;
+            this.settingsControls[ctrlType].Add(newOptionsItem);
         }
-        private void HandleCodeChange(ICodeSymbolCode codeSymbolCode, PropertyType propertyType)
-        {
-            if (this.settingsControls.TryGetValue(propertyType, out var optionsItem))
-            {
-                if (codeSymbolCode == null)
-                {
-                    RemoveControlType(propertyType);
-                }
-                else
-                {
-                    var newDrawableCode = new DrawableCodeSymbolCode(codeSymbolCode, this.drawingProperties[propertyType]);
 
-                    this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
-                    optionsItem.DrawableCodeSymbolCode = newDrawableCode;
-                    this.drawingManager.RegisterCodeSymbolCode(newDrawableCode);
-                }
-            }
-            else if(codeSymbolCode != null)
+        private void HandleUniqueCodeChange(ICodeSymbolCode newCodeSymbolCode, PropertyType propertyType)
+        {
+            var symbolList = new List<ICodeSymbolCode>();
+
+            if (newCodeSymbolCode != null)
+                symbolList.Add(newCodeSymbolCode);
+
+            this.HandleCodeChange(symbolList, propertyType);
+        }
+
+        private void HandleCodeChange(IEnumerable<ICodeSymbolCode> codeSymbolCodes, PropertyType propertyType)
+        {
+            List<CodeSymbolCodeOptionsItem> optionsItemList;
+
+            // create list, if not existing yet
+            if (!this.settingsControls.TryGetValue(propertyType, out optionsItemList))
             {
-                var drawableCode = new DrawableCodeSymbolCode(codeSymbolCode, this.drawingProperties[propertyType]);
+                optionsItemList = new List<CodeSymbolCodeOptionsItem>();
+                this.settingsControls[propertyType] = optionsItemList;
+            }
+
+            var newCount = codeSymbolCodes.Count();
+
+            // remove excessive trailing old items
+            for (int i = newCount; i < optionsItemList.Count; i++)
+                RemoveControlTypeElement(propertyType, i);
+
+            // update existing item
+            for (int i = 0; i < optionsItemList.Count; i++)
+            {
+                var newDrawableCode = new DrawableCodeSymbolCode(codeSymbolCodes.ElementAt(i), this.drawingProperties[propertyType]);
+                var optionsItem = optionsItemList[i];
+
+                this.drawingManager.UnregisterCodeSymbolCode(optionsItem.DrawableCodeSymbolCode);
+                optionsItem.DrawableCodeSymbolCode = newDrawableCode;
+                this.drawingManager.RegisterCodeSymbolCode(newDrawableCode);
+            }
+
+            // add new items
+            for (int i = optionsItemList.Count; i < newCount; i++)
+            {
+                var drawableCode = new DrawableCodeSymbolCode(codeSymbolCodes.ElementAt(i), this.drawingProperties[propertyType]);
 
                 this.AddCodeSymbolCodeOptionsItem(drawableCode, propertyType);
             }
         }
+
         private void HandleRawCodeChanged(ICodeSymbolCode newRawCode)
         {
-            this.HandleCodeChange(newRawCode, PropertyType.RawCode);
+            this.HandleUniqueCodeChange(newRawCode, PropertyType.RawCode);
         }
         private void HandleRawDataBytesChanged(ICodeSymbolCode newRawDataBytes)
         {
-            this.HandleCodeChange(newRawDataBytes, PropertyType.RawDataBytes);
+            this.HandleUniqueCodeChange(newRawDataBytes, PropertyType.RawDataBytes);
         }
         private void HandleRawECCBytesChanged(ICodeSymbolCode newRawECCBytes)
         {
-            this.HandleCodeChange(newRawECCBytes, PropertyType.RawECCBytes);
-        }
-        private void HandleMessageModeChanged(ICodeSymbolCode newMessageModeSymbol)
-        {
-            this.HandleCodeChange(newMessageModeSymbol, PropertyType.MessageModeSymbol);
-        }
-        private void HandleCharCountIndicatorChanged(ICodeSymbolCode newCharCountIndicator)
-        {
-            this.HandleCodeChange(newCharCountIndicator, PropertyType.CharCountIndicator);
+            this.HandleUniqueCodeChange(newRawECCBytes, PropertyType.RawECCBytes);
         }
         private void HandlePaddingBytesChanged(ICodeSymbolCode newPaddingBytes)
         {
-            this.HandleCodeChange(newPaddingBytes, PropertyType.PaddingBytes);
-        }
-        private void HandleEncodedSymbolsChanged(ICodeSymbolCode newEncodedSymbols)
-        {
-            this.HandleCodeChange(newEncodedSymbols, PropertyType.EncodedSymbols);
+            this.HandleUniqueCodeChange(newPaddingBytes, PropertyType.PaddingBytes);
         }
         private void HandleTerminatorSymbolChanged(ICodeSymbolCode newTerminatorSymbol)
         {
-            this.HandleCodeChange(newTerminatorSymbol, PropertyType.TerminatorSymbol);
+            this.HandleUniqueCodeChange(newTerminatorSymbol, PropertyType.TerminatorSymbol);
+        }
+        private void HandleEncodedMessagesChanged(IEnumerable<EncodedMessage> newEncodedMessages)
+        {
+            var messageModeCodes = from msg in newEncodedMessages where msg.MessageModeSymbolCode != null select msg.MessageModeSymbolCode;
+            var charCountCodes = from msg in newEncodedMessages where msg.CharCountIndicatorSymbolCode != null select msg.CharCountIndicatorSymbolCode;
+            var messageCodes = from msg in newEncodedMessages where msg.Message != null select msg.Message;
+
+            this.HandleCodeChange(messageModeCodes, PropertyType.MessageModeSymbol);
+            this.HandleCodeChange(charCountCodes, PropertyType.CharCountIndicator);
+            this.HandleCodeChange(messageCodes, PropertyType.EncodedSymbols);
         }
         #endregion
         #region public methods

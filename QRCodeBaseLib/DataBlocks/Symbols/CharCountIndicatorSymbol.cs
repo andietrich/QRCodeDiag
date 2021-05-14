@@ -10,6 +10,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
     {
         private readonly uint size;
         public override bool IsComplete => this.bitCoordinates.Count == this.size;
+        public override uint MaxSymbolLength => this.size;
 
         public CharCountIndicatorSymbol(MessageMode messageMode) : base()
         {

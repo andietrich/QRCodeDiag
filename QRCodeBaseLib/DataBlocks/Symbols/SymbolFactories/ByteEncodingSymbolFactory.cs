@@ -7,11 +7,23 @@ namespace QRCodeBaseLib.DataBlocks.Symbols.SymbolFactories
 {
     class ByteEncodingSymbolFactory : ICodeSymbolFactory<ByteEncodingSymbol>
     {
-        public ByteEncodingSymbolFactory()
-        { }
+        private int symbolsCreated = 0;
+        private readonly uint maxSymbols;
+        public ByteEncodingSymbolFactory(uint setMaxSymbols)
+        {
+            this.maxSymbols = setMaxSymbols;
+        }
         public ByteEncodingSymbol GenerateCodeSymbol()
         {
-            return new ByteEncodingSymbol();
+            if (this.symbolsCreated < this.maxSymbols)
+            {
+                this.symbolsCreated++;
+                return new ByteEncodingSymbol();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

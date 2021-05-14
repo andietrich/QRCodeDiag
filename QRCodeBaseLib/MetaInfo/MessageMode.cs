@@ -9,10 +9,11 @@ namespace QRCodeBaseLib.MetaInfo
     {
         public enum EncodingMode
         {
+            Terminator = 0,
             Numeric = 1,
             Alphanumeric = 2,
             Byte = 4,
-            ECI = 7,    // extended channel interpretation
+            //ECI = 7,    // extended channel interpretation
             Kanji = 8
         }
 
@@ -20,22 +21,33 @@ namespace QRCodeBaseLib.MetaInfo
 
         public EncodingMode Mode { get; private set; }
         public uint CharacterCountIndicatorLength { get; private set; }
-        public uint CharacterLength { get; private set; }
 
         private MessageMode(EncodingMode mode, uint characterCountIndicatorLength)
         {
             this.Mode = mode;
             this.CharacterCountIndicatorLength = characterCountIndicatorLength;
-            this.CharacterLength = MessageMode.GetCharacterLength(mode);
         }
 
+        internal static bool TryParseMessageMode(MessageModeSymbol modeSymbol, QRCodeVersion version, out MessageMode mode)
+        {
+            if (MessageMode.TryParse(modeSymbol.GetSymbolValue(), out var encodingMode))
+            {
+                mode = new MessageMode(encodingMode, MessageMode.GetCharacterCountIndicatorLength(version, encodingMode));
+                return true;
+            }
+            else
+            {
+                mode = null;
+                return false;
+            }
+        }
         internal static MessageMode ParseMessageMode(MessageModeSymbol modeSymbol, QRCodeVersion version)
         {
-            var mode = modeSymbol.GetMessageMode();
+            var mode = MessageMode.Parse(modeSymbol.GetSymbolValue());
             return new MessageMode(mode, MessageMode.GetCharacterCountIndicatorLength(version, mode));
         }
 
-        internal static bool TryParse(byte value, out EncodingMode mode)
+        internal static bool TryParse(int value, out EncodingMode mode)
         {
             if (Enum.IsDefined(typeof(EncodingMode), value))
             {
@@ -94,20 +106,10 @@ namespace QRCodeBaseLib.MetaInfo
                         else
                             return 14u;
                     }
-                case EncodingMode.ECI:
+                case EncodingMode.Terminator:
+                    return 0;
                 default:
                     throw new NotImplementedException();
-            }
-        }
-
-        internal static uint GetCharacterLength(EncodingMode mode)
-        {
-            switch (mode)
-            {
-                case EncodingMode.Byte:
-                    return 8;
-                default:
-                    throw new NotImplementedException(); //ToDo split combined characters, find out final chunks' character count
             }
         }
     }

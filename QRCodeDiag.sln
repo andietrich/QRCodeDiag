@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeDiag", "QRCodeDiag\QRCodeDiag.csproj", "{FDD9082C-313A-4CD9-BE9B-55B3D8E64793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidUI", "AndroidUI\AndroidUI.csproj", "{5AA881E5-5A1F-4EEA-82E4-1F217014B6F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeBaseLib", "QRCodeBaseLib\QRCodeBaseLib.csproj", "{3357734A-FAD0-4895-BE65-B3FF8F37113B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QRCodeBaseLib", "QRCodeBaseLib\QRCodeBaseLib.csproj", "{3357734A-FAD0-4895-BE65-B3FF8F37113B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestQRCodeBaseLib", "XUnitTestQRCodeBaseLib\XUnitTestQRCodeBaseLib.csproj", "{B475977D-A998-4017-BECF-5444627B46E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3357734A-FAD0-4895-BE65-B3FF8F37113B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B475977D-A998-4017-BECF-5444627B46E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B475977D-A998-4017-BECF-5444627B46E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B475977D-A998-4017-BECF-5444627B46E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B475977D-A998-4017-BECF-5444627B46E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

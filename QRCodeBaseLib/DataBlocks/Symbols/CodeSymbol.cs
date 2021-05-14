@@ -17,6 +17,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         public uint CurrentSymbolLength { get { return (uint)this.bitCoordinates.Count; } }
         public virtual string BitString { get { return new string(this.bitValues.ToArray(), 0, this.bitCoordinates.Count); } } // TODO this should not be a property, but a get method, because it creates a new object every call
         public abstract bool IsComplete { get; }
+        public abstract uint MaxSymbolLength { get; }
         protected CodeSymbol()
         {
             this.bitValues = new List<char>();
@@ -26,8 +27,8 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         /* Filling from most significant bit to least significant bit */
         public void AddBit(char bit, Vector2D bitPosition)
         {
-            if (this.IsComplete)
-                throw new InvalidOperationException($"The maximum symbol length {this.CurrentSymbolLength} has already been reached.");
+            if (this.CurrentSymbolLength == this.MaxSymbolLength)
+                throw new InvalidOperationException($"The maximum symbol length {this.MaxSymbolLength} has already been reached.");
 
             this.bitValues.Add(bit);
             this.bitCoordinates.Add(bitPosition);

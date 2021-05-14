@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols
 {
-    /// <summary>
-    /// Abstract super class for any type of symbol that has byte length (8 bits)
-    /// </summary>
-    internal abstract class ByteSymbol : CodeSymbol
+    class PaddingSymbol : CodeSymbol
     {
-        public override bool IsComplete => this.bitCoordinates.Count == this.MaxSymbolLength;
-        public override uint MaxSymbolLength => 8u;
-        public abstract object Clone();
+        private readonly uint maxSymbolLength;
+        public override uint MaxSymbolLength => this.maxSymbolLength;
+        public override bool IsComplete => this.CurrentSymbolLength == this.MaxSymbolLength;
+        public PaddingSymbol(uint setMaxSymbolLength)
+        {
+            this.maxSymbolLength = setMaxSymbolLength;
+        }
+
         /// <summary>
-        /// Gets the byte representation of the ByteSymbol.
+        /// Gets the byte representation of the PaddingSymbol.
         /// If there are unknown bits they will be replaced by 0 and the function will return false.
         /// If not all bits have been set, the missing bits will be treated as unknown.
         /// </summary>
@@ -40,7 +40,14 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         public override string ToString()
         {
             if (this.TryGetAsByte(out var value))
-                return $"{value:X2}";
+            {
+                if (this.MaxSymbolLength == 4)
+                    return $"{value:X1}";
+                else if (this.MaxSymbolLength == 8)
+                    return $"{value:X2}";
+                else
+                    return base.ToString();
+            }
             else
                 return base.ToString();
         }

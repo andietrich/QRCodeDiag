@@ -15,63 +15,30 @@ namespace QRCodeBaseLib.DataBlocks
     /// <typeparam name="T"></typeparam>
     class OverrideByteSymbolCodeValuesBitIterator<T> : IBitIterator where T: ByteSymbol, new()
     {
-        private int bitPosition;
+        private uint bitPosition;
         private uint bitCount;
         private readonly CodeSymbolCode<T> originalCode;
         private readonly int[] newValues;
-        public bool EndReached
+        public bool EndReached => this.bitPosition >= this.bitCount;
+        public char CurrentChar => this.EndReached ? 'e' : this.GetBitCharAt(this.bitPosition);
+        public Vector2D Position => this.originalCode.GetBitPosition(this.bitPosition);
+        public uint BitsConsumed => this.bitPosition;
+
+        public OverrideByteSymbolCodeValuesBitIterator(CodeSymbolCode<T> setOriginalCode, int[] setNewValues)
         {
-            get
-            {
-                return this.bitPosition >= this.bitCount;
-            }
+            this.bitPosition = 0;
+            this.bitCount = setOriginalCode.BitCount;
+            this.originalCode = setOriginalCode;
+            this.newValues = setNewValues;
         }
 
-        public char CurrentChar
+        private char GetBitCharAt(uint index)
         {
-            get
-            {
-                if (this.bitPosition < 0)
-                {
-                    return this.GetBitCharAt(0);
-                }
-                else if (!this.EndReached)
-                {
-                    return this.GetBitCharAt(this.bitPosition);
-                }
-                else
-                {
-                    return 'e';
-                }
-            }
-        }
-
-        public Vector2D Position
-        {
-            get
-            {
-                var pos = this.bitPosition < 0 ? 0u : (uint)this.bitPosition;
-                return this.originalCode.GetBitPosition(pos);
-            }
-        }
-
-        public OverrideByteSymbolCodeValuesBitIterator(CodeSymbolCode<T> _originalCode, int[] _newValues)
-        {
-            this.bitPosition = -1;
-            this.bitCount = _originalCode.BitCount;
-            this.originalCode = _originalCode;
-            this.newValues = _newValues;
-        }
-
-        private char GetBitCharAt(int index)
-        {
-            var bytePos = index / ByteSymbol.BYTESYMBOLLENGTH;
-            var bitPos = (int)((ByteSymbol.BYTESYMBOLLENGTH - 1) - (index % ByteSymbol.BYTESYMBOLLENGTH));  // iterate from msbit to lsbit
+            var bytePos = index / 8;
+            var bitPos = (int)((8 - 1) - (index % 8));  // iterate from msbit to lsbit
             var bitValue = (((byte)newValues[bytePos]) >> bitPos) & 1;
-            if (bitValue == 1)
-                return '1';
-            else
-                return '0';
+            
+            return (bitValue == 1) ? '1' : '0';
         }
 
         public char NextBit()

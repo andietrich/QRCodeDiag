@@ -12,7 +12,8 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         private readonly string bitString;
         private readonly uint endPosition;
         private readonly uint startPosition;
-        private int currentPosition;
+        private uint currentPosition;
+        public uint BitsConsumed => this.currentPosition;
 
         public CodeSymbolCodeBitIterator(ICodeSymbolCode csc) : this(csc, 0, csc.BitCount)
         {
@@ -23,34 +24,16 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             this.bitString = csc.GetBitString();
             this.startPosition = startIndex;
             this.endPosition = startIndex + length;
-            this.currentPosition = (int)this.startPosition-1;
+            this.currentPosition = this.startPosition;
         }
-        public bool EndReached { get { return this.currentPosition == this.endPosition; } }
-
-        public char CurrentChar
-        {
-            get
-            {
-                if (this.currentPosition < this.startPosition)
-                {
-                    return this.bitString[(int)this.startPosition];
-                }
-                else if (this.currentPosition < this.endPosition)
-                {
-                    return this.bitString[this.currentPosition];
-                }
-                else
-                {
-                    return 'e';
-                }
-            }
-        }
+        public bool EndReached => this.currentPosition == this.endPosition;
+        public char CurrentChar => this.EndReached ? 'e' : this.bitString[(int)this.currentPosition];
 
         public Vector2D Position
         {
             get
             {
-                if (this.currentPosition < 0 || this.currentPosition >= this.endPosition)
+                if (this.EndReached)
                 {
                     throw new InvalidOperationException("The iterator is not on a valid position.");
                 }

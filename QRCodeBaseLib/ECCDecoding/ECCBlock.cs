@@ -50,8 +50,8 @@ namespace QRCodeBaseLib.ECCDecoding
                 var dataIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairData, dataArr);
                 var eccIt = new OverrideByteSymbolCodeValuesBitIterator<RawCodeByte>(this.preRepairECC, eccArr);
                 var factory = new RawCodeByteFactory();
-                this.postRepairData = CodeSymbolCode<RawCodeByte>.CreateInstance(dataIt, factory);
-                this.postRepairECC = CodeSymbolCode<RawCodeByte>.CreateInstance(eccIt, factory);
+                this.postRepairData = CodeSymbolCode<RawCodeByte>.BuildInstance(dataIt, factory);
+                this.postRepairECC = CodeSymbolCode<RawCodeByte>.BuildInstance(eccIt, factory);
             }
             else
             {

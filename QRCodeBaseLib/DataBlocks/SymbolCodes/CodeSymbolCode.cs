@@ -30,26 +30,27 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
 
 
         #region Internal Functions
-        internal static CodeSymbolCode<T2> CreateInstance<T2>(IBitIterator it, ICodeSymbolFactory<T2> symbolFactory) where T2 : IBuildableCodeSymbol
+        internal static CodeSymbolCode<T2> BuildInstance<T2>(IBitIterator it, ICodeSymbolFactory<T2> symbolFactory) where T2 : IBuildableCodeSymbol
         {
             var codeSymbolList = new List<T2>();
             var sym = symbolFactory.GenerateCodeSymbol();
-            char c = it.NextBit();
 
-            while (c != 'e')
+            while (!it.EndReached && sym != null)
             {
+                char c = it.CurrentChar;
+
                 if (c != '0' && c != '1' && c != 'u')
                     throw new NotImplementedException("Bit value " + c + " was not defined.");
 
                 sym.AddBit(c, it.Position);
 
-                if (sym.IsComplete)
+                if (sym.CurrentSymbolLength == sym.MaxSymbolLength)
                 {
                     codeSymbolList.Add(sym);
                     sym = symbolFactory.GenerateCodeSymbol();
                 }
 
-                c = it.NextBit();
+                it.NextBit();
             }
 
             //ToDo handle remainder bits or error: if(!wd.IsComplete){ if(wd.CurrentSymbolLength > 0) or: if(wd.CurrentSymbolLength != number of remainder bits) for QRCodeBitIterator
@@ -87,7 +88,7 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
         }
         internal CodeSymbolCode<T2> ToCodeSymbolCode<T2>(uint startIndex, uint length, ICodeSymbolFactory<T2> codeSymbolFactory) where T2 : IBuildableCodeSymbol
         {
-            return CreateInstance(this.GetBitIterator(startIndex, length), codeSymbolFactory);
+            return BuildInstance(this.GetBitIterator(startIndex, length), codeSymbolFactory);
         }
         #endregion
         #region Public Functions
@@ -139,6 +140,13 @@ namespace QRCodeBaseLib.DataBlocks.SymbolCodes
             }
 
             throw new ArgumentOutOfRangeException();
+        }
+        public void CutIncompleteEnd()
+        {
+            var lastItem = this.codeSymbolList.Last();
+
+            if (!lastItem.IsComplete)
+                this.codeSymbolList.Remove(lastItem);
         }
         public override string ToString()
         {

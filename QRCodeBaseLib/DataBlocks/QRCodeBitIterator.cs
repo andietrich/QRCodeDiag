@@ -35,17 +35,10 @@ namespace QRCodeBaseLib.DataBlocks
                     this.yPos = value;
             }
         }
-        public Vector2D Position { get { return new Vector2D(this.xPos, this.yPos); } }
-
+        public Vector2D Position => new Vector2D(this.xPos, this.yPos);
         public bool EndReached { get; private set; }
-        public bool IsInitial { get; private set; }
-        public char CurrentChar
-        {
-            get
-            {
-                return this.qrCode.GetBit((uint)this.XPos, (uint)this.YPos, true);
-            }
-        }
+        public char CurrentChar => this.qrCode.GetBit((uint)this.XPos, (uint)this.YPos, true);
+        public uint BitsConsumed { get; private set; }
 
         public QRCodeBitIterator(QRCode code)
         {
@@ -55,16 +48,11 @@ namespace QRCodeBaseLib.DataBlocks
             this.directionUp = true;
             this.rightCell = true;
             this.EndReached = false;
-            this.IsInitial = true;
+            this.BitsConsumed = 0;
         }
         
         public char NextBit()
         {
-            if(this.IsInitial)
-            {
-                this.IsInitial = false;
-                return this.CurrentChar;
-            }
             bool nextFound = false;
             while (!this.EndReached && !nextFound)
             {
@@ -112,8 +100,10 @@ namespace QRCodeBaseLib.DataBlocks
                     nextFound = true;
                 }
             }
+
             if (nextFound)
             {
+                this.BitsConsumed++;
                 return this.qrCode.GetBit((uint)this.XPos, (uint)this.YPos, true);
             }
             else

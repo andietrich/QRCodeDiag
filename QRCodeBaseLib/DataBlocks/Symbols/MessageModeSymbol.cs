@@ -11,15 +11,15 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         public MessageModeSymbol() : base()
         { }
 
-        public override bool IsComplete => this.bitCoordinates.Count == MODEINFOLENGTH;
-
-        public MessageMode.EncodingMode GetMessageMode()
+        public override bool IsComplete => this.bitCoordinates.Count == this.MaxSymbolLength;
+        public override uint MaxSymbolLength => MODEINFOLENGTH;
+        public byte GetSymbolValue()
         {
             var bitString = this.BitString;
 
             try
             {
-                return MessageMode.Parse(Convert.ToByte(bitString, 2));
+                return Convert.ToByte(bitString, 2);
             }
             catch (Exception e) when (e is FormatException || e is ArgumentException)
             {
@@ -31,8 +31,7 @@ namespace QRCodeBaseLib.DataBlocks.Symbols
         {
             try
             {
-                return this.GetMessageMode().ToString();
-
+                return MessageMode.Parse(this.GetSymbolValue()).ToString();
             }
             catch(QRCodeFormatException)
             {

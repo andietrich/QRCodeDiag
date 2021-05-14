@@ -8,7 +8,7 @@ using static QRCodeBaseLib.QRCode;
 
 namespace QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols
 {
-    public interface IEncodingSymbol
+    internal interface IEncodingSymbol : IBuildableCodeSymbol
     {
         MessageMode.EncodingMode EncodingType { get; }
     }

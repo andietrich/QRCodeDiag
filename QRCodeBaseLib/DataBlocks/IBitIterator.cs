@@ -19,5 +19,6 @@ namespace QRCodeBaseLib.DataBlocks
         /// </summary>
         char CurrentChar { get; }
         Vector2D Position { get; }
+        uint BitsConsumed { get; }
     }
 }
