@@ -1,4 +1,4 @@
-﻿using QRCodeBaseLib;
+using QRCodeBaseLib;
 using QRCodeBaseLib.DataBlocks;
 using QRCodeBaseLib.DataBlocks.SymbolCodes;
 using QRCodeBaseLib.DataBlocks.Symbols;
@@ -163,8 +163,8 @@ namespace QRCodeDiag
             var newCount = codeSymbolCodes.Count();
 
             // remove excessive trailing old items
-            for (int i = newCount; i < optionsItemList.Count; i++)
-                RemoveControlTypeElement(propertyType, i);
+            for (int i = optionsItemList.Count; i > newCount; i--)
+                RemoveControlTypeElement(propertyType, i - 1);
 
             // update existing item
             for (int i = 0; i < optionsItemList.Count; i++)
