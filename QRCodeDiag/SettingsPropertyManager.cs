@@ -1,8 +1,9 @@
-using QRCodeBaseLib;
+﻿using QRCodeBaseLib;
 using QRCodeBaseLib.DataBlocks;
 using QRCodeBaseLib.DataBlocks.SymbolCodes;
 using QRCodeBaseLib.DataBlocks.Symbols;
 using QRCodeBaseLib.DataBlocks.Symbols.EncodingSymbols;
+using QRCodeBaseLib.ECCDecoding;
 using QRCodeDiag.UserInterface;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,10 @@ namespace QRCodeDiag
             RawCode,
             RawDataBytes,
             RawECCBytes,
+            PreRepairData,
+            PreRepairECC,
+            PostRepairData,
+            PostRepairECC,
             MessageModeSymbol,
             CharCountIndicator,
             PaddingBytes,
@@ -49,14 +54,18 @@ namespace QRCodeDiag
         {
             return new Dictionary<PropertyType, CodeSymbolCodeDrawingProperties>
             {
-                [PropertyType.RawCode]            = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.Orange,    "Raw Code"            ),
-                [PropertyType.RawDataBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange), Color.LightBlue, "Raw Data Bytes"      ),
-                [PropertyType.RawECCBytes]        = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.LightBlue, "Raw ECC Bytes"       ),
-                [PropertyType.MessageModeSymbol]  = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Message Mode Symbol" ),
-                [PropertyType.CharCountIndicator] = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Char Count Indicator"),
-                [PropertyType.PaddingBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Padding Bytes"       ),
-                [PropertyType.EncodedSymbols]     = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Encoded Symbols"     ),
-                [PropertyType.TerminatorSymbol]   = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Terminator Symbol"   ),
+                [PropertyType.RawCode]            = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.Orange,    "Raw Code"              ),
+                [PropertyType.RawDataBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.DarkOrange, Color.DarkOrange), Color.LightBlue, "Raw Data Bytes"        ),
+                [PropertyType.RawECCBytes]        = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.Orange,     Color.Orange    ), Color.LightBlue, "Raw ECC Bytes"         ),
+                [PropertyType.PreRepairData]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Pre repair data block" ),
+                [PropertyType.PreRepairECC]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Orange,     Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Pre repair ecc block"  ),
+                [PropertyType.PostRepairData]     = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Post repair data block"),
+                [PropertyType.PostRepairECC]      = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.DarkOrange, Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Post repair ecc block" ),
+                [PropertyType.MessageModeSymbol]  = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Message Mode Symbol"   ),
+                [PropertyType.CharCountIndicator] = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Char Count Indicator"  ),
+                [PropertyType.PaddingBytes]       = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Blue,       Color.LightBlue,  Color.DarkCyan  ), Color.LightBlue, "Padding Bytes"         ),
+                [PropertyType.EncodedSymbols]     = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Encoded Symbols"       ),
+                [PropertyType.TerminatorSymbol]   = new CodeSymbolCodeDrawingProperties(new SymbolColors(Color.Red,        Color.LightBlue,  Color.Orange    ), Color.LightBlue, "Terminator Symbol"     ),
             };
         }
 
@@ -68,6 +77,7 @@ namespace QRCodeDiag
             qrCode.RawECCBytesChangedEvent -= HandleRawECCBytesChanged;
             qrCode.PaddingBytesChangedEvent -= HandlePaddingBytesChanged;
             qrCode.TerminatorSymbolCodeChangedEvent -= HandleTerminatorSymbolChanged;
+            qrCode.InterleavingBlocksChangedEvent -= HandleInterleavingBlocksChanged;
             qrCode.EncodedMessagesChangedEvent -= HandleEncodedMessagesChanged;
         }
         private void RegisterEventHandlers()
@@ -77,6 +87,7 @@ namespace QRCodeDiag
             qrCode.RawECCBytesChangedEvent += HandleRawECCBytesChanged;
             qrCode.PaddingBytesChangedEvent += HandlePaddingBytesChanged;
             qrCode.TerminatorSymbolCodeChangedEvent += HandleTerminatorSymbolChanged;
+            qrCode.InterleavingBlocksChangedEvent += HandleInterleavingBlocksChanged;
             qrCode.EncodedMessagesChangedEvent += HandleEncodedMessagesChanged;
         }
         //private void RegisterMessageContentListener()
@@ -215,6 +226,18 @@ namespace QRCodeDiag
             this.HandleCodeChange(messageModeCodes, PropertyType.MessageModeSymbol);
             this.HandleCodeChange(charCountCodes, PropertyType.CharCountIndicator);
             this.HandleCodeChange(messageCodes, PropertyType.EncodedSymbols);
+        }
+        private void HandleInterleavingBlocksChanged(IEnumerable<ECCBlock> newInterleavingBlocks)
+        {
+            var preRepData = from blk in newInterleavingBlocks select blk.GetPreRepairData();
+            var preRepECC = from blk in newInterleavingBlocks select blk.GetPreRepairECC();
+            var postRepData = from blk in newInterleavingBlocks where blk.RepairSuccess select blk.GetPostRepairData();
+            var postRepECC = from blk in newInterleavingBlocks where blk.RepairSuccess select blk.GetPostRepairECC();
+
+            this.HandleCodeChange(preRepData, PropertyType.PreRepairData);
+            this.HandleCodeChange(preRepECC, PropertyType.PreRepairECC);
+            this.HandleCodeChange(postRepData, PropertyType.PreRepairData);
+            this.HandleCodeChange(postRepECC, PropertyType.PreRepairECC);
         }
         #endregion
         #region public methods

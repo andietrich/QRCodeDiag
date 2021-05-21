@@ -11,7 +11,7 @@ using ZXing.Common.ReedSolomon;
 
 namespace QRCodeBaseLib.ECCDecoding
 {
-    internal class ECCBlock
+    public class ECCBlock
     {
         private readonly CodeSymbolCode<RawCodeByte> preRepairData;
         private readonly CodeSymbolCode<RawCodeByte> preRepairECC;
@@ -20,7 +20,7 @@ namespace QRCodeBaseLib.ECCDecoding
 
         public bool RepairSuccess { get; private set; }
 
-        public ECCBlock(CodeSymbolCode<RawCodeByte> _preRepairData, CodeSymbolCode<RawCodeByte> _preRepairECC)
+        internal ECCBlock(CodeSymbolCode<RawCodeByte> _preRepairData, CodeSymbolCode<RawCodeByte> _preRepairECC)
         {
             this.preRepairData = _preRepairData;
             this.preRepairECC = _preRepairECC;
@@ -71,19 +71,35 @@ namespace QRCodeBaseLib.ECCDecoding
             return symbolsAsInts;
         }
 
-        public CodeSymbolCode<RawCodeByte> GetPreRepairData()
+        internal CodeSymbolCode<RawCodeByte> GetRawPreRepairData()
         {
             return this.preRepairData;
         }
-        public CodeSymbolCode<RawCodeByte> GetPreRepairECC()
+        internal CodeSymbolCode<RawCodeByte> GetRawPreRepairECC()
         {
             return this.preRepairECC;
         }
-        public CodeSymbolCode<RawCodeByte> GetPostRepairData()
+        internal CodeSymbolCode<RawCodeByte> GetRawPostRepairData()
         {
             return this.postRepairData;
         }
-        public CodeSymbolCode<RawCodeByte> GetPostRepairECC()
+        internal CodeSymbolCode<RawCodeByte> GetRawPostRepairECC()
+        {
+            return this.postRepairECC;
+        }
+        public ICodeSymbolCode GetPreRepairData()
+        {
+            return this.preRepairData;
+        }
+        public ICodeSymbolCode GetPreRepairECC()
+        {
+            return this.preRepairECC;
+        }
+        public ICodeSymbolCode GetPostRepairData()
+        {
+            return this.postRepairData;
+        }
+        public ICodeSymbolCode GetPostRepairECC()
         {
             return this.postRepairECC;
         }

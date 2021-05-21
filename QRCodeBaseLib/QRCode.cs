@@ -21,6 +21,7 @@ namespace QRCodeBaseLib
         public delegate void RawDataBytesChangedHandler(ICodeSymbolCode newRawDataBytes);
         public delegate void RawECCBytesChangedHandler(ICodeSymbolCode newRawECCBytes);
         public delegate void EncodedMessagesChangedHandler(IEnumerable<EncodedMessage> encodedMessages);
+        public delegate void InterleavingBlocksChangedHandler(IEnumerable<ECCBlock> newInterleavingBlocks);
         public delegate void TerminatorSymbolCodeChangedHandler(ICodeSymbolCode newTerminatorSymbol);
         public delegate void PaddingBytesChangedHandler(ICodeSymbolCode newPaddingBytes);
         public event VersionChangedHandler VersionChangedEvent;
@@ -29,6 +30,7 @@ namespace QRCodeBaseLib
         public event RawDataBytesChangedHandler RawDataBytesChangedEvent;
         public event RawECCBytesChangedHandler RawECCBytesChangedEvent;
         public event EncodedMessagesChangedHandler EncodedMessagesChangedEvent;
+        public event InterleavingBlocksChangedHandler InterleavingBlocksChangedEvent;
         public event TerminatorSymbolCodeChangedHandler TerminatorSymbolCodeChangedEvent;
         public event PaddingBytesChangedHandler PaddingBytesChangedEvent;
 
@@ -53,6 +55,17 @@ namespace QRCodeBaseLib
                                                //ToDo highlight version/ecc info 1 + 2
         #endregion
 
+        #region private properties
+        private List<ECCBlock> InterleavingBlocks
+        {
+            get => this.interleavingBlocks;
+            set
+            {
+                this.interleavingBlocks = value;
+                this.InterleavingBlocksChangedEvent?.Invoke(value);
+            }
+        }
+        #endregion
         #region internal properties
         internal CodeSymbolCode<RawCodeByte> RawCode
         {
@@ -110,7 +123,7 @@ namespace QRCodeBaseLib
         }
         #endregion
 
-        #region internal properties
+        #region public properties
         public QRCodeVersion Version
         {
             get
@@ -312,7 +325,7 @@ namespace QRCodeBaseLib
 
             for (int i = 0; i < deinterleavedBlocks.Count; i++)
             {
-                dataCodeSymbols.Add(deinterleavedBlocks[i].GetPostRepairData());
+                dataCodeSymbols.Add(deinterleavedBlocks[i].GetRawPostRepairData());
             }
 
             return new CodeSymbolCode<RawCodeByte>(dataCodeSymbols);
@@ -324,7 +337,7 @@ namespace QRCodeBaseLib
 
             for (int i = 0; i < deinterleavedBlocks.Count; i++)
             {
-                eccCodeSymbols.Add(deinterleavedBlocks[i].GetPostRepairECC());
+                eccCodeSymbols.Add(deinterleavedBlocks[i].GetRawPostRepairECC());
             }
 
             return new CodeSymbolCode<RawCodeByte>(eccCodeSymbols);
@@ -335,9 +348,9 @@ namespace QRCodeBaseLib
             this.ReadFormatInformation();
 
             this.RawCode = CodeSymbolCode<RawCodeByte>.BuildInstance(this.GetBitIterator(), new RawCodeByteFactory());
-            this.interleavingBlocks = DeInterleaver.DeInterleave(this.RawCode, this.eccLevel);
-            this.RawDataBytes = QRCode.GetRawDataBytes(this.interleavingBlocks);
-            this.RawECCBytes = QRCode.GetRawECCBytes(this.interleavingBlocks);
+            this.InterleavingBlocks = DeInterleaver.DeInterleave(this.RawCode, this.eccLevel);
+            this.RawDataBytes = QRCode.GetRawDataBytes(this.InterleavingBlocks);
+            this.RawECCBytes = QRCode.GetRawECCBytes(this.InterleavingBlocks);
             
             var it = this.rawDataBytes.GetBitIterator();
             var encodedMsgs = new List<EncodedMessage>();
@@ -495,7 +508,7 @@ namespace QRCodeBaseLib
 
         public string GetRepairMessageStatusLine()
         {
-            if (this.interleavingBlocks == null)
+            if (this.InterleavingBlocks == null)
             {
                 return "Nothing to repair.";
             }
@@ -503,9 +516,9 @@ namespace QRCodeBaseLib
             {
                 var sb = new StringBuilder();
 
-                for (int i = 0; i < this.interleavingBlocks.Count; i++)
+                for (int i = 0; i < this.InterleavingBlocks.Count; i++)
                 {
-                    sb.AppendLine(String.Format("Block {0} {1} repaired", i, this.interleavingBlocks[i].RepairSuccess ? "successfully" : "not"));
+                    sb.AppendLine(String.Format("Block {0} {1} repaired", i, this.InterleavingBlocks[i].RepairSuccess ? "successfully" : "not"));
                 }
                 return sb.ToString();
             }
