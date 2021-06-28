@@ -1,0 +1,21 @@
+﻿<ContentDialog
+    x:Class="QRCodeDiagUWP.NewCodeDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QRCodeDiagUWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Title="Create new code"
+    PrimaryButtonText="Create"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+    <StackPanel>
+        <muxc:NumberBox Value="{x:Bind Path=Version, Mode=TwoWay}" Header="Version" Maximum="40" Minimum="1" ValidationMode="InvalidInputOverwritten" SpinButtonPlacementMode="Compact"/>
+        <ComboBox x:Name="comboBoxEccLevel" Header="ECC Level"/>
+        <ComboBox x:Name="comboBoxXorMask" Header="XOR Mask"/>
+    </StackPanel>
+</ContentDialog>

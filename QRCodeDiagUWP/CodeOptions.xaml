@@ -1,0 +1,30 @@
+﻿<UserControl
+    x:Class="QRCodeDiagUWP.CodeOptions"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QRCodeDiagUWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <StackPanel>
+        <TextBox Header="Name of the value" PlaceholderText="Code Content" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Row="1" Grid.Column="0" Content="Draw code element" />
+            <CheckBox Grid.Row="1" Grid.Column="1" Content="Draw bit indices"/>
+            <CheckBox Grid.Row="2" Grid.Column="0" Content="Draw symbol indices"/>
+            <CheckBox Grid.Row="2" Grid.Column="1" Content="Draw symbol values"/>
+        </Grid>
+    </StackPanel>
+</UserControl>
