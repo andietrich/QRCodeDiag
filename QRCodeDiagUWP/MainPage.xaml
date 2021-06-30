@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:uc="using:QRCodeDiagUWP"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -23,8 +24,9 @@
                 
             </StackPanel>
         </SplitView.Pane>
-        <Viewbox Stretch="Uniform" Grid.Column="0" Grid.Row="1">
-            <Canvas Background="Red" Height="500" Width="500"/>
+
+        <Viewbox Stretch="Uniform" Grid.Column="0" Grid.Row="1" >
+            <canvas:CanvasControl x:Name="canvasControl" Draw="CanvasControl_Draw" ClearColor="White"/>
         </Viewbox>
     </SplitView>
 
