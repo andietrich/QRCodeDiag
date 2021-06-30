@@ -447,16 +447,16 @@ namespace QRCodeBaseLib
 
         public void ToggleDataCell(int x, int y)
         {
-            switch (bits[x, y])
+            switch (this.bits[x, y])
             {
                 case '0':
-                    bits[x, y] = '1';
+                    this.bits[x, y] = '1';
                     break;
                 case '1':
-                    bits[x, y] = 'u';
+                    this.bits[x, y] = 'u';
                     break;
                 case 'u':
-                    bits[x, y] = '0';
+                    this.bits[x, y] = '0';
                     break;
                 default:
                     break;
@@ -471,14 +471,14 @@ namespace QRCodeBaseLib
             if (y < 0 || y >= this.Version.GetEdgeSizeFromVersion())
                 throw new ArgumentOutOfRangeException(nameof(y));
 
-            if (this.IsDataCell((uint)x, (uint)y))
+            if (this.IsDataCell((uint)x, (uint)y) && (this.bits[x, y] != cellValue))
             {
                 switch (cellValue)
                 {
                     case '0':
                     case '1':
                     case 'u':
-                        bits[x, y] = cellValue;
+                        this.bits[x, y] = cellValue;
                         break;
                     default:
                         throw new ArgumentException("Invalid cellValue: " + cellValue);
