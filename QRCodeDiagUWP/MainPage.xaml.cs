@@ -37,23 +37,61 @@ namespace QRCodeDiagUWP
         }
 
         private bool toggleOnTap;
+        private bool showXored;
         private QRCode displayedCode;
+        private readonly DrawingManager drawingManager;
+        private readonly SettingsPropertyManager settingsPropertyManager;
+        private XORMask.MaskType CurrentMaskUsed
+        {
+            get
+            {
+                if (this.DisplayedCode != null)
+                    return this.DisplayedCode.AppliedXORMaskType;
+                else
+                    return XORMask.MaskType.None;
+            }
+            set
+            {
+                if (this.DisplayedCode != null)
+                {
+                    this.DisplayedCode.AppliedXORMaskType = value;
+                    this.canvasControl.Invalidate();
+                }
+            }
+        }
+        private bool ShowXored
+        {
+            get => this.showXored;
+            set
+            {
+                this.showXored = value;
+                this.canvasControl.Invalidate();
+            }
+        }
         private QRCode DisplayedCode
         {
             get => this.displayedCode;
             set
             {
                 this.displayedCode = value;
-                this.canvasControl.Width = this.displayedCode.GetEdgeLength() * 10;
+                this.settingsPropertyManager.SetQRCode(value);
+                this.canvasControl.Width = this.displayedCode.GetEdgeLength() * 100;
                 this.canvasControl.Height = this.canvasControl.Width;
+                this.canvasControl.Invalidate();
+                this.xorMaskToggleSplitButton.IsEnabled = value != null;
             }
         }
         public MainPage()
         {
+            this.drawingManager = new DrawingManager();
             this.InitializeComponent();
+            this.xorMaskToggleSplitButton.IsEnabled = false;
             this.canvasControl.Width = 2000;
             this.canvasControl.Height = 2000;
             this.toggleOnTap = false;
+            this.showXored = false;
+            this.settingsPropertyManager = new SettingsPropertyManager(this.drawingManager, this.codeOptionsStackPanel);
+            this.settingsPropertyManager.PropertyChangedEvent += this.canvasControl.Invalidate;
         }
 
         private async void AppBarButton_Click(object sender, RoutedEventArgs e)
@@ -66,59 +104,25 @@ namespace QRCodeDiagUWP
         }
 
 
-
-        public void DrawQRCode(char[,] bits, CanvasDrawingSession canvasDrawingSession, bool transparent = false)
-        {
-            var alpha = transparent ? (byte)128 : (byte)255;
-            var codeEdgeLength = bits.GetLength(0);
-            var black = Color.FromArgb(alpha, Colors.Black.R, Colors.Black.G, Colors.Black.B);
-            var white = Color.FromArgb(alpha, Colors.White.R, Colors.White.G, Colors.White.B);
-            var gray = Color.FromArgb(alpha, Colors.Gray.R, Colors.Gray.G, Colors.Gray.B);
-            var codeElHeight = (int)Math.Min(canvasControl.Height, canvasControl.Width) / codeEdgeLength;
-
-            canvasDrawingSession.Antialiasing = CanvasAntialiasing.Aliased;
-
-            for (int y = 0; y < codeEdgeLength; y++)
-            {
-                for (int x = 0; x < codeEdgeLength; x++)
-                {
-                    Color color;
-                    switch (bits[x, y])
-                    {
-                        case '0':
-                        case 'w':
-                        case 's':
-                            color = white;
-                            break;
-                        case '1':
-                        case 'b':
-                            color = black;
-                            break;
-                        case 'u':
-                            color = gray;
-                            break;
-                        default:
-                            throw new QRCodeFormatException("Invalid codeEl value: " + bits[x, y]);
-                    }
-
-                    canvasDrawingSession.FillRectangle(x * codeElHeight, y * codeElHeight, codeElHeight, codeElHeight, color);
-                }
-            }
-        }
-
         private void CanvasControl_Draw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             if (this.DisplayedCode != null)
-                this.DrawQRCode(this.DisplayedCode.GetBits(true), args.DrawingSession);
+            {
+                var codeElHeight = (int)Math.Min(canvasControl.Height, canvasControl.Width) / this.DisplayedCode.GetEdgeLength();
+                CodeElementDrawer.DrawQRCode(this.DisplayedCode.GetBits(this.ShowXored), codeElHeight, args.DrawingSession);
+                this.drawingManager.Draw(args.DrawingSession, codeElHeight);
+            }
             else
+            {
                 args.DrawingSession.Clear(Colors.White);
+            }
         }
 
         private void ProcessClickInput(ClickInput input, CanvasControl canvasControl, Point position)
         {
-            if (this.displayedCode != null)
+            if (this.DisplayedCode != null)
             {
-                var edgeLength = this.displayedCode.GetEdgeLength();
+                var edgeLength = this.DisplayedCode.GetEdgeLength();
                 int x = (int)(edgeLength * position.X / canvasControl.ActualSize.X);
                 int y = (int)(edgeLength * position.Y / canvasControl.ActualSize.Y);
 
@@ -127,15 +131,15 @@ namespace QRCodeDiagUWP
                     switch(input)
                     {
                         case ClickInput.Black:
-                            this.displayedCode.SetDataCell(x, y, '1');
+                            this.DisplayedCode.SetDataCell(x, y, '1');
                             break;
 
                         case ClickInput.White:
-                            this.displayedCode.SetDataCell(x, y, '0');
+                            this.DisplayedCode.SetDataCell(x, y, '0');
                             break;
 
                         case ClickInput.Gray:
-                            this.displayedCode.SetDataCell(x, y, 'u');
+                            this.DisplayedCode.SetDataCell(x, y, 'u');
                             break;
 
                         case ClickInput.Toggle:
@@ -174,7 +178,7 @@ namespace QRCodeDiagUWP
 
         private void CanvasControl_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            if (this.displayedCode != null)
+            if (this.DisplayedCode != null)
             {
                 var canvasCtrl = ((CanvasControl)sender);
                 var point = e.GetCurrentPoint(canvasCtrl);
@@ -191,7 +195,7 @@ namespace QRCodeDiagUWP
 
         private void CanvasControl_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
-            if (this.displayedCode != null && !this.toggleOnTap && e.Pointer.IsInContact)
+            if (this.DisplayedCode != null && !this.toggleOnTap && e.Pointer.IsInContact)
             {
                 var canvasCtrl = ((CanvasControl)sender);
                 var point = e.GetCurrentPoint(canvasCtrl);
@@ -204,6 +208,23 @@ namespace QRCodeDiagUWP
         private void CanvasControl_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
             ((CanvasControl)sender).ReleasePointerCapture(e.Pointer);
+        }
+
+        private void MenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        {
+            var itemText = ((MenuFlyoutItem)sender).Text.ToString();
+
+            if (itemText.StartsWith("Mask"))
+            {
+                this.CurrentMaskUsed = (XORMask.MaskType)char.GetNumericValue(itemText, 5);
+                this.ShowXored = true;
+                this.xorMaskToggleSplitButton.IsChecked = true;
+            }
+        }
+
+        private void XorMaskToggleSplitButton_Click(Microsoft.UI.Xaml.Controls.SplitButton sender, Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs args)
+        {
+            this.ShowXored = !this.ShowXored;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿<Page
     x:Class="QRCodeDiagUWP.MainPage"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:QRCodeDiagUWP"
@@ -16,13 +17,66 @@
             <AppBarButton Icon="OpenFile" Label="Open"/>
             <AppBarButton Icon="Save" Label="Save"/>
             <AppBarSeparator/>
-            <AppBarToggleButton Label="Toggle Color" IsChecked="{x:Bind Path=toggleOnTap, Mode=TwoWay}"/>
+            <AppBarElementContainer>
+                <muxc:ToggleSplitButton x:Name="xorMaskToggleSplitButton" ToolTipService.ToolTip="Apply XOR Mask" Content="XOR Mask" Click="XorMaskToggleSplitButton_Click">
+                    <muxc:ToggleSplitButton.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedTop">
+                            <MenuFlyoutItem Text="Mask 0" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask000.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 1" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask001.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 2" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask010.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 3" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask011.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 4" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask100.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 5" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask101.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 6" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask110.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Mask 7" Click="MenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/mask111.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </muxc:ToggleSplitButton.Flyout>
+                </muxc:ToggleSplitButton>
+            </AppBarElementContainer>
+
+            <AppBarToggleButton Label="Toggle Color" IsChecked="{x:Bind Path=toggleOnTap, Mode=TwoWay}">
+                <AppBarToggleButton.Icon>
+                    <BitmapIcon UriSource="/Assets/toggle_icon.png" />
+                </AppBarToggleButton.Icon>
+            </AppBarToggleButton>
         </CommandBar>
     </Page.TopAppBar>
 
     <SplitView IsPaneOpen="True" DisplayMode="Inline" PanePlacement="Right">
         <SplitView.Pane>
-            <StackPanel>
+            <StackPanel x:Name="codeOptionsStackPanel">
 
             </StackPanel>
         </SplitView.Pane>

@@ -119,9 +119,14 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CodeElementDrawer.cs" />
     <Compile Include="CodeOptions.xaml.cs">
       <DependentUpon>CodeOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CodeSymbolCodeDrawingProperties.cs" />
+    <Compile Include="DrawableCodeSymbolCode.cs" />
+    <Compile Include="DrawingManager.cs" />
+    <Compile Include="IDrawableCodeSymbolCode.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -129,6 +134,8 @@
       <DependentUpon>NewCodeDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsPropertyManager.cs" />
+    <Compile Include="SymbolColors.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -136,6 +143,15 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\mask000.png" />
+    <Content Include="Assets\mask001.png" />
+    <Content Include="Assets\mask010.png" />
+    <Content Include="Assets\mask011.png" />
+    <Content Include="Assets\mask100.png" />
+    <Content Include="Assets\mask101.png" />
+    <Content Include="Assets\mask110.png" />
+    <Content Include="Assets\mask111.png" />
+    <Content Include="Assets\toggle_icon.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

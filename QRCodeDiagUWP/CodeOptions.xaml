@@ -10,7 +10,7 @@
     d:DesignWidth="400">
 
     <StackPanel>
-        <TextBox Header="Name of the value" PlaceholderText="Code Content" />
+        <TextBox Header="{x:Bind Path=CodeSymbolName}" Text="{x:Bind Path=symbolValue}" IsEnabled="False" />
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -21,10 +21,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Row="1" Grid.Column="0" Content="Draw code element" />
-            <CheckBox Grid.Row="1" Grid.Column="1" Content="Draw bit indices"/>
-            <CheckBox Grid.Row="2" Grid.Column="0" Content="Draw symbol indices"/>
-            <CheckBox Grid.Row="2" Grid.Column="1" Content="Draw symbol values"/>
+            <CheckBox Grid.Row="1" Grid.Column="0" Content="Draw code element" IsChecked="{x:Bind Path=DrawSymbolCode, Mode=TwoWay}"/>
+            <CheckBox Grid.Row="1" Grid.Column="1" Content="Draw bit indices" IsChecked="{x:Bind Path=DrawBitIndices, Mode=TwoWay}"/>
+            <CheckBox Grid.Row="2" Grid.Column="0" Content="Draw symbol indices" IsChecked="{x:Bind Path=DrawSymbolIndices, Mode=TwoWay}"/>
+            <CheckBox Grid.Row="2" Grid.Column="1" Content="Draw symbol values" IsChecked="{x:Bind Path=DrawSymbolValues, Mode=TwoWay}"/>
         </Grid>
     </StackPanel>
 </UserControl>
