@@ -214,22 +214,13 @@ namespace QRCodeBaseLib
             this.UpdateMessage();
         }
 
-        public QRCode(string path)
+        public QRCode(IEnumerable<string> fileContent)
         {
             List<string[]> cells = new List<string[]>();
-            try
+
+            foreach(var line in fileContent)
             {
-                using (var f = File.OpenText(path))
-                {
-                    while (!f.EndOfStream)
-                    {
-                        cells.Add(f.ReadLine().Trim().Split(null));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new QRCodeFormatException("Can't read file.", ex);
+                cells.Add(line.Trim().Split(null));
             }
             try
             {
@@ -393,7 +384,7 @@ namespace QRCodeBaseLib
         #endregion
         #region public methods
 
-        public void SaveToFile(string path)
+        public string GetSaveFileContent()
         {
             var sb = new StringBuilder();
             for (int y = 0; y < this.bits.GetLength(0); y++)
@@ -406,7 +397,7 @@ namespace QRCodeBaseLib
                 sb.Append(this.bits[this.bits.GetLength(1) - 1, y]);
                 sb.Append(Environment.NewLine);
             }
-            File.WriteAllText(path, sb.ToString());
+            return sb.ToString();
         }
 
         /// <summary>

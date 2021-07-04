@@ -13,12 +13,12 @@
 
     <Page.TopAppBar>
         <CommandBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
-            <AppBarButton Icon="Add" Label="New" Click="AppBarButton_Click"/>
-            <AppBarButton Icon="OpenFile" Label="Open"/>
-            <AppBarButton Icon="Save" Label="Save"/>
+            <AppBarButton Icon="Add" Label="New" Click="AppBarButton_New_Click"/>
+            <AppBarButton Icon="OpenFile" Label="Open" Click="AppBarButton_OpenFile_Click"/>
+            <AppBarButton x:Name="saveAppBarButton" Icon="Save" Label="Save" Click="AppBarButton_Save_Click" IsEnabled="False"/>
             <AppBarSeparator/>
             <AppBarElementContainer>
-                <muxc:ToggleSplitButton x:Name="xorMaskToggleSplitButton" ToolTipService.ToolTip="Apply XOR Mask" Content="XOR Mask" Click="XorMaskToggleSplitButton_Click">
+                <muxc:ToggleSplitButton x:Name="xorMaskToggleSplitButton" ToolTipService.ToolTip="Apply XOR Mask" Content="XOR Mask" Click="XorMaskToggleSplitButton_Click" IsEnabled="False">
                     <muxc:ToggleSplitButton.Flyout>
                         <MenuFlyout Placement="RightEdgeAlignedTop">
                             <MenuFlyoutItem Text="Mask 0" Click="MenuFlyoutItem_Click">
@@ -76,9 +76,9 @@
 
     <SplitView IsPaneOpen="True" DisplayMode="Inline" PanePlacement="Right">
         <SplitView.Pane>
-            <StackPanel x:Name="codeOptionsStackPanel">
-
-            </StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
+                <StackPanel x:Name="codeOptionsStackPanel"/>
+            </ScrollViewer>
         </SplitView.Pane>
 
         <Viewbox Stretch="Uniform" Grid.Column="0" Grid.Row="1">

@@ -9,6 +9,8 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.UI;
 using Windows.UI.Input;
 using Windows.UI.Xaml;
@@ -79,13 +81,13 @@ namespace QRCodeDiagUWP
                 this.canvasControl.Height = this.canvasControl.Width;
                 this.canvasControl.Invalidate();
                 this.xorMaskToggleSplitButton.IsEnabled = value != null;
+                this.saveAppBarButton.IsEnabled = value != null;
             }
         }
         public MainPage()
         {
             this.drawingManager = new DrawingManager();
             this.InitializeComponent();
-            this.xorMaskToggleSplitButton.IsEnabled = false;
             this.canvasControl.Width = 2000;
             this.canvasControl.Height = 2000;
             this.toggleOnTap = false;
@@ -94,7 +96,7 @@ namespace QRCodeDiagUWP
             this.settingsPropertyManager.PropertyChangedEvent += this.canvasControl.Invalidate;
         }
 
-        private async void AppBarButton_Click(object sender, RoutedEventArgs e)
+        private async void AppBarButton_New_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new NewCodeDialog();
             var result = await dialog.ShowAsync();
@@ -225,6 +227,39 @@ namespace QRCodeDiagUWP
         private void XorMaskToggleSplitButton_Click(Microsoft.UI.Xaml.Controls.SplitButton sender, Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs args)
         {
             this.ShowXored = !this.ShowXored;
+        }
+
+        private async void AppBarButton_OpenFile_Click(object sender, RoutedEventArgs e)
+        {
+            var openPicker = new FileOpenPicker();
+
+            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            openPicker.FileTypeFilter.Add(".txt");
+
+            var file = await openPicker.PickSingleFileAsync();
+            
+            if(file != null)
+            {
+                var fileContent = await FileIO.ReadLinesAsync(file);
+                this.DisplayedCode = new QRCode(fileContent);
+            }
+        }
+
+        private async void AppBarButton_Save_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.DisplayedCode != null)
+            {
+                var savePicker = new FileSavePicker();
+
+                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                savePicker.FileTypeChoices.Add("Text Files", new List<string>() { ".txt" });
+
+                var file = await savePicker.PickSaveFileAsync();
+                if (file != null)
+                {
+                    await FileIO.WriteTextAsync(file, this.DisplayedCode.GetSaveFileContent());
+                }
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,7 +75,8 @@ namespace QRCodeDiag.UserInterface
             {
                 try
                 {
-                    this.DisplayCode = new QRCode(this.openFileDialog1.FileName);
+                    var fileContent = File.ReadAllLines(this.openFileDialog1.FileName);
+                    this.DisplayCode = new QRCode(fileContent);
                 }
                 catch(QRCodeFormatException ex)
                 {
@@ -154,7 +156,11 @@ namespace QRCodeDiag.UserInterface
             {
                 try
                 {
-                    this.DisplayCode?.SaveToFile(this.saveFileDialog1.FileName);
+                    if(this.DisplayCode != null)
+                    {
+                        var content = this.displayCode.GetSaveFileContent();
+                        File.WriteAllText(this.saveFileDialog1.FileName, content);
+                    }
                 }
                 catch (Exception ex)
                 {

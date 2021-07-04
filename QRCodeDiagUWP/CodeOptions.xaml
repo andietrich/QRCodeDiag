@@ -10,7 +10,7 @@
     d:DesignWidth="400">
 
     <StackPanel>
-        <TextBox Header="{x:Bind Path=CodeSymbolName}" Text="{x:Bind Path=symbolValue}" IsEnabled="False" />
+        <TextBox Header="{x:Bind Path=CodeSymbolName}" Text="{x:Bind Path=symbolValue}" IsReadOnly="True"/>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>
