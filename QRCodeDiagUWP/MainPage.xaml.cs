@@ -43,6 +43,26 @@ namespace QRCodeDiagUWP
         private QRCode displayedCode;
         private readonly DrawingManager drawingManager;
         private readonly SettingsPropertyManager settingsPropertyManager;
+        private CanvasBitmap backgroundImg;
+        private bool showBackgroundImg;
+        private bool ShowBackgroundImg
+        {
+            get => this.showBackgroundImg;
+            set
+            {
+                this.showBackgroundImg = value;
+                this.canvasControl.Invalidate();
+            }
+        }
+        private CanvasBitmap BackgroundImg
+        {
+            get => this.backgroundImg;
+            set
+            {
+                this.backgroundImg = value;
+                this.ShowBackgroundImg = true;
+            }
+        }
         private XORMask.MaskType CurrentMaskUsed
         {
             get
@@ -87,11 +107,12 @@ namespace QRCodeDiagUWP
         public MainPage()
         {
             this.drawingManager = new DrawingManager();
+            this.showBackgroundImg = false;
+            this.toggleOnTap = false;
+            this.showXored = false;
             this.InitializeComponent();
             this.canvasControl.Width = 2000;
             this.canvasControl.Height = 2000;
-            this.toggleOnTap = false;
-            this.showXored = false;
             this.settingsPropertyManager = new SettingsPropertyManager(this.drawingManager, this.codeOptionsStackPanel);
             this.settingsPropertyManager.PropertyChangedEvent += this.canvasControl.Invalidate;
         }
@@ -111,7 +132,7 @@ namespace QRCodeDiagUWP
             if (this.DisplayedCode != null)
             {
                 var codeElHeight = (int)Math.Min(canvasControl.Height, canvasControl.Width) / this.DisplayedCode.GetEdgeLength();
-                CodeElementDrawer.DrawQRCode(this.DisplayedCode.GetBits(this.ShowXored), codeElHeight, args.DrawingSession);
+                CodeElementDrawer.DrawQRCode(this.DisplayedCode.GetBits(!this.ShowXored), codeElHeight, args.DrawingSession, this.showBackgroundImg ? this.BackgroundImg : null);
                 this.drawingManager.Draw(args.DrawingSession, codeElHeight);
             }
             else
@@ -259,6 +280,30 @@ namespace QRCodeDiagUWP
                 {
                     await FileIO.WriteTextAsync(file, this.DisplayedCode.GetSaveFileContent());
                 }
+            }
+        }
+
+        private void BackgroundImgToggleSplitButton_Click(Microsoft.UI.Xaml.Controls.SplitButton sender, Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs args)
+        {
+            this.ShowBackgroundImg = !this.ShowBackgroundImg;
+        }
+
+        private async void BackgroundImageMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        {
+            var openPicker = new FileOpenPicker();
+
+            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            openPicker.FileTypeFilter.Add(".png");
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".bmp");
+
+            var file = await openPicker.PickSingleFileAsync();
+
+            if (file != null)
+            {
+                var stream = await file.OpenReadAsync();
+                this.BackgroundImg = await CanvasBitmap.LoadAsync(this.canvasControl, stream);
+                this.backgroundImgToggleSplitButton.IsChecked = this.ShowBackgroundImg;
             }
         }
     }

@@ -10,7 +10,6 @@ namespace QRCodeDiagUWP
     internal class DrawingManager
     {
         private readonly List<DrawableCodeSymbolCode> drawableCodeSymbolCodes;
-        private readonly CodeElementDrawer codeElementDrawer;
 
         public DrawingManager()
         {

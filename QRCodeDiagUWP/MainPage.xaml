@@ -65,6 +65,15 @@
                     </muxc:ToggleSplitButton.Flyout>
                 </muxc:ToggleSplitButton>
             </AppBarElementContainer>
+            <AppBarElementContainer>
+                <muxc:ToggleSplitButton x:Name="backgroundImgToggleSplitButton" ToolTipService.ToolTip="Background Image" FontFamily="Segoe MDL2 Assets" Content="&#xE158;" Click="BackgroundImgToggleSplitButton_Click" IsEnabled="True">
+                    <muxc:ToggleSplitButton.Flyout>
+                        <MenuFlyout Placement="RightEdgeAlignedTop">
+                            <MenuFlyoutItem x:Name="backgroundImageMenuFlyoutItem" Click="BackgroundImageMenuFlyoutItem_Click" Icon="BrowsePhotos" Text="Select Image"/>
+                        </MenuFlyout>
+                    </muxc:ToggleSplitButton.Flyout>
+                </muxc:ToggleSplitButton>
+            </AppBarElementContainer>
 
             <AppBarToggleButton Label="Toggle Color" IsChecked="{x:Bind Path=toggleOnTap, Mode=TwoWay}">
                 <AppBarToggleButton.Icon>

@@ -113,15 +113,24 @@ namespace QRCodeDiagUWP
             }
         }
 
-        public static void DrawQRCode(char[,] bits, int codeElHeight, CanvasDrawingSession canvasDrawingSession, bool transparent = false)
+        public static void DrawQRCode(char[,] bits, int codeElHeight, CanvasDrawingSession canvasDrawingSession, ICanvasImage backgroundImage)
         {
-            var alpha = transparent ? (byte)128 : (byte)255;
+            var alpha = backgroundImage != null ? (byte)128 : (byte)255;
             var codeEdgeLength = bits.GetLength(0);
             var black = Color.FromArgb(alpha, Colors.Black.R, Colors.Black.G, Colors.Black.B);
             var white = Color.FromArgb(alpha, Colors.White.R, Colors.White.G, Colors.White.B);
             var gray = Color.FromArgb(alpha, Colors.Gray.R, Colors.Gray.G, Colors.Gray.B);
 
             canvasDrawingSession.Antialiasing = CanvasAntialiasing.Aliased;
+
+            if (backgroundImage != null)
+            {
+                var bounds = backgroundImage.GetBounds(canvasDrawingSession);
+                var sourceRect = new Rect() { Height = bounds.Height, Width = bounds.Width };
+                var targetRect = new Rect() { Height = codeEdgeLength * codeElHeight, Width = codeEdgeLength * codeElHeight };
+                
+                canvasDrawingSession.DrawImage(backgroundImage, targetRect, sourceRect);
+            }
 
             for (int y = 0; y < codeEdgeLength; y++)
             {
